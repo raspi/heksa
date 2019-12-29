@@ -11,16 +11,19 @@ type offsetViewer uint8
 const (
 	OffsetHex offsetViewer = iota
 	OffsetDec
+	OffsetPercent
 )
 
 var offsetViewers = map[offsetViewer]ShowsOffset{
-	OffsetHex: display.NewHex(),
-	OffsetDec: display.NewDec(),
+	OffsetHex:     display.NewHex(),
+	OffsetDec:     display.NewDec(),
+	OffsetPercent: display.NewPercent(),
 }
 
 var offsetViewersStringToEnumMap = map[string]offsetViewer{
 	`hex`: OffsetHex,
 	`dec`: OffsetDec,
+	`per`: OffsetPercent,
 }
 
 // ShowsOffset is interface for displaying file offset in X format (where X might be hex, decimal, octal, ..)
