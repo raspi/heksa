@@ -12,7 +12,7 @@ type Hex struct {
 	palette map[uint8]clr.Color
 }
 
-func (d Hex) SetBitWidthSize(s uint8) {
+func (d *Hex) SetBitWidthSize(s uint8) {
 	d.fs = s
 }
 
