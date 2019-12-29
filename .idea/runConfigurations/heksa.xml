@@ -3,6 +3,7 @@
     <module name="heksa" />
     <working_directory value="$PROJECT_DIR$/" />
     <go_parameters value="-i" />
+    <parameters value="-f hex,asc -l 1000 -s 1000 build/heksa.exe" />
     <kind value="DIRECTORY" />
     <directory value="$PROJECT_DIR$" />
     <method v="2" />
