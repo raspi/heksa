@@ -1,8 +1,8 @@
 package main
 
 import (
-	"./display"
 	"fmt"
+	"github.com/raspi/heksa/display"
 	"io"
 )
 

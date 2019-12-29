@@ -1,9 +1,9 @@
 package main
 
 import (
-	"./display"
 	"fmt"
 	clr "github.com/logrusorgru/aurora"
+	"github.com/raspi/heksa/display"
 )
 
 type dataViewer uint8
