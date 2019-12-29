@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/DavidGamba/go-getoptions"
+	"github.com/raspi/heksa/pkg/iface"
+	"github.com/raspi/heksa/pkg/reader"
 	"io"
 	"os"
 	"strings"
@@ -14,7 +16,7 @@ var BUILD = `dev`
 const AUTHOR = `Pekka Järvinen`
 const HOMEPAGE = `https://github.com/raspi/heksa`
 
-func main() {
+func getParams() (source iface.ReadSeekerCloser, displays []iface.Views, offsetViewer iface.ShowsOffset, limit uint64) {
 	opt := getoptions.New()
 
 	opt.HelpSynopsisArgs(`<filename>`)
@@ -69,65 +71,73 @@ func main() {
 		os.Exit(1)
 	}
 
-	/*
-		stat, _ := os.Stdin.Stat()
-		if (stat.Mode() & os.ModeCharDevice) == 0 {
-			fmt.Println("data is being piped to stdin")
-		}
-	*/
-
-	offViewer, err := getOffsetViewer(*offsetDisplayS)
+	offsetViewer, err = reader.GetOffsetViewer(*offsetDisplayS)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error getting offset displayer: %v`, err))
 		os.Exit(1)
 	}
 
-	displays, err := getViewers(strings.Split(*formatS, `,`))
+	displays, err = reader.GetViewers(strings.Split(*formatS, `,`))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error getting data displayer: %v`, err))
 		os.Exit(1)
 	}
 
-	if len(remaining) != 1 {
-		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error: no file given as argument`))
-		os.Exit(1)
-	}
-
-	fpath := remaining[0]
-
-	f, err := os.Open(fpath)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error opening file: %v`, err))
-		os.Exit(1)
-	}
-	defer f.Close()
-
-	fi, err := f.Stat()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error stat'ing file: %v`, err))
-		os.Exit(1)
-	}
-
-	startOffset := int64(*startOffsetS)
-
-	if startOffset != 0 {
-		_, err = f.Seek(startOffset, io.SeekCurrent)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, fmt.Sprintf(`couldn't seek: %v`, err))
+	stat, _ := os.Stdin.Stat()
+	if (stat.Mode() & os.ModeCharDevice) == 0 {
+		// Stdin has data
+		source = os.Stdin
+		offsetViewer.SetFileSize(0)
+	} else {
+		// Read file
+		if len(remaining) != 1 {
+			fmt.Fprintln(os.Stderr, fmt.Sprintf(`error: no file given as argument, see --help `))
 			os.Exit(1)
 		}
+
+		fpath := remaining[0]
+
+		fhandle, err := os.Open(fpath)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, fmt.Sprintf(`error opening file: %v`, err))
+			os.Exit(1)
+		}
+
+		fi, err := fhandle.Stat()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, fmt.Sprintf(`error stat'ing file: %v`, err))
+			os.Exit(1)
+		}
+
+		startOffset := int64(*startOffsetS)
+
+		if startOffset != 0 {
+			_, err = fhandle.Seek(startOffset, io.SeekCurrent)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, fmt.Sprintf(`couldn't seek: %v`, err))
+				os.Exit(1)
+			}
+		}
+
+		// Hint offset viewer
+		offsetViewer.SetFileSize(fi.Size())
+
+		source = fhandle
+
 	}
 
-	// Hint offset viewer
-	offViewer.SetFileSize(fi.Size())
+	return source, displays, offsetViewer, uint64(*limitS)
+}
+
+func main() {
+
+	source, displays, offViewer, limit := getParams()
 
 	for idx, _ := range displays {
 		displays[idx].SetPalette(defaultCharacterColors)
 	}
 
-	limit := uint64(*limitS)
-
-	r := New(f, offViewer, displays)
+	r := reader.New(source, offViewer, displays)
 
 	// Dump hex
 	for {
@@ -149,5 +159,7 @@ func main() {
 		}
 
 	}
+
+	source.Close()
 
 }

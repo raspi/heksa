@@ -1,9 +1,9 @@
-package main
+package reader
 
 import (
 	"fmt"
-	"github.com/raspi/heksa/display"
-	"io"
+	"github.com/raspi/heksa/pkg/display"
+	"github.com/raspi/heksa/pkg/iface"
 )
 
 type offsetViewer uint8
@@ -15,7 +15,7 @@ const (
 	OffsetPercent
 )
 
-var offsetViewers = map[offsetViewer]ShowsOffset{
+var offsetViewers = map[offsetViewer]iface.ShowsOffset{
 	OffsetHex:     display.NewHex(),
 	OffsetDec:     display.NewDec(),
 	OffsetOct:     display.NewOct(),
@@ -29,13 +29,7 @@ var offsetViewersStringToEnumMap = map[string]offsetViewer{
 	`per`: OffsetPercent,
 }
 
-// ShowsOffset is interface for displaying file offset in X format (where X might be hex, decimal, octal, ..)
-type ShowsOffset interface {
-	DisplayOffset(r io.ReadSeeker) string
-	SetFileSize(int64) // For leading zeros information
-}
-
-func getOffsetViewer(viewerStr string) (ShowsOffset, error) {
+func GetOffsetViewer(viewerStr string) (iface.ShowsOffset, error) {
 	en, ok := offsetViewersStringToEnumMap[viewerStr]
 	if !ok {
 		return nil, fmt.Errorf(`invalid: %v`, viewerStr)

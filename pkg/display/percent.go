@@ -3,6 +3,7 @@ package display
 import (
 	"fmt"
 	clr "github.com/logrusorgru/aurora"
+	"github.com/raspi/heksa/pkg/iface"
 	"io"
 	"math/bits"
 )
@@ -25,7 +26,7 @@ func NewPercent() *Percent {
 }
 
 // DisplayOffset displays offset as percentage 0% - 100%
-func (d Percent) DisplayOffset(r io.ReadSeeker) string {
+func (d Percent) DisplayOffset(r iface.ReadSeekerCloser) string {
 	off, _ := r.Seek(0, io.SeekCurrent)
 	percent := float64(off) * 100.0 / float64(d.fs)
 	return fmt.Sprintf(`%07.3f`, percent)

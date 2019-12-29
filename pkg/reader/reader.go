@@ -1,15 +1,15 @@
-package main
+package reader
 
-import "io"
+import "github.com/raspi/heksa/pkg/iface"
 
 type Reader struct {
-	r               io.ReadSeeker
-	displays        []Views     // displayer(s) for data
-	offsetFormatter ShowsOffset // offset displayer
+	r               iface.ReadSeekerCloser
+	displays        []iface.Views     // displayer(s) for data
+	offsetFormatter iface.ShowsOffset // offset displayer
 	ReadBytes       uint64
 }
 
-func New(r io.ReadSeeker, offsetFormatter ShowsOffset, formatters []Views) *Reader {
+func New(r iface.ReadSeekerCloser, offsetFormatter iface.ShowsOffset, formatters []iface.Views) *Reader {
 	if offsetFormatter == nil {
 		panic(`nil offset displayer`)
 	}

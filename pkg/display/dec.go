@@ -3,6 +3,7 @@ package display
 import (
 	"fmt"
 	clr "github.com/logrusorgru/aurora"
+	"github.com/raspi/heksa/pkg/iface"
 	"io"
 	"math/bits"
 	"strings"
@@ -46,7 +47,7 @@ func (d Dec) Display(a []byte) string {
 }
 
 // DisplayOffset displays offset as decimal 0 - 9999999....
-func (d Dec) DisplayOffset(r io.ReadSeeker) string {
+func (d Dec) DisplayOffset(r iface.ReadSeekerCloser) string {
 	off, _ := r.Seek(0, io.SeekCurrent)
 	return fmt.Sprintf(d.offFormat, off)
 }

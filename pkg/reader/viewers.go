@@ -1,9 +1,9 @@
-package main
+package reader
 
 import (
 	"fmt"
-	clr "github.com/logrusorgru/aurora"
-	"github.com/raspi/heksa/display"
+	"github.com/raspi/heksa/pkg/display"
+	"github.com/raspi/heksa/pkg/iface"
 )
 
 type dataViewer uint8
@@ -16,7 +16,7 @@ const (
 	ViewBit
 )
 
-var viewerEnumMap = map[dataViewer]Views{
+var viewerEnumMap = map[dataViewer]iface.Views{
 	ViewHex:   display.NewHex(),
 	ViewASCII: display.NewAscii(),
 	ViewBit:   display.NewBit(),
@@ -33,13 +33,8 @@ var viewersStringToEnumMap = map[string]dataViewer{
 	`oct`: ViewOct,
 }
 
-type Views interface {
-	Display([]byte) string
-	SetPalette(map[uint8]clr.Color)
-}
-
 // getViewers returns viewers from string separated by ','
-func getViewers(viewers []string) (ds []Views, err error) {
+func GetViewers(viewers []string) (ds []iface.Views, err error) {
 
 	for _, v := range viewers {
 		en, ok := viewersStringToEnumMap[v]
