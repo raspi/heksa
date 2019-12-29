@@ -144,6 +144,7 @@ func main() {
 		fmt.Println(s)
 
 		if limit > 0 && r.ReadBytes >= limit {
+			// Limit is set and found
 			break
 		}
 
