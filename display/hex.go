@@ -43,12 +43,6 @@ func (d Hex) Display(a []byte) string {
 	return strings.Trim(out, ` `)
 }
 
-func (d Hex) leading(i int64) string {
-	out := fmt.Sprintf(`%02x`, i)
-	out = strings.Repeat(`0`, int(d.fs-2)-len(out)) + out
-	return out
-}
-
 // DisplayOffset displays offset as hexadecimal 0x00 - 0xFFFFFFFF....
 func (d Hex) DisplayOffset(r io.ReadSeeker) string {
 	off, _ := r.Seek(0, io.SeekCurrent)
