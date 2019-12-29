@@ -7,22 +7,22 @@ import (
 	"strings"
 )
 
-type DecOffset struct {
+type Dec struct {
 	fs      uint8
 	palette map[uint8]clr.Color
 }
 
-func (d DecOffset) SetBitWidthSize(s uint8) {
+func (d Dec) SetBitWidthSize(s uint8) {
 	d.fs = s
 }
 
-func NewDec() *DecOffset {
-	return &DecOffset{
+func NewDec() *Dec {
+	return &Dec{
 		fs: 8,
 	}
 }
 
-func (d DecOffset) Display(a []byte) string {
+func (d Dec) Display(a []byte) string {
 	out := ``
 	for idx, b := range a {
 		if idx == 8 {
@@ -40,17 +40,17 @@ func (d DecOffset) Display(a []byte) string {
 	return strings.Trim(out, ` `)
 }
 
-func (d DecOffset) leading(i int64) string {
+func (d Dec) leading(i int64) string {
 	out := fmt.Sprintf(`%02x`, i)
 	out = strings.Repeat(`0`, int(d.fs-2)-len(out)) + out
 	return out
 }
 
-func (d DecOffset) DisplayOffset(r io.ReadSeeker) string {
+func (d Dec) DisplayOffset(r io.ReadSeeker) string {
 	off, _ := r.Seek(0, io.SeekCurrent)
 	return d.leading(off)
 }
 
-func (d *DecOffset) SetPalette(p map[uint8]clr.Color) {
+func (d *Dec) SetPalette(p map[uint8]clr.Color) {
 	d.palette = p
 }
