@@ -1,0 +1,17 @@
+language: go
+
+go:
+  - tip
+  - "1.13"
+  - "1.12"
+  - "1.11"
+  - "1.10"
+
+before_install:
+  - go get golang.org/x/tools/cmd/cover
+
+script:
+  - go test -coverprofile=coverage.txt -covermode=atomic ./ ./completion/ ./option ./help
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
