@@ -46,6 +46,7 @@ func (d Dec) leading(i int64) string {
 	return out
 }
 
+// DisplayOffset displays offset as decimal 0 - 9999999....
 func (d Dec) DisplayOffset(r io.ReadSeeker) string {
 	off, _ := r.Seek(0, io.SeekCurrent)
 	return d.leading(off)
