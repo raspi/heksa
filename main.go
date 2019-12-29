@@ -89,6 +89,11 @@ func main() {
 		os.Exit(1)
 	}
 
+	if len(remaining) != 1 {
+		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error: no file given as argument`))
+		os.Exit(1)
+	}
+
 	fpath := remaining[0]
 
 	f, err := os.Open(fpath)
