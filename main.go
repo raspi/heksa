@@ -139,10 +139,12 @@ func main() {
 			os.Exit(1)
 		}
 
-		if r.ReadBytes >= limit {
+		fmt.Println(s)
+
+		if limit > 0 && r.ReadBytes >= limit {
 			break
 		}
 
-		fmt.Println(s)
 	}
+
 }
