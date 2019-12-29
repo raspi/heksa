@@ -52,6 +52,8 @@ func main() {
 	remaining, err := opt.Parse(os.Args[1:])
 
 	if opt.Called("help") {
+		fmt.Fprintf(os.Stdout, fmt.Sprintf(`heksa - hex file dumper %v build %v`+"\n", VERSION, BUILD))
+		fmt.Fprintf(os.Stdout, fmt.Sprintf(`(c) %v 2019- [ %v ]`+"\n", AUTHOR, HOMEPAGE))
 		fmt.Fprintf(os.Stdout, opt.Help())
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`EXAMPLES:`)+"\n")
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -f hex,asc,bit foo.dat`)+"\n")
