@@ -122,7 +122,7 @@ func main() {
 	bitWidth := uint8(bits.Len64(uint64(fi.Size())))
 	bitWidth = (bitWidth + (8 - 1)) & ^(bitWidth - 1)
 
-	offViewer.SetBitWidthSize(bitWidth)
+	offViewer.SetFileSize(fi.Size())
 
 	for idx, _ := range displays {
 		displays[idx].SetPalette(defaultCharacterColors)

@@ -4,22 +4,25 @@ import (
 	"fmt"
 	clr "github.com/logrusorgru/aurora"
 	"io"
+	"math/bits"
 	"strings"
 )
 
 type Hex struct {
-	fs      uint8
-	palette map[uint8]clr.Color
+	fs        uint64 // File size
+	bw        uint8  // Bit width calculated from file size
+	palette   map[uint8]clr.Color
+	offFormat string
 }
 
-func (d *Hex) SetBitWidthSize(s uint8) {
-	d.fs = s
+func (d *Hex) SetFileSize(s int64) {
+	d.fs = uint64(s)
+	d.bw = nearest(uint8(bits.Len64(d.fs)))
+	d.offFormat = fmt.Sprintf(`%%0%vx`, d.bw)
 }
 
 func NewHex() *Hex {
-	return &Hex{
-		fs: 8,
-	}
+	return &Hex{}
 }
 
 func (d Hex) Display(a []byte) string {
@@ -49,7 +52,7 @@ func (d Hex) leading(i int64) string {
 // DisplayOffset displays offset as hexadecimal 0x00 - 0xFFFFFFFF....
 func (d Hex) DisplayOffset(r io.ReadSeeker) string {
 	off, _ := r.Seek(0, io.SeekCurrent)
-	return d.leading(off)
+	return fmt.Sprintf(d.offFormat, off)
 }
 
 func (d *Hex) SetPalette(p map[uint8]clr.Color) {

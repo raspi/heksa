@@ -26,7 +26,7 @@ var offsetViewersStringToEnumMap = map[string]offsetViewer{
 // ShowsOffset is interface for displaying file offset in X format (where X might be hex, decimal, octal, ..)
 type ShowsOffset interface {
 	DisplayOffset(r io.ReadSeeker) string
-	SetBitWidthSize(uint8) // For leading zeros information
+	SetFileSize(int64) // For leading zeros information
 }
 
 func getOffsetViewer(viewerStr string) (ShowsOffset, error) {

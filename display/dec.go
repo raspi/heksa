@@ -4,16 +4,21 @@ import (
 	"fmt"
 	clr "github.com/logrusorgru/aurora"
 	"io"
+	"math/bits"
 	"strings"
 )
 
 type Dec struct {
-	fs      uint8
-	palette map[uint8]clr.Color
+	fs        uint64
+	bw        uint8 // Bit width calculated from file size
+	palette   map[uint8]clr.Color
+	offFormat string
 }
 
-func (d Dec) SetBitWidthSize(s uint8) {
-	d.fs = s
+func (d *Dec) SetFileSize(s int64) {
+	d.fs = uint64(s)
+	d.bw = nearest(uint8(bits.Len64(d.fs)))
+	d.offFormat = fmt.Sprintf(`%%0%vd`, d.bw)
 }
 
 func NewDec() *Dec {
@@ -40,16 +45,10 @@ func (d Dec) Display(a []byte) string {
 	return strings.Trim(out, ` `)
 }
 
-func (d Dec) leading(i int64) string {
-	out := fmt.Sprintf(`%02x`, i)
-	out = strings.Repeat(`0`, int(d.fs-2)-len(out)) + out
-	return out
-}
-
 // DisplayOffset displays offset as decimal 0 - 9999999....
 func (d Dec) DisplayOffset(r io.ReadSeeker) string {
 	off, _ := r.Seek(0, io.SeekCurrent)
-	return d.leading(off)
+	return fmt.Sprintf(d.offFormat, off)
 }
 
 func (d *Dec) SetPalette(p map[uint8]clr.Color) {
