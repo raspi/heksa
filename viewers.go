@@ -11,6 +11,7 @@ type dataViewer uint8
 const (
 	ViewHex dataViewer = iota
 	ViewDec
+	ViewOct
 	ViewASCII
 	ViewBit
 )
@@ -20,6 +21,7 @@ var viewerEnumMap = map[dataViewer]Views{
 	ViewASCII: display.NewAscii(),
 	ViewBit:   display.NewBit(),
 	ViewDec:   display.NewDec(),
+	ViewOct:   display.NewOct(),
 }
 
 // Get enum from string
@@ -28,6 +30,7 @@ var viewersStringToEnumMap = map[string]dataViewer{
 	`asc`: ViewASCII,
 	`bit`: ViewBit,
 	`dec`: ViewDec,
+	`oct`: ViewOct,
 }
 
 type Views interface {

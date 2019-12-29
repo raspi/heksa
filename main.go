@@ -23,7 +23,7 @@ func main() {
 	offsetDisplayS := opt.StringOptional(`offset-display`, `hex`,
 		opt.Alias(`o`),
 		opt.ArgName(`offset format`),
-		opt.Description(`One of: hex, dec`),
+		opt.Description(`One of: hex, dec, oct, per`),
 	)
 
 	formatS := opt.StringOptional(`format`, `hex,asc`,

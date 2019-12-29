@@ -11,18 +11,21 @@ type offsetViewer uint8
 const (
 	OffsetHex offsetViewer = iota
 	OffsetDec
+	OffsetOct
 	OffsetPercent
 )
 
 var offsetViewers = map[offsetViewer]ShowsOffset{
 	OffsetHex:     display.NewHex(),
 	OffsetDec:     display.NewDec(),
+	OffsetOct:     display.NewOct(),
 	OffsetPercent: display.NewPercent(),
 }
 
 var offsetViewersStringToEnumMap = map[string]offsetViewer{
 	`hex`: OffsetHex,
 	`dec`: OffsetDec,
+	`oct`: OffsetOct,
 	`per`: OffsetPercent,
 }
 
