@@ -3,7 +3,7 @@ Hex dumper with colors
 
 ```
 % heksa -h
-heksa - hex file dumper v1.1.1 build e52b556b08e65e4f76dd3db17789299ac047b23b
+heksa - hex file dumper v1.2.0 build f1de56765413b8aa6f22cb0cbedbff24f038334f
 (c) Pekka Järvinen 2019- [ https://github.com/raspi/heksa ]
 SYNOPSIS:
     heksa [--format|-f <fmt1,fmt2,..>] [--help|-h|-?] [--limit|-l <bytes>]
@@ -16,7 +16,7 @@ OPTIONS:
 
     --limit|-l <bytes>                     Read only N bytes (0 = no limit) (default: 0)
 
-    --offset-display|-o <offset format>    One of: hex, dec (default: "hex")
+    --offset-display|-o <offset format>    One of: hex, dec, oct, per (default: "hex")
 
     --seek|-s <offset>                     Start reading from certain offset (default: 0)
 
