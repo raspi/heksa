@@ -18,7 +18,7 @@ var offsetViewers = map[offsetViewer]ShowsOffset{
 	OffsetDec: display.NewDec(),
 }
 
-var viewersOffS = map[string]offsetViewer{
+var offsetViewersStringToEnumMap = map[string]offsetViewer{
 	`hex`: OffsetHex,
 	`dec`: OffsetDec,
 }
@@ -30,7 +30,7 @@ type ShowsOffset interface {
 }
 
 func getOffsetViewer(viewerStr string) (ShowsOffset, error) {
-	en, ok := viewersOffS[viewerStr]
+	en, ok := offsetViewersStringToEnumMap[viewerStr]
 	if !ok {
 		return nil, fmt.Errorf(`invalid: %v`, viewerStr)
 	}

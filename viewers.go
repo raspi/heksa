@@ -22,7 +22,8 @@ var viewerEnumMap = map[dataViewer]Views{
 	ViewDec:   display.NewDec(),
 }
 
-var viewersS = map[string]dataViewer{
+// Get enum from string
+var viewersStringToEnumMap = map[string]dataViewer{
 	`hex`: ViewHex,
 	`asc`: ViewASCII,
 	`bit`: ViewBit,
@@ -38,7 +39,7 @@ type Views interface {
 func getViewers(viewers []string) (ds []Views, err error) {
 
 	for _, v := range viewers {
-		en, ok := viewersS[v]
+		en, ok := viewersStringToEnumMap[v]
 		if !ok {
 			return nil, fmt.Errorf(`invalid: %v`, v)
 		}
