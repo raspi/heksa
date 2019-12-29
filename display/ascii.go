@@ -34,6 +34,7 @@ func (d *Ascii) SetPalette(p map[uint8]clr.Color) {
 	d.palette = p
 }
 
+// non-printable characters as dot ('.')
 func (d *Ascii) toChar(b byte) byte {
 	if b < 32 || b > 126 {
 		return '.'
