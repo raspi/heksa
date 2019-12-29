@@ -3,31 +3,33 @@ package main
 import "io"
 
 type Reader struct {
-	r           io.ReadSeeker
-	displays    []Views     // displayer(s) for data
-	offdisplats ShowsOffset // offset displayer
+	r               io.ReadSeeker
+	displays        []Views     // displayer(s) for data
+	offsetFormatter ShowsOffset // offset displayer
+	ReadBytes       uint64
 }
 
-func New(r io.ReadSeeker, offdisplays ShowsOffset, displays []Views) *Reader {
-	if offdisplays == nil {
+func New(r io.ReadSeeker, offsetFormatter ShowsOffset, formatters []Views) *Reader {
+	if offsetFormatter == nil {
 		panic(`nil offset displayer`)
 	}
 
-	if displays == nil {
+	if formatters == nil {
 		panic(`nil displayer(s)`)
 	}
 
 	return &Reader{
-		r:           r,
-		displays:    displays,
-		offdisplats: offdisplays,
+		r:               r,
+		displays:        formatters,
+		offsetFormatter: offsetFormatter,
+		ReadBytes:       0,
 	}
 }
 
 // Read reads 16 bytes and provides string to display
-func (r Reader) Read() (string, error) {
+func (r *Reader) Read() (string, error) {
 	out := ``
-	out += r.offdisplats.DisplayOffset(r.r)
+	out += r.offsetFormatter.DisplayOffset(r.r)
 	out += ` | `
 
 	tmp := make([]byte, 16)
@@ -35,6 +37,8 @@ func (r Reader) Read() (string, error) {
 	if err != nil {
 		return ``, err
 	}
+
+	r.ReadBytes += uint64(rb)
 
 	for _, dplay := range r.displays {
 		out += dplay.Display(tmp[0:rb])
