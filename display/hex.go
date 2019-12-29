@@ -46,6 +46,7 @@ func (d Hex) leading(i int64) string {
 	return out
 }
 
+// DisplayOffset displays offset as hexadecimal 0x00 - 0xFFFFFFFF....
 func (d Hex) DisplayOffset(r io.ReadSeeker) string {
 	off, _ := r.Seek(0, io.SeekCurrent)
 	return d.leading(off)
