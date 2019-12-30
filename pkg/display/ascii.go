@@ -16,7 +16,7 @@ func NewAscii() *Ascii {
 	}
 }
 
-func (d *Ascii) Display(b byte) string {
+func (d *Ascii) Format(b byte) string {
 	d.sb.Reset()
 
 	color, ok := d.palette[b]

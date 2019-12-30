@@ -34,7 +34,7 @@ func NewHex() *Hex {
 	}
 }
 
-func (d *Hex) Display(b byte) string {
+func (d *Hex) Format(b byte) string {
 	d.sb.Reset()
 	color, ok := d.palette[b]
 	if !ok {

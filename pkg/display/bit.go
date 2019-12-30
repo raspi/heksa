@@ -16,7 +16,7 @@ func NewBit() *Bit {
 	}
 }
 
-func (d *Bit) Display(b byte) string {
+func (d *Bit) Format(b byte) string {
 	d.sb.Reset()
 
 	color, ok := d.palette[b]

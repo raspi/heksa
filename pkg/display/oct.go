@@ -29,7 +29,7 @@ func NewOct() *Oct {
 	}
 }
 
-func (d *Oct) Display(b byte) string {
+func (d *Oct) Format(b byte) string {
 	d.sb.Reset()
 
 	color, ok := d.palette[b]

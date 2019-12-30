@@ -7,15 +7,15 @@ import (
 
 type Reader struct {
 	r                     iface.ReadSeekerCloser
-	displays              []iface.Views // displayer(s) for data
+	displays              []iface.CharacterFormatter // displayer(s) for data
 	displayFormatterCount int
-	offsetFormatter       iface.ShowsOffset // offset displayer
+	offsetFormatter       iface.OffsetFormatter // offset displayer
 	ReadBytes             uint64
 	sb                    strings.Builder
 	Splitter              string
 }
 
-func New(r iface.ReadSeekerCloser, offsetFormatter iface.ShowsOffset, formatters []iface.Views) *Reader {
+func New(r iface.ReadSeekerCloser, offsetFormatter iface.OffsetFormatter, formatters []iface.CharacterFormatter) *Reader {
 	if offsetFormatter == nil {
 		panic(`nil offset displayer`)
 	}
@@ -64,7 +64,7 @@ func (r *Reader) Read() (string, error) {
 			}
 
 			if rb > i {
-				s := dplay.Display(tmp[i])
+				s := dplay.Format(tmp[i])
 				if i < 15 {
 					r.sb.WriteString(s)
 				} else {

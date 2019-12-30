@@ -16,7 +16,7 @@ var BUILD = `dev`
 const AUTHOR = `Pekka Järvinen`
 const HOMEPAGE = `https://github.com/raspi/heksa`
 
-func getParams() (source iface.ReadSeekerCloser, displays []iface.Views, offsetViewer iface.ShowsOffset, limit uint64) {
+func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterFormatter, offsetViewer iface.OffsetFormatter, limit uint64) {
 	opt := getoptions.New()
 
 	opt.HelpSynopsisArgs(`<filename>`)

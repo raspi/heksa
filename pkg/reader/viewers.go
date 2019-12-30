@@ -16,7 +16,7 @@ const (
 	ViewBit
 )
 
-var viewerEnumMap = map[dataViewer]iface.Views{
+var viewerEnumMap = map[dataViewer]iface.CharacterFormatter{
 	ViewHex:   display.NewHex(),
 	ViewASCII: display.NewAscii(),
 	ViewBit:   display.NewBit(),
@@ -34,7 +34,7 @@ var viewersStringToEnumMap = map[string]dataViewer{
 }
 
 // getViewers returns viewers from string separated by ','
-func GetViewers(viewers []string) (ds []iface.Views, err error) {
+func GetViewers(viewers []string) (ds []iface.CharacterFormatter, err error) {
 
 	for _, v := range viewers {
 		en, ok := viewersStringToEnumMap[v]

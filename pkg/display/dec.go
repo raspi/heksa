@@ -30,7 +30,7 @@ func NewDec() *Dec {
 	}
 }
 
-func (d *Dec) Display(b byte) string {
+func (d *Dec) Format(b byte) string {
 	d.sb.Reset()
 
 	color, ok := d.palette[b]

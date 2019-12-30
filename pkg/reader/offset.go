@@ -15,7 +15,7 @@ const (
 	OffsetPercent
 )
 
-var offsetViewers = map[offsetViewer]iface.ShowsOffset{
+var offsetViewers = map[offsetViewer]iface.OffsetFormatter{
 	OffsetHex:     display.NewHex(),
 	OffsetDec:     display.NewDec(),
 	OffsetOct:     display.NewOct(),
@@ -29,7 +29,7 @@ var offsetViewersStringToEnumMap = map[string]offsetViewer{
 	`per`: OffsetPercent,
 }
 
-func GetOffsetViewer(viewerStr string) (iface.ShowsOffset, error) {
+func GetOffsetViewer(viewerStr string) (iface.OffsetFormatter, error) {
 	en, ok := offsetViewersStringToEnumMap[viewerStr]
 	if !ok {
 		return nil, fmt.Errorf(`invalid: %v`, viewerStr)
