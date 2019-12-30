@@ -25,7 +25,13 @@ func (d *Hex) SetFileSize(s int64) {
 		d.bw = 8
 	}
 
-	d.offFormat = fmt.Sprintf(`%%0%vx`, d.bw)
+	zeroes := (d.bw / 8) + 1
+
+	if zeroes&1 != 0 {
+		zeroes++
+	}
+
+	d.offFormat = fmt.Sprintf(`%%0%vx`, zeroes)
 }
 
 func NewHex() *Hex {
@@ -36,6 +42,7 @@ func NewHex() *Hex {
 
 func (d *Hex) Format(b byte) string {
 	d.sb.Reset()
+
 	color, ok := d.palette[b]
 	if !ok {
 		color = clr.BrightFg

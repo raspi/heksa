@@ -48,7 +48,6 @@ func (d *Oct) FormatOffset(r iface.ReadSeekerCloser) string {
 	off, _ := r.Seek(0, io.SeekCurrent)
 	d.sb.WriteString(fmt.Sprintf(d.offFormat, off))
 	return d.sb.String()
-
 }
 
 func (d *Oct) SetPalette(p map[uint8]clr.Color) {

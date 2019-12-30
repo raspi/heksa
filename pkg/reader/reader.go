@@ -9,13 +9,14 @@ type Reader struct {
 	r                     iface.ReadSeekerCloser
 	displays              []iface.CharacterFormatter // displayer(s) for data
 	displayFormatterCount int
-	offsetFormatter       iface.OffsetFormatter // offset displayer
+	offsetFormatter       []iface.OffsetFormatter // offset displayer
+	offsetFormatterCount  int
 	ReadBytes             uint64
 	sb                    strings.Builder
 	Splitter              string
 }
 
-func New(r iface.ReadSeekerCloser, offsetFormatter iface.OffsetFormatter, formatters []iface.CharacterFormatter) *Reader {
+func New(r iface.ReadSeekerCloser, offsetFormatter []iface.OffsetFormatter, formatters []iface.CharacterFormatter) *Reader {
 	if offsetFormatter == nil {
 		panic(`nil offset displayer`)
 	}
@@ -32,6 +33,7 @@ func New(r iface.ReadSeekerCloser, offsetFormatter iface.OffsetFormatter, format
 		sb:                    strings.Builder{},
 		Splitter:              `|`,
 		displayFormatterCount: len(formatters),
+		offsetFormatterCount:  len(offsetFormatter),
 	}
 
 	return reader
@@ -42,8 +44,10 @@ func (r *Reader) Read() (string, error) {
 	r.sb.Reset()
 	r.sb.Grow(1024)
 
-	r.sb.WriteString(r.offsetFormatter.FormatOffset(r.r))
-	r.sb.WriteString(r.Splitter)
+	if r.offsetFormatterCount > 0 {
+		r.sb.WriteString(r.offsetFormatter[0].FormatOffset(r.r))
+		r.sb.WriteString(r.Splitter)
+	}
 
 	tmp := make([]byte, 16)
 	rb, err := r.r.Read(tmp)
@@ -86,6 +90,11 @@ func (r *Reader) Read() (string, error) {
 		if didx < (r.displayFormatterCount - 1) {
 			r.sb.WriteString(r.Splitter)
 		}
+	}
+
+	if r.offsetFormatterCount > 1 {
+		r.sb.WriteString(r.Splitter)
+		r.sb.WriteString(r.offsetFormatter[1].FormatOffset(r.r))
 	}
 
 	return r.sb.String(), nil

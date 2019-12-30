@@ -30,10 +30,16 @@ func NewPercent() *Percent {
 
 // FormatOffset displays offset as percentage 0% - 100%
 func (d *Percent) FormatOffset(r iface.ReadSeekerCloser) string {
+	if d.fs == 0 {
+		// No clue when file size is zero
+		// it is a stream from stdin probably
+		return `?%`
+	}
+
 	d.sb.Reset()
 	off, _ := r.Seek(0, io.SeekCurrent)
-	percent := float64(off) * 100.0 / float64(d.fs)
-	d.sb.WriteString(fmt.Sprintf(`%07.3f`, percent))
+	percent := (float64(off) * 100.0) / float64(d.fs)
+	d.sb.WriteString(fmt.Sprintf(`%07.3f%%`, percent))
 	return d.sb.String()
 
 }

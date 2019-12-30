@@ -16,15 +16,15 @@ var BUILD = `dev`
 const AUTHOR = `Pekka Järvinen`
 const HOMEPAGE = `https://github.com/raspi/heksa`
 
-func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterFormatter, offsetViewer iface.OffsetFormatter, limit uint64) {
+func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterFormatter, offsetViewer []iface.OffsetFormatter, limit uint64) {
 	opt := getoptions.New()
 
 	opt.HelpSynopsisArgs(`<filename>`)
 
-	offsetDisplayS := opt.StringOptional(`offset-display`, `hex`,
+	offsetDisplayS := opt.StringOptional(`offset-format`, `hex`,
 		opt.Alias(`o`),
-		opt.ArgName(`offset format`),
-		opt.Description(`One of: hex, dec, oct, per`),
+		opt.ArgName(`[fmt1][,fmt2]`),
+		opt.Description(`Zero to two of: hex, dec, oct, per. First one is displayed on the left side and second one on right after formatters`),
 	)
 
 	formatS := opt.StringOptional(`format`, `hex,asc`,
@@ -58,8 +58,9 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 		fmt.Fprintf(os.Stdout, opt.Help())
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`EXAMPLES:`)+"\n")
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -f hex,asc,bit foo.dat`)+"\n")
+		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -o hex,per -f hex,asc foo.dat`)+"\n")
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -o hex -f hex,asc,bit foo.dat`)+"\n")
-		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -o hex -f bit foo.dat`)+"\n")
+		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -o '' -f bit foo.dat`)+"\n")
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -l 1024 foo.dat`)+"\n")
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -s 1234 foo.dat`)+"\n")
 		os.Exit(0)
@@ -71,7 +72,7 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 		os.Exit(1)
 	}
 
-	offsetViewer, err = reader.GetOffsetViewer(*offsetDisplayS)
+	offsetViewer, err = reader.GetOffsetViewer(strings.Split(*offsetDisplayS, `,`))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error getting offset displayer: %v`, err))
 		os.Exit(1)
@@ -87,7 +88,11 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
 		// Stdin has data
 		source = os.Stdin
-		offsetViewer.SetFileSize(0)
+
+		// No clue of file size when streaming from stdin
+		for idx, _ := range offsetViewer {
+			offsetViewer[idx].SetFileSize(0)
+		}
 	} else {
 		// Read file
 		if len(remaining) != 1 {
@@ -120,7 +125,9 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 		}
 
 		// Hint offset viewer
-		offsetViewer.SetFileSize(fi.Size())
+		for idx, _ := range offsetViewer {
+			offsetViewer[idx].SetFileSize(fi.Size())
+		}
 
 		source = fhandle
 

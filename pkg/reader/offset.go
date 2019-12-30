@@ -29,11 +29,28 @@ var offsetViewersStringToEnumMap = map[string]offsetViewer{
 	`per`: OffsetPercent,
 }
 
-func GetOffsetViewer(viewerStr string) (iface.OffsetFormatter, error) {
-	en, ok := offsetViewersStringToEnumMap[viewerStr]
-	if !ok {
-		return nil, fmt.Errorf(`invalid: %v`, viewerStr)
+func GetOffsetViewer(viewerStr []string) (formatters []iface.OffsetFormatter, err error) {
+
+	if len(viewerStr) > 2 {
+		return nil, fmt.Errorf(`error: max two formatters, got: %v`, viewerStr)
 	}
 
-	return offsetViewers[en], nil
+	formatters = make([]iface.OffsetFormatter, 0)
+
+	for _, v := range viewerStr {
+		if v == `` {
+			continue
+		}
+
+		en, ok := offsetViewersStringToEnumMap[v]
+		if !ok {
+			return nil, fmt.Errorf(`invalid: %v`, viewerStr)
+		}
+
+		formatters = append(formatters, offsetViewers[en])
+
+	}
+
+	return formatters, nil
+
 }
