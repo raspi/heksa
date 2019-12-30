@@ -6,12 +6,13 @@ import (
 )
 
 type Reader struct {
-	r               iface.ReadSeekerCloser
-	displays        []iface.Views     // displayer(s) for data
-	offsetFormatter iface.ShowsOffset // offset displayer
-	ReadBytes       uint64
-	sb              strings.Builder
-	Splitter        string
+	r                     iface.ReadSeekerCloser
+	displays              []iface.Views // displayer(s) for data
+	displayFormatterCount int
+	offsetFormatter       iface.ShowsOffset // offset displayer
+	ReadBytes             uint64
+	sb                    strings.Builder
+	Splitter              string
 }
 
 func New(r iface.ReadSeekerCloser, offsetFormatter iface.ShowsOffset, formatters []iface.Views) *Reader {
@@ -24,12 +25,13 @@ func New(r iface.ReadSeekerCloser, offsetFormatter iface.ShowsOffset, formatters
 	}
 
 	reader := &Reader{
-		r:               r,
-		displays:        formatters,
-		offsetFormatter: offsetFormatter,
-		ReadBytes:       0,
-		sb:              strings.Builder{},
-		Splitter:        `|`,
+		r:                     r,
+		displays:              formatters,
+		offsetFormatter:       offsetFormatter,
+		ReadBytes:             0,
+		sb:                    strings.Builder{},
+		Splitter:              `|`,
+		displayFormatterCount: len(formatters),
 	}
 
 	return reader
@@ -51,20 +53,39 @@ func (r *Reader) Read() (string, error) {
 
 	r.ReadBytes += uint64(rb)
 
-	for _, dplay := range r.displays {
+	for didx, dplay := range r.displays {
+
+		eof := []byte(dplay.EofStr())
+		eofl := len(eof)
+
 		for i := 0; i < 16; i++ {
 			if i == 8 {
 				r.sb.WriteString(` `)
 			}
 
 			if rb > i {
-				r.sb.WriteString(dplay.Display(tmp[i]))
+				s := dplay.Display(tmp[i])
+				if i < 15 {
+					r.sb.WriteString(s)
+				} else {
+					r.sb.WriteString(strings.Trim(s, ` `))
+				}
 			} else {
-				r.sb.WriteString(dplay.EofStr())
+				if i < 15 {
+					r.sb.Write(eof)
+				} else {
+					if eofl > 1 {
+						r.sb.Write(eof[0 : eofl-1])
+					} else {
+						r.sb.Write(eof)
+					}
+				}
 			}
 		}
 
-		r.sb.WriteString(r.Splitter)
+		if didx < (r.displayFormatterCount - 1) {
+			r.sb.WriteString(r.Splitter)
+		}
 	}
 
 	return r.sb.String(), nil
