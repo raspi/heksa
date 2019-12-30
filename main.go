@@ -12,6 +12,7 @@ import (
 
 var VERSION = `v0.0.0`
 var BUILD = `dev`
+var BUILDDATE = `0000-00-00T00:00:00+00:00`
 
 const AUTHOR = `Pekka Järvinen`
 const HOMEPAGE = `https://github.com/raspi/heksa`
@@ -38,6 +39,10 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 		opt.Description(`Show this help`),
 	)
 
+	opt.Bool(`version`, false,
+		opt.Description(`Show version information`),
+	)
+
 	limitS := opt.IntOptional(`limit`, 0,
 		opt.Alias("l"),
 		opt.ArgName(`bytes`),
@@ -53,7 +58,7 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 	remaining, err := opt.Parse(os.Args[1:])
 
 	if opt.Called("help") {
-		fmt.Fprintf(os.Stdout, fmt.Sprintf(`heksa - hex file dumper %v build %v`+"\n", VERSION, BUILD))
+		fmt.Fprintf(os.Stdout, fmt.Sprintf(`heksa - hex file dumper %v`+"\n", VERSION))
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`(c) %v 2019- [ %v ]`+"\n", AUTHOR, HOMEPAGE))
 		fmt.Fprintf(os.Stdout, opt.Help())
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`EXAMPLES:`)+"\n")
@@ -63,6 +68,9 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -o '' -f bit foo.dat`)+"\n")
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -l 1024 foo.dat`)+"\n")
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -s 1234 foo.dat`)+"\n")
+		os.Exit(0)
+	} else if opt.Called("version") {
+		fmt.Fprintf(os.Stdout, fmt.Sprintf(`%v build %v on %v`+"\n", VERSION, BUILD, BUILDDATE))
 		os.Exit(0)
 	}
 

@@ -1,5 +1,6 @@
 LAST_TAG := $(shell git describe --abbrev=0 --always --tags)
 BUILD := $(shell git rev-parse $(LAST_TAG))
+BUILDDATE := $(shell git log -1 --format=%aI $(LAST_TAG))
 
 BINARY := heksa
 UNIXBINARY := $(BINARY)
@@ -9,7 +10,7 @@ BUILDDIR := build
 LINUXRELEASE := $(BINARY)-$(LAST_TAG)-linux-x64.tar.gz
 WINRELEASE := $(BINARY)-$(LAST_TAG)-windows-x64.zip
 
-LDFLAGS := -ldflags "-s -w -X=main.VERSION=$(LAST_TAG) -X=main.BUILD=$(BUILD)"
+LDFLAGS := -ldflags "-s -w -X=main.VERSION=$(LAST_TAG) -X=main.BUILD=$(BUILD) -X=main.BUILDDATE=$(BUILDDATE)"
 
 bin:
 	GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -v -o $(BUILDDIR)/$(UNIXBINARY)
