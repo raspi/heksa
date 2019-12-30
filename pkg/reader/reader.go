@@ -42,7 +42,7 @@ func (r *Reader) Read() (string, error) {
 	r.sb.Reset()
 	r.sb.Grow(1024)
 
-	r.sb.WriteString(r.offsetFormatter.DisplayOffset(r.r))
+	r.sb.WriteString(r.offsetFormatter.FormatOffset(r.r))
 	r.sb.WriteString(r.Splitter)
 
 	tmp := make([]byte, 16)

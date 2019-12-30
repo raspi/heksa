@@ -42,8 +42,8 @@ func (d *Oct) Format(b byte) string {
 
 }
 
-// DisplayOffset displays offset as hexadecimal 0x00 - 0xFFFFFFFF....
-func (d *Oct) DisplayOffset(r iface.ReadSeekerCloser) string {
+// FormatOffset displays offset as hexadecimal 0x00 - 0xFFFFFFFF....
+func (d *Oct) FormatOffset(r iface.ReadSeekerCloser) string {
 	d.sb.Reset()
 	off, _ := r.Seek(0, io.SeekCurrent)
 	d.sb.WriteString(fmt.Sprintf(d.offFormat, off))

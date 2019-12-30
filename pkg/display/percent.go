@@ -28,8 +28,8 @@ func NewPercent() *Percent {
 	}
 }
 
-// DisplayOffset displays offset as percentage 0% - 100%
-func (d *Percent) DisplayOffset(r iface.ReadSeekerCloser) string {
+// FormatOffset displays offset as percentage 0% - 100%
+func (d *Percent) FormatOffset(r iface.ReadSeekerCloser) string {
 	d.sb.Reset()
 	off, _ := r.Seek(0, io.SeekCurrent)
 	percent := float64(off) * 100.0 / float64(d.fs)

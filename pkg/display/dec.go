@@ -44,8 +44,8 @@ func (d *Dec) Format(b byte) string {
 
 }
 
-// DisplayOffset displays offset as decimal 0 - 9999999....
-func (d *Dec) DisplayOffset(r iface.ReadSeekerCloser) string {
+// FormatOffset displays offset as decimal 0 - 9999999....
+func (d *Dec) FormatOffset(r iface.ReadSeekerCloser) string {
 	d.sb.Reset()
 	off, _ := r.Seek(0, io.SeekCurrent)
 	d.sb.WriteString(fmt.Sprintf(d.offFormat, off))

@@ -7,7 +7,7 @@ import (
 
 // OffsetFormatter is interface for displaying file offset in X format (where X might be hex, decimal, octal, ..)
 type OffsetFormatter interface {
-	DisplayOffset(r ReadSeekerCloser) string
+	FormatOffset(r ReadSeekerCloser) string
 	SetFileSize(int64) // For leading zeros information
 }
 
