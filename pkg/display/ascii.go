@@ -7,27 +7,26 @@ import (
 
 type Ascii struct {
 	palette map[uint8]clr.Color
+	sb      strings.Builder
 }
 
 func NewAscii() *Ascii {
-	return &Ascii{}
+	return &Ascii{
+		sb: strings.Builder{},
+	}
 }
 
-func (d Ascii) Display(a []byte) string {
-	out := ``
-	for idx, b := range a {
-		if idx == 8 {
-			out += ` `
-		}
-		color, ok := d.palette[b]
-		if !ok {
-			color = clr.BrightFg
-		}
+func (d *Ascii) Display(b byte) string {
+	d.sb.Reset()
 
-		out += clr.Sprintf(`%c`, clr.Colorize(d.toChar(b), color))
+	color, ok := d.palette[b]
+	if !ok {
+		color = clr.BrightFg
 	}
 
-	return strings.Trim(out, ` `)
+	d.sb.WriteString(clr.Sprintf(`%c`, clr.Colorize(d.toChar(b), color)))
+	return d.sb.String()
+
 }
 
 func (d *Ascii) SetPalette(p map[uint8]clr.Color) {
@@ -40,4 +39,8 @@ func (d *Ascii) toChar(b byte) byte {
 		return '.'
 	}
 	return b
+}
+
+func (d *Ascii) EofStr() string {
+	return ` `
 }

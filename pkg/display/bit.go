@@ -7,30 +7,32 @@ import (
 
 type Bit struct {
 	palette map[uint8]clr.Color
+	sb      strings.Builder
 }
 
 func NewBit() *Bit {
-	return &Bit{}
+	return &Bit{
+		sb: strings.Builder{},
+	}
 }
 
-func (d Bit) Display(a []byte) string {
-	out := ``
-	for idx, b := range a {
-		if idx == 8 {
-			out += ` `
-		}
+func (d *Bit) Display(b byte) string {
+	d.sb.Reset()
 
-		color, ok := d.palette[b]
-		if !ok {
-			color = clr.BrightFg
-		}
-
-		out += clr.Sprintf(`%08b `, clr.Colorize(b, color))
+	color, ok := d.palette[b]
+	if !ok {
+		color = clr.BrightFg
 	}
 
-	return strings.Trim(out, ` `)
+	d.sb.WriteString(clr.Sprintf(`%08b `, clr.Colorize(b, color)))
+
+	return d.sb.String()
 }
 
 func (d *Bit) SetPalette(p map[uint8]clr.Color) {
 	d.palette = p
+}
+
+func (d *Bit) EofStr() string {
+	return `         `
 }

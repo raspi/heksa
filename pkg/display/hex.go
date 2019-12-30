@@ -14,6 +14,7 @@ type Hex struct {
 	bw        uint8  // Bit width calculated from file size
 	palette   map[uint8]clr.Color
 	offFormat string
+	sb        strings.Builder
 }
 
 func (d *Hex) SetFileSize(s int64) {
@@ -28,33 +29,36 @@ func (d *Hex) SetFileSize(s int64) {
 }
 
 func NewHex() *Hex {
-	return &Hex{}
+	return &Hex{
+		sb: strings.Builder{},
+	}
 }
 
-func (d Hex) Display(a []byte) string {
-	out := ``
-	for idx, b := range a {
-		if idx == 8 {
-			out += ` `
-		}
-
-		color, ok := d.palette[b]
-		if !ok {
-			color = clr.BrightFg
-		}
-
-		out += clr.Sprintf(`%02x `, clr.Colorize(b, color))
+func (d *Hex) Display(b byte) string {
+	d.sb.Reset()
+	color, ok := d.palette[b]
+	if !ok {
+		color = clr.BrightFg
 	}
 
-	return strings.Trim(out, ` `)
+	d.sb.WriteString(clr.Sprintf(`%02x `, clr.Colorize(b, color)))
+
+	return d.sb.String()
+
 }
 
 // DisplayOffset displays offset as hexadecimal 0x00 - 0xFFFFFFFF....
-func (d Hex) DisplayOffset(r iface.ReadSeekerCloser) string {
+func (d *Hex) DisplayOffset(r iface.ReadSeekerCloser) string {
+	d.sb.Reset()
 	off, _ := r.Seek(0, io.SeekCurrent)
-	return fmt.Sprintf(d.offFormat, off)
+	d.sb.WriteString(fmt.Sprintf(d.offFormat, off))
+	return d.sb.String()
 }
 
 func (d *Hex) SetPalette(p map[uint8]clr.Color) {
 	d.palette = p
+}
+
+func (d *Hex) EofStr() string {
+	return `   `
 }

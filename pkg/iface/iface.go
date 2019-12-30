@@ -11,9 +11,11 @@ type ShowsOffset interface {
 	SetFileSize(int64) // For leading zeros information
 }
 
+// Views displays bytes in X format
 type Views interface {
-	Display([]byte) string
+	Display(b byte) string // Get the colorized representation
 	SetPalette(map[uint8]clr.Color)
+	EofStr() string // String if EOF has been reached. for lining output.
 }
 
 type ReadSeekerCloser interface {
