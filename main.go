@@ -96,7 +96,7 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 	} else {
 		// Read file
 		if len(remaining) != 1 {
-			fmt.Fprintln(os.Stderr, fmt.Sprintf(`error: no file given as argument, see --help `))
+			fmt.Fprintln(os.Stderr, fmt.Sprintf(`error: no file given as argument, see --help`))
 			os.Exit(1)
 		}
 
@@ -111,6 +111,11 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 		fi, err := fhandle.Stat()
 		if err != nil {
 			fmt.Fprintln(os.Stderr, fmt.Sprintf(`error stat'ing file: %v`, err))
+			os.Exit(1)
+		}
+
+		if fi.IsDir() {
+			fmt.Fprintln(os.Stderr, fmt.Sprintf(`error: %v is directory`, fpath))
 			os.Exit(1)
 		}
 
