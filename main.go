@@ -87,13 +87,13 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 
 	offsetViewer, err = reader.GetOffsetFormatters(strings.Split(*argOffset, `,`))
 	if err != nil {
-		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error getting offset displayer: %v`, err))
+		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error getting offset formatter: %v`, err))
 		os.Exit(1)
 	}
 
 	displays, err = reader.GetViewers(strings.Split(*argFormat, `,`))
 	if err != nil {
-		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error getting data displayer: %v`, err))
+		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error getting formatter: %v`, err))
 		os.Exit(1)
 	}
 
