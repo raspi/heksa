@@ -29,6 +29,6 @@ release-windows:
 	cd $(BUILDDIR); zip -v -9 $(WINRELEASE) $(WINBINARY)
 
 screenshot:
-	cd build; echo "% $(SCREENSHOTCMD)" > scr.txt && $(SCREENSHOTCMD) >> scr.txt && konsole --notransparency --noclose -e cat scr.txt
+	cd build; echo "% $(SCREENSHOTCMD)" > scr.txt && $(SCREENSHOTCMD) >> scr.txt && echo "% " >> scr.txt && konsole --notransparency --noclose --hide-tabbar -e cat scr.txt
 
 .PHONY: all clean test
