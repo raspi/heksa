@@ -12,7 +12,7 @@ WINRELEASE := $(BINARY)-$(LAST_TAG)-windows-x64.zip
 
 LDFLAGS := -ldflags "-s -w -X=main.VERSION=$(LAST_TAG) -X=main.BUILD=$(BUILD) -X=main.BUILDDATE=$(BUILDDATE)"
 
-SCREENSHOTCMD := ./heksa -f hex,asc,bit -l 0x100 heksa.exe
+SCREENSHOTCMD := ./heksa -f hex,asc,bit -l 0x200 heksa.exe
 
 bin:
 	GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -v -o $(BUILDDIR)/$(UNIXBINARY)
