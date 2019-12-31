@@ -15,17 +15,17 @@ type Dec struct {
 	zeroes    int
 }
 
-func (d *Dec) SetFileSize(s int64) {
-	d.fs = uint64(s)
-	d.zeroes = len(string(d.fs))
-	d.offFormat = fmt.Sprintf(`%%0%vd`, d.zeroes)
-}
-
 func NewDec() *Dec {
 	return &Dec{
 		fs: 0,
 		sb: strings.Builder{},
 	}
+}
+
+func (d *Dec) SetFileSize(s int64) {
+	d.fs = uint64(s)
+	d.zeroes = len(string(d.fs))
+	d.offFormat = fmt.Sprintf(`%%0%vd`, d.zeroes)
 }
 
 func (d *Dec) Format(b byte, color clr.Color) string {

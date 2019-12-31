@@ -15,16 +15,17 @@ type Oct struct {
 	zeroes    int
 }
 
+func NewOct() *Oct {
+	return &Oct{
+		fs: 0,
+		sb: strings.Builder{},
+	}
+}
+
 func (d *Oct) SetFileSize(s int64) {
 	d.fs = uint64(s)
 	d.zeroes = len(fmt.Sprintf(`%o`, d.fs))
 	d.offFormat = fmt.Sprintf(`%%0%vo`, d.zeroes)
-}
-
-func NewOct() *Oct {
-	return &Oct{
-		sb: strings.Builder{},
-	}
 }
 
 func (d *Oct) Format(b byte, color clr.Color) string {

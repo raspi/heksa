@@ -12,15 +12,15 @@ type Percent struct {
 	sb strings.Builder
 }
 
-func (d *Percent) SetFileSize(s int64) {
-	d.fs = uint64(s)
-}
-
 func NewPercent() *Percent {
 	return &Percent{
 		fs: 0,
 		sb: strings.Builder{},
 	}
+}
+
+func (d *Percent) SetFileSize(s int64) {
+	d.fs = uint64(s)
 }
 
 // FormatOffset displays offset as percentage 0% - 100%

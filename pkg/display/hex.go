@@ -16,16 +16,17 @@ type Hex struct {
 	sb        strings.Builder
 }
 
+func NewHex() *Hex {
+	return &Hex{
+		fs: 0,
+		sb: strings.Builder{},
+	}
+}
+
 func (d *Hex) SetFileSize(s int64) {
 	d.fs = uint64(s)
 	d.bw = nearest(uint8(bits.Len64(d.fs)))
 	d.offFormat = fmt.Sprintf(`%%0%vx`, d.bw/8)
-}
-
-func NewHex() *Hex {
-	return &Hex{
-		sb: strings.Builder{},
-	}
 }
 
 func (d *Hex) Format(b byte, color clr.Color) string {
