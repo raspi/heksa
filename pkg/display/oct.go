@@ -5,13 +5,11 @@ import (
 	clr "github.com/logrusorgru/aurora"
 	"github.com/raspi/heksa/pkg/iface"
 	"io"
-	"math/bits"
 	"strings"
 )
 
 type Oct struct {
 	fs        uint64 // File size
-	bw        uint8  // Bit width calculated from file size
 	offFormat string // Format for offset column
 	sb        strings.Builder
 	zeroes    int
@@ -19,7 +17,6 @@ type Oct struct {
 
 func (d *Oct) SetFileSize(s int64) {
 	d.fs = uint64(s)
-	d.bw = nearest(uint8(bits.Len64(d.fs)))
 	d.zeroes = len(fmt.Sprintf(`%o`, d.fs))
 	d.offFormat = fmt.Sprintf(`%%0%vo`, d.zeroes)
 }

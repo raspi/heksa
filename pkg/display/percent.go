@@ -4,19 +4,16 @@ import (
 	"fmt"
 	"github.com/raspi/heksa/pkg/iface"
 	"io"
-	"math/bits"
 	"strings"
 )
 
 type Percent struct {
 	fs uint64 // File size
-	bw uint8  // Bit width calculated from file size
 	sb strings.Builder
 }
 
 func (d *Percent) SetFileSize(s int64) {
 	d.fs = uint64(s)
-	d.bw = nearest(uint8(bits.Len64(d.fs)))
 }
 
 func NewPercent() *Percent {
