@@ -7,6 +7,7 @@ import (
 	"github.com/raspi/heksa/pkg/reader"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -17,7 +18,7 @@ var BUILDDATE = `0000-00-00T00:00:00+00:00`
 const AUTHOR = `Pekka Järvinen`
 const HOMEPAGE = `https://github.com/raspi/heksa`
 
-func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterFormatter, offsetViewer []iface.OffsetFormatter, limit uint64) {
+func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterFormatter, offsetViewer []iface.OffsetFormatter, limit uint64, startOffset int64) {
 	opt := getoptions.New()
 
 	opt.HelpSynopsisArgs(`<filename>`)
@@ -43,31 +44,34 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 		opt.Description(`Show version information`),
 	)
 
-	limitS := opt.IntOptional(`limit`, 0,
+	limitS := opt.StringOptional(`limit`, `0`,
 		opt.Alias("l"),
-		opt.ArgName(`bytes`),
-		opt.Description(`Read only N bytes (0 = no limit)`),
+		opt.ArgName(`[prefix]bytes`),
+		opt.Description(`Read only N bytes (0 = no limit). See NOTES.`),
 	)
 
-	startOffsetS := opt.IntOptional(`seek`, 0,
+	startOffsetS := opt.StringOptional(`seek`, `0`,
 		opt.Alias("s"),
-		opt.ArgName(`offset`),
-		opt.Description(`Start reading from certain offset`),
+		opt.ArgName(`[prefix]offset`),
+		opt.Description(`Start reading from certain offset. See NOTES.`),
 	)
 
 	remaining, err := opt.Parse(os.Args[1:])
 
 	if opt.Called("help") {
-		fmt.Fprintf(os.Stdout, fmt.Sprintf(`heksa - hex file dumper %v`+"\n", VERSION))
+		fmt.Fprintf(os.Stdout, fmt.Sprintf(`heksa - hex file dumper %v - (%v)`+"\n", VERSION, BUILDDATE))
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`(c) %v 2019- [ %v ]`+"\n", AUTHOR, HOMEPAGE))
 		fmt.Fprintf(os.Stdout, opt.Help())
+		fmt.Fprintf(os.Stdout, fmt.Sprintf(`NOTES:`)+"\n")
+		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    You can use prefixes for seek and limit. 0x = hex, 0b = binary, 0o = octal`)+"\n")
+		fmt.Fprintf(os.Stdout, "\n")
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`EXAMPLES:`)+"\n")
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -f hex,asc,bit foo.dat`)+"\n")
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -o hex,per -f hex,asc foo.dat`)+"\n")
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -o hex -f hex,asc,bit foo.dat`)+"\n")
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -o '' -f bit foo.dat`)+"\n")
-		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -l 1024 foo.dat`)+"\n")
-		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -s 1234 foo.dat`)+"\n")
+		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -l 0x1024 foo.dat`)+"\n")
+		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -s 0b1010 foo.dat`)+"\n")
 		os.Exit(0)
 	} else if opt.Called("version") {
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`%v build %v on %v`+"\n", VERSION, BUILD, BUILDDATE))
@@ -89,6 +93,18 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 	displays, err = reader.GetViewers(strings.Split(*formatS, `,`))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error getting data displayer: %v`, err))
+		os.Exit(1)
+	}
+
+	limit, err = strconv.ParseUint(*limitS, 0, 64)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error parsing limit: %v`, err))
+		os.Exit(1)
+	}
+
+	startOffset, err = strconv.ParseInt(*startOffsetS, 0, 64)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error parsing seek: %v`, err))
 		os.Exit(1)
 	}
 
@@ -127,16 +143,6 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 			os.Exit(1)
 		}
 
-		startOffset := int64(*startOffsetS)
-
-		if startOffset != 0 {
-			_, err = fhandle.Seek(startOffset, io.SeekCurrent)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, fmt.Sprintf(`couldn't seek: %v`, err))
-				os.Exit(1)
-			}
-		}
-
 		// Hint offset viewer
 		for idx, _ := range offsetViewer {
 			offsetViewer[idx].SetFileSize(fi.Size())
@@ -146,11 +152,11 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 
 	}
 
-	return source, displays, offsetViewer, uint64(*limitS)
+	return source, displays, offsetViewer, limit, startOffset
 }
 
 func main() {
-	source, displays, offViewer, limit := getParams()
+	source, displays, offViewer, limit, startOffset := getParams()
 	palette := defaultCharacterColors
 
 	for i := uint8(0); i < 255; i++ {
@@ -158,6 +164,14 @@ func main() {
 		if !ok {
 			// Fall back
 			palette[i] = defaultColor
+		}
+	}
+
+	if startOffset != 0 {
+		_, err := source.Seek(startOffset, io.SeekCurrent)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, fmt.Sprintf(`couldn't seek: %v`, err))
+			os.Exit(1)
 		}
 	}
 
