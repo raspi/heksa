@@ -112,8 +112,8 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 	}
 
 	// Initialize palette
-	for i := uint8(0); i < 255; i++ {
-		color, ok := defaultCharacterColors[i]
+	for i := uint16(0); i < 256; i++ {
+		color, ok := defaultCharacterColors[uint8(i)]
 		if !ok {
 			// Fall back
 			color = defaultColor
