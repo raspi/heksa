@@ -2,7 +2,6 @@ package display
 
 import (
 	"fmt"
-	clr "github.com/logrusorgru/aurora"
 	"github.com/raspi/heksa/pkg/iface"
 	"io"
 	"math/bits"
@@ -10,10 +9,9 @@ import (
 )
 
 type Percent struct {
-	fs      uint64 // File size
-	bw      uint8  // Bit width calculated from file size
-	palette map[uint8]clr.Color
-	sb      strings.Builder
+	fs uint64 // File size
+	bw uint8  // Bit width calculated from file size
+	sb strings.Builder
 }
 
 func (d *Percent) SetFileSize(s int64) {
@@ -41,5 +39,4 @@ func (d *Percent) FormatOffset(r iface.ReadSeekerCloser) string {
 	percent := (float64(off) * 100.0) / float64(d.fs)
 	d.sb.WriteString(fmt.Sprintf(`%07.3f%%`, percent))
 	return d.sb.String()
-
 }

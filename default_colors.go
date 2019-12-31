@@ -4,6 +4,7 @@ import (
 	clr "github.com/logrusorgru/aurora"
 )
 
+var defaultColor = clr.WhiteFg
 var defaultLineColor = clr.CyanFg
 var defaultSpaceColor = clr.MagentaFg
 

@@ -1,6 +1,7 @@
 package reader
 
 import (
+	clr "github.com/logrusorgru/aurora"
 	"github.com/raspi/heksa/pkg/iface"
 	"strings"
 )
@@ -14,9 +15,10 @@ type Reader struct {
 	ReadBytes             uint64
 	sb                    strings.Builder
 	Splitter              string
+	palette               map[uint8]clr.Color
 }
 
-func New(r iface.ReadSeekerCloser, offsetFormatter []iface.OffsetFormatter, formatters []iface.CharacterFormatter) *Reader {
+func New(r iface.ReadSeekerCloser, offsetFormatter []iface.OffsetFormatter, formatters []iface.CharacterFormatter, palette map[uint8]clr.Color) *Reader {
 	if offsetFormatter == nil {
 		panic(`nil offset displayer`)
 	}
@@ -34,6 +36,7 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []iface.OffsetFormatter, form
 		Splitter:              `|`,
 		displayFormatterCount: len(formatters),
 		offsetFormatterCount:  len(offsetFormatter),
+		palette:               palette,
 	}
 
 	return reader
@@ -68,7 +71,8 @@ func (r *Reader) Read() (string, error) {
 			}
 
 			if rb > i {
-				s := dplay.Format(tmp[i])
+				s := dplay.Format(tmp[i], r.palette[tmp[i]])
+
 				if i < 15 {
 					r.sb.WriteString(s)
 				} else {

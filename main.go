@@ -150,14 +150,18 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 }
 
 func main() {
-
 	source, displays, offViewer, limit := getParams()
+	palette := defaultCharacterColors
 
-	for idx, _ := range displays {
-		displays[idx].SetPalette(defaultCharacterColors)
+	for i := uint8(0); i < 255; i++ {
+		_, ok := palette[i]
+		if !ok {
+			// Fall back
+			palette[i] = defaultColor
+		}
 	}
 
-	r := reader.New(source, offViewer, displays)
+	r := reader.New(source, offViewer, displays, palette)
 
 	// Dump hex
 	for {

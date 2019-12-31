@@ -12,7 +12,6 @@ import (
 type Oct struct {
 	fs        uint64 // File size
 	bw        uint8  // Bit width calculated from file size
-	palette   map[uint8]clr.Color
 	offFormat string
 	sb        strings.Builder
 }
@@ -29,17 +28,10 @@ func NewOct() *Oct {
 	}
 }
 
-func (d *Oct) Format(b byte) string {
+func (d *Oct) Format(b byte, color clr.Color) string {
 	d.sb.Reset()
-
-	color, ok := d.palette[b]
-	if !ok {
-		color = clr.BrightFg
-	}
-
 	d.sb.WriteString(clr.Sprintf(`%03o `, clr.Colorize(b, color)))
 	return d.sb.String()
-
 }
 
 // FormatOffset displays offset as hexadecimal 0x00 - 0xFFFFFFFF....
@@ -48,10 +40,6 @@ func (d *Oct) FormatOffset(r iface.ReadSeekerCloser) string {
 	off, _ := r.Seek(0, io.SeekCurrent)
 	d.sb.WriteString(fmt.Sprintf(d.offFormat, off))
 	return d.sb.String()
-}
-
-func (d *Oct) SetPalette(p map[uint8]clr.Color) {
-	d.palette = p
 }
 
 func (d *Oct) EofStr() string {
