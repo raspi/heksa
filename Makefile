@@ -12,6 +12,8 @@ WINRELEASE := $(BINARY)-$(LAST_TAG)-windows-x64.zip
 
 LDFLAGS := -ldflags "-s -w -X=main.VERSION=$(LAST_TAG) -X=main.BUILD=$(BUILD) -X=main.BUILDDATE=$(BUILDDATE)"
 
+SCREENSHOTCMD := ./heksa -f hex,asc,bit -l 0x100 heksa.exe
+
 bin:
 	GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -v -o $(BUILDDIR)/$(UNIXBINARY)
 	upx -v -9 $(BUILDDIR)/$(UNIXBINARY)
@@ -25,5 +27,8 @@ release:
 
 release-windows:
 	cd $(BUILDDIR); zip -v -9 $(WINRELEASE) $(WINBINARY)
+
+screenshot:
+	cd build; echo "% $(SCREENSHOTCMD)" > scr.txt && $(SCREENSHOTCMD) >> scr.txt && konsole --notransparency --noclose -e cat scr.txt
 
 .PHONY: all clean test
