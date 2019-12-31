@@ -14,17 +14,19 @@ type Dec struct {
 	bw        uint8  // Bit width calculated from file size
 	offFormat string // Format for offset column
 	sb        strings.Builder
+	zeroes    int
 }
 
 func (d *Dec) SetFileSize(s int64) {
 	d.fs = uint64(s)
 	d.bw = nearest(uint8(bits.Len64(d.fs)))
-	d.offFormat = fmt.Sprintf(`%%0%vd`, d.bw)
+	d.zeroes = len(string(d.fs))
+	d.offFormat = fmt.Sprintf(`%%0%vd`, d.zeroes)
 }
 
 func NewDec() *Dec {
 	return &Dec{
-		fs: 8,
+		fs: 0,
 		sb: strings.Builder{},
 	}
 }
@@ -45,4 +47,12 @@ func (d *Dec) FormatOffset(r iface.ReadSeekerCloser) string {
 
 func (d *Dec) EofStr() string {
 	return `    `
+}
+
+func (d *Dec) OffsetHeader() string {
+	return strings.Repeat(`_`, d.zeroes)
+}
+
+func (d *Dec) Header() string {
+	return header(3)
 }

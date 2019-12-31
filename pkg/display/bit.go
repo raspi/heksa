@@ -24,3 +24,7 @@ func (d *Bit) Format(b byte, color clr.Color) string {
 func (d *Bit) EofStr() string {
 	return `         `
 }
+
+func (d *Bit) Header() string {
+	return header(8)
+}

@@ -45,3 +45,11 @@ func (d *Hex) FormatOffset(r iface.ReadSeekerCloser) string {
 func (d *Hex) EofStr() string {
 	return `   `
 }
+
+func (d *Hex) OffsetHeader() string {
+	return strings.Repeat(`_`, int(d.bw/8))
+}
+
+func (d *Hex) Header() string {
+	return header(2)
+}

@@ -20,7 +20,7 @@ const AUTHOR = `Pekka Järvinen`
 const HOMEPAGE = `https://github.com/raspi/heksa`
 
 // Parse command line arguments
-func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterFormatter, offsetViewer []iface.OffsetFormatter, limit uint64, startOffset int64, palette [256]clr.Color) {
+func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterFormatter, offsetViewer []iface.OffsetFormatter, limit uint64, startOffset int64, palette [256]clr.Color, showHeader bool) {
 	opt := getoptions.New()
 
 	opt.HelpSynopsisArgs(`<filename> or STDIN`)
@@ -32,6 +32,10 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 
 	opt.Bool(`version`, false,
 		opt.Description(`Show version information`),
+	)
+
+	argHeader := opt.Bool(`header`, false,
+		opt.Description(`Show offset header`),
 	)
 
 	argOffset := opt.StringOptional(`offset-format`, `hex`,
@@ -86,6 +90,8 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 		fmt.Fprintf(os.Stderr, opt.Help(getoptions.HelpSynopsis))
 		os.Exit(1)
 	}
+
+	showHeader = *argHeader
 
 	limit, err = strconv.ParseUint(*argLimit, 0, 64)
 	if err != nil {
@@ -166,11 +172,11 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 
 	}
 
-	return source, displays, offsetViewer, limit, startOffset, palette
+	return source, displays, offsetViewer, limit, startOffset, palette, showHeader
 }
 
 func main() {
-	source, displays, offViewer, limit, startOffset, palette := getParams()
+	source, displays, offViewer, limit, startOffset, palette, showHeader := getParams()
 
 	if startOffset != 0 {
 		// Seek to given offset
@@ -182,7 +188,8 @@ func main() {
 		}
 	}
 
-	r := reader.New(source, offViewer, displays, palette)
+	r := reader.New(source, offViewer, displays, palette, showHeader)
+	fmt.Print(r.Header())
 
 	// Dump hex
 	for {

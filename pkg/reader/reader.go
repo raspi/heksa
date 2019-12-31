@@ -16,9 +16,10 @@ type Reader struct {
 	sb                   strings.Builder
 	Splitter             string         // Splitter character for columns
 	palette              [256]clr.Color // color palette for each byte
+	showHeader           bool           //  Show formatter header?
 }
 
-func New(r iface.ReadSeekerCloser, offsetFormatter []iface.OffsetFormatter, formatters []iface.CharacterFormatter, palette [256]clr.Color) *Reader {
+func New(r iface.ReadSeekerCloser, offsetFormatter []iface.OffsetFormatter, formatters []iface.CharacterFormatter, palette [256]clr.Color, showHeader bool) *Reader {
 	if offsetFormatter == nil {
 		panic(`nil offset formatter`)
 	}
@@ -37,6 +38,7 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []iface.OffsetFormatter, form
 		charFormatterCount:   len(formatters),
 		offsetFormatterCount: len(offsetFormatter),
 		palette:              palette,
+		showHeader:           showHeader,
 	}
 
 	return reader
@@ -108,4 +110,36 @@ func (r *Reader) Read() (string, error) {
 	}
 
 	return r.sb.String(), nil
+}
+
+func (r *Reader) Header() string {
+	if !r.showHeader {
+		return ``
+	}
+
+	r.sb.Reset()
+
+	if r.offsetFormatterCount > 0 {
+		// show offset on the left side
+		r.sb.WriteString(r.offsetFormatter[0].OffsetHeader())
+		r.sb.WriteString(r.Splitter)
+	}
+
+	// iterate through every formatter which outputs it's own header
+	for didx, dplay := range r.charFormatters {
+		r.sb.WriteString(dplay.Header())
+		if didx < (r.charFormatterCount - 1) {
+			r.sb.WriteString(r.Splitter)
+		}
+	}
+
+	if r.offsetFormatterCount > 1 {
+		// show offset on the right side
+		r.sb.WriteString(r.Splitter)
+		r.sb.WriteString(r.offsetFormatter[1].OffsetHeader())
+	}
+
+	r.sb.WriteString("\n")
+
+	return r.sb.String()
 }

@@ -32,3 +32,7 @@ func (d *Ascii) toChar(b byte) byte {
 func (d *Ascii) EofStr() string {
 	return ` `
 }
+
+func (d *Ascii) Header() string {
+	return header(1)
+}

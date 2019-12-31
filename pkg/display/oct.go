@@ -14,12 +14,14 @@ type Oct struct {
 	bw        uint8  // Bit width calculated from file size
 	offFormat string // Format for offset column
 	sb        strings.Builder
+	zeroes    int
 }
 
 func (d *Oct) SetFileSize(s int64) {
 	d.fs = uint64(s)
 	d.bw = nearest(uint8(bits.Len64(d.fs)))
-	d.offFormat = fmt.Sprintf(`%%0%vo`, d.bw)
+	d.zeroes = len(fmt.Sprintf(`%o`, d.fs))
+	d.offFormat = fmt.Sprintf(`%%0%vo`, d.zeroes)
 }
 
 func NewOct() *Oct {
@@ -44,4 +46,12 @@ func (d *Oct) FormatOffset(r iface.ReadSeekerCloser) string {
 
 func (d *Oct) EofStr() string {
 	return `    `
+}
+
+func (d *Oct) OffsetHeader() string {
+	return strings.Repeat(`_`, d.zeroes)
+}
+
+func (d *Oct) Header() string {
+	return header(3)
 }

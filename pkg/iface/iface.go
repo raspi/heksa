@@ -9,12 +9,14 @@ import (
 type OffsetFormatter interface {
 	FormatOffset(r ReadSeekerCloser) string
 	SetFileSize(int64) // For leading zeros information
+	OffsetHeader() string
 }
 
 // CharacterFormatter displays bytes in X format
 type CharacterFormatter interface {
 	Format(b byte, c clr.Color) string // Get the colorized representation
 	EofStr() string                    // String if EOF has been reached. for lining output.
+	Header() string
 }
 
 type ReadSeekerCloser interface {

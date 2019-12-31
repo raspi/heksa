@@ -40,3 +40,7 @@ func (d *Percent) FormatOffset(r iface.ReadSeekerCloser) string {
 	d.sb.WriteString(fmt.Sprintf(`%07.3f%%`, percent))
 	return d.sb.String()
 }
+
+func (d *Percent) OffsetHeader() string {
+	return `________`
+}
