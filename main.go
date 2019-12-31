@@ -35,7 +35,7 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 	argOffset := opt.StringOptional(`offset-format`, `hex`,
 		opt.Alias(`o`),
 		opt.ArgName(`[fmt1][,fmt2]`),
-		opt.Description(`Zero to two of: hex, dec, oct, per. First one is displayed on the left side and second one on right after formatters`),
+		opt.Description(`Zero to two of: hex, dec, oct, per, no, ''. First one is displayed on the left side and second one on right after formatters`),
 	)
 
 	argFormat := opt.StringOptional(`format`, `hex,asc`,
@@ -63,13 +63,14 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`(c) %v 2019- [ %v ]`+"\n", AUTHOR, HOMEPAGE))
 		fmt.Fprintf(os.Stdout, opt.Help())
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`NOTES:`)+"\n")
-		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    You can use prefixes for seek and limit. 0x = hex, 0b = binary, 0o = octal.`)+"\n")
+		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    - You can use prefixes for seek and limit. 0x = hex, 0b = binary, 0o = octal.`)+"\n")
+		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    - Use 'no' or '' for offset formatter for disabling offset output.`)+"\n")
 		fmt.Fprintf(os.Stdout, "\n")
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`EXAMPLES:`)+"\n")
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -f hex,asc,bit foo.dat`)+"\n")
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -o hex,per -f hex,asc foo.dat`)+"\n")
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -o hex -f hex,asc,bit foo.dat`)+"\n")
-		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -o '' -f bit foo.dat`)+"\n")
+		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -o no -f bit foo.dat`)+"\n")
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -l 0x1024 foo.dat`)+"\n")
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -s 0b1010 foo.dat`)+"\n")
 		os.Exit(0)

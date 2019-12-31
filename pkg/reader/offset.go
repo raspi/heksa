@@ -40,6 +40,10 @@ func GetOffsetFormatters(viewerStr []string) (formatters []iface.OffsetFormatter
 	formatters = make([]iface.OffsetFormatter, 0)
 
 	for _, v := range viewerStr {
+		if v == `no` {
+			v = ``
+		}
+
 		if v == `` {
 			continue
 		}
