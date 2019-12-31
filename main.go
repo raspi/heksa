@@ -23,7 +23,7 @@ const HOMEPAGE = `https://github.com/raspi/heksa`
 func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterFormatter, offsetViewer []iface.OffsetFormatter, limit uint64, startOffset int64, palette [256]clr.Color) {
 	opt := getoptions.New()
 
-	opt.HelpSynopsisArgs(`<filename>`)
+	opt.HelpSynopsisArgs(`<filename> or STDIN`)
 
 	opt.Bool(`help`, false,
 		opt.Alias("h", "?"),
@@ -36,8 +36,8 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 
 	argOffset := opt.StringOptional(`offset-format`, `hex`,
 		opt.Alias(`o`),
-		opt.ArgName(`[fmt1][,fmt2]`),
-		opt.Description(`Zero to two of: hex, dec, oct, per, no, ''. First one is displayed on the left side and second one on right after formatters`),
+		opt.ArgName(`fmt1[,fmt2]`),
+		opt.Description(`One or two of: hex, dec, oct, per, no, ''. First one is displayed on the left side and second one on right side after formatters`),
 	)
 
 	argFormat := opt.StringOptional(`format`, `hex,asc`,
