@@ -63,7 +63,7 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`(c) %v 2019- [ %v ]`+"\n", AUTHOR, HOMEPAGE))
 		fmt.Fprintf(os.Stdout, opt.Help())
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`NOTES:`)+"\n")
-		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    You can use prefixes for seek and limit. 0x = hex, 0b = binary, 0o = octal`)+"\n")
+		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    You can use prefixes for seek and limit. 0x = hex, 0b = binary, 0o = octal.`)+"\n")
 		fmt.Fprintf(os.Stdout, "\n")
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`EXAMPLES:`)+"\n")
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -f hex,asc,bit foo.dat`)+"\n")
