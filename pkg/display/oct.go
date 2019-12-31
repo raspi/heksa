@@ -12,7 +12,7 @@ import (
 type Oct struct {
 	fs        uint64 // File size
 	bw        uint8  // Bit width calculated from file size
-	offFormat string
+	offFormat string // Format for offset column
 	sb        strings.Builder
 }
 

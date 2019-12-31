@@ -1,7 +1,7 @@
 package display
 
 /*
-nearest returns nearest bits to eight bits
+nearest returns nearest bits to uint8-64 len
 
 1-7 = 8
 9-15 = 16

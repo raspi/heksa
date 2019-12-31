@@ -11,8 +11,8 @@ import (
 
 type Dec struct {
 	fs        uint64
-	bw        uint8 // Bit width calculated from file size
-	offFormat string
+	bw        uint8  // Bit width calculated from file size
+	offFormat string // Format for offset column
 	sb        strings.Builder
 }
 
