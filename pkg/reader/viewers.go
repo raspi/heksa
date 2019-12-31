@@ -6,17 +6,17 @@ import (
 	"github.com/raspi/heksa/pkg/iface"
 )
 
-type dataViewer uint8
+type byteFormatter uint8
 
 const (
-	ViewHex dataViewer = iota
+	ViewHex byteFormatter = iota
 	ViewDec
 	ViewOct
 	ViewASCII
 	ViewBit
 )
 
-var viewerEnumMap = map[dataViewer]iface.CharacterFormatter{
+var formatterEnumToImplMap = map[byteFormatter]iface.CharacterFormatter{
 	ViewHex:   display.NewHex(),
 	ViewASCII: display.NewAscii(),
 	ViewBit:   display.NewBit(),
@@ -25,7 +25,7 @@ var viewerEnumMap = map[dataViewer]iface.CharacterFormatter{
 }
 
 // Get enum from string
-var viewersStringToEnumMap = map[string]dataViewer{
+var formatterStringToEnumMap = map[string]byteFormatter{
 	`hex`: ViewHex,
 	`asc`: ViewASCII,
 	`bit`: ViewBit,
@@ -37,12 +37,12 @@ var viewersStringToEnumMap = map[string]dataViewer{
 func GetViewers(viewers []string) (ds []iface.CharacterFormatter, err error) {
 
 	for _, v := range viewers {
-		en, ok := viewersStringToEnumMap[v]
+		en, ok := formatterStringToEnumMap[v]
 		if !ok {
 			return nil, fmt.Errorf(`invalid: %v`, v)
 		}
 
-		ds = append(ds, viewerEnumMap[en])
+		ds = append(ds, formatterEnumToImplMap[en])
 	}
 
 	if len(ds) == 0 {

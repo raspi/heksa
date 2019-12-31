@@ -23,18 +23,6 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 
 	opt.HelpSynopsisArgs(`<filename>`)
 
-	offsetDisplayS := opt.StringOptional(`offset-format`, `hex`,
-		opt.Alias(`o`),
-		opt.ArgName(`[fmt1][,fmt2]`),
-		opt.Description(`Zero to two of: hex, dec, oct, per. First one is displayed on the left side and second one on right after formatters`),
-	)
-
-	formatS := opt.StringOptional(`format`, `hex,asc`,
-		opt.Alias(`f`),
-		opt.ArgName(`fmt1,fmt2,..`),
-		opt.Description(`One or multiple of: hex, dec, oct, bit`),
-	)
-
 	opt.Bool(`help`, false,
 		opt.Alias("h", "?"),
 		opt.Description(`Show this help`),
@@ -44,19 +32,31 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 		opt.Description(`Show version information`),
 	)
 
-	limitS := opt.StringOptional(`limit`, `0`,
+	argOffset := opt.StringOptional(`offset-format`, `hex`,
+		opt.Alias(`o`),
+		opt.ArgName(`[fmt1][,fmt2]`),
+		opt.Description(`Zero to two of: hex, dec, oct, per. First one is displayed on the left side and second one on right after formatters`),
+	)
+
+	argFormat := opt.StringOptional(`format`, `hex,asc`,
+		opt.Alias(`f`),
+		opt.ArgName(`fmt1,fmt2,..`),
+		opt.Description(`One or multiple of: hex, dec, oct, bit`),
+	)
+
+	argLimit := opt.StringOptional(`limit`, `0`,
 		opt.Alias("l"),
 		opt.ArgName(`[prefix]bytes`),
 		opt.Description(`Read only N bytes (0 = no limit). See NOTES.`),
 	)
 
-	startOffsetS := opt.StringOptional(`seek`, `0`,
+	argSeek := opt.StringOptional(`seek`, `0`,
 		opt.Alias("s"),
 		opt.ArgName(`[prefix]offset`),
 		opt.Description(`Start reading from certain offset. See NOTES.`),
 	)
 
-	remaining, err := opt.Parse(os.Args[1:])
+	remainingArgs, err := opt.Parse(os.Args[1:])
 
 	if opt.Called("help") {
 		fmt.Fprintf(os.Stdout, fmt.Sprintf(`heksa - hex file dumper %v - (%v)`+"\n", VERSION, BUILDDATE))
@@ -84,25 +84,25 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 		os.Exit(1)
 	}
 
-	offsetViewer, err = reader.GetOffsetViewer(strings.Split(*offsetDisplayS, `,`))
+	offsetViewer, err = reader.GetOffsetFormatters(strings.Split(*argOffset, `,`))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error getting offset displayer: %v`, err))
 		os.Exit(1)
 	}
 
-	displays, err = reader.GetViewers(strings.Split(*formatS, `,`))
+	displays, err = reader.GetViewers(strings.Split(*argFormat, `,`))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error getting data displayer: %v`, err))
 		os.Exit(1)
 	}
 
-	limit, err = strconv.ParseUint(*limitS, 0, 64)
+	limit, err = strconv.ParseUint(*argLimit, 0, 64)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error parsing limit: %v`, err))
 		os.Exit(1)
 	}
 
-	startOffset, err = strconv.ParseInt(*startOffsetS, 0, 64)
+	startOffset, err = strconv.ParseInt(*argSeek, 0, 64)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error parsing seek: %v`, err))
 		os.Exit(1)
@@ -119,12 +119,12 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 		}
 	} else {
 		// Read file
-		if len(remaining) != 1 {
+		if len(remainingArgs) != 1 {
 			fmt.Fprintln(os.Stderr, fmt.Sprintf(`error: no file given as argument, see --help`))
 			os.Exit(1)
 		}
 
-		fpath := remaining[0]
+		fpath := remainingArgs[0]
 
 		fhandle, err := os.Open(fpath)
 		if err != nil {

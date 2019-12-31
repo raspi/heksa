@@ -6,30 +6,32 @@ import (
 	"github.com/raspi/heksa/pkg/iface"
 )
 
-type offsetViewer uint8
+type offsetFormatter uint8
 
 const (
-	OffsetHex offsetViewer = iota
+	OffsetHex offsetFormatter = iota
 	OffsetDec
 	OffsetOct
 	OffsetPercent
 )
 
-var offsetViewers = map[offsetViewer]iface.OffsetFormatter{
+var offsetFormattersEnumToImpl = map[offsetFormatter]iface.OffsetFormatter{
 	OffsetHex:     display.NewHex(),
 	OffsetDec:     display.NewDec(),
 	OffsetOct:     display.NewOct(),
 	OffsetPercent: display.NewPercent(),
 }
 
-var offsetViewersStringToEnumMap = map[string]offsetViewer{
+// Get enum from string
+var offsetFormattersStringToEnumMap = map[string]offsetFormatter{
 	`hex`: OffsetHex,
 	`dec`: OffsetDec,
 	`oct`: OffsetOct,
 	`per`: OffsetPercent,
 }
 
-func GetOffsetViewer(viewerStr []string) (formatters []iface.OffsetFormatter, err error) {
+// GetOffsetFormatters parses string and returns proper formatter(s)
+func GetOffsetFormatters(viewerStr []string) (formatters []iface.OffsetFormatter, err error) {
 
 	if len(viewerStr) > 2 {
 		return nil, fmt.Errorf(`error: max two formatters, got: %v`, viewerStr)
@@ -42,15 +44,14 @@ func GetOffsetViewer(viewerStr []string) (formatters []iface.OffsetFormatter, er
 			continue
 		}
 
-		en, ok := offsetViewersStringToEnumMap[v]
+		en, ok := offsetFormattersStringToEnumMap[v]
 		if !ok {
 			return nil, fmt.Errorf(`invalid: %v`, viewerStr)
 		}
 
-		formatters = append(formatters, offsetViewers[en])
+		formatters = append(formatters, offsetFormattersEnumToImpl[en])
 
 	}
 
 	return formatters, nil
-
 }
