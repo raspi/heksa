@@ -5,26 +5,27 @@
 Hex dumper with colors
 
 ```
-% heksa -h
-heksa - hex file dumper v1.6.0 - (2019-12-31T10:18:30+02:00)
+heksa - hex file dumper v1.7.0 - (2019-12-31T13:35:02+02:00)
 (c) Pekka Järvinen 2019- [ https://github.com/raspi/heksa ]
 SYNOPSIS:
-    heksa [--format|-f <fmt1,fmt2,..>] [--help|-h|-?]
-          [--limit|-l <[prefix]bytes>] [--offset-format|-o <[fmt1][,fmt2]>]
-          [--seek|-s <[prefix]offset>] [--version] <filename>
+    heksa [--format|-f <fmt1,fmt2,..>] [--header] [--help|-h|-?]
+          [--limit|-l <[prefix]bytes>] [--offset-format|-o <fmt1[,fmt2]>]
+          [--seek|-s <[prefix]offset>] [--version] <filename> or STDIN
 
 OPTIONS:
-    --format|-f <fmt1,fmt2,..>            One or multiple of: hex, dec, oct, bit (default: "hex,asc")
+    --format|-f <fmt1,fmt2,..>          One or multiple of: hex, dec, oct, bit (default: "hex,asc")
 
-    --help|-h|-?                          Show this help (default: false)
+    --header                            Show offset header (default: false)
 
-    --limit|-l <[prefix]bytes>            Read only N bytes (0 = no limit). See NOTES. (default: "0")
+    --help|-h|-?                        Show this help (default: false)
 
-    --offset-format|-o <[fmt1][,fmt2]>    Zero to two of: hex, dec, oct, per, no, ''. First one is displayed on the left side and second one on right after formatters (default: "hex")
+    --limit|-l <[prefix]bytes>          Read only N bytes (0 = no limit). See NOTES. (default: "0")
 
-    --seek|-s <[prefix]offset>            Start reading from certain offset. See NOTES. (default: "0")
+    --offset-format|-o <fmt1[,fmt2]>    One or two of: hex, dec, oct, per, no, ''. First one is displayed on the left side and second one on right side after formatters (default: "hex")
 
-    --version                             Show version information (default: false)
+    --seek|-s <[prefix]offset>          Start reading from certain offset. See NOTES. (default: "0")
+
+    --version                           Show version information (default: false)
 
 NOTES:
     - You can use prefixes for seek and limit. 0x = hex, 0b = binary, 0o = octal.
