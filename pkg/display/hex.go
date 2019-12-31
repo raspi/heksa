@@ -19,18 +19,7 @@ type Hex struct {
 func (d *Hex) SetFileSize(s int64) {
 	d.fs = uint64(s)
 	d.bw = nearest(uint8(bits.Len64(d.fs)))
-
-	if d.bw == 0 {
-		d.bw = 8
-	}
-
-	zeroes := (d.bw / 8) + 1
-
-	if zeroes&1 != 0 {
-		zeroes++
-	}
-
-	d.offFormat = fmt.Sprintf(`%%0%vx`, zeroes)
+	d.offFormat = fmt.Sprintf(`%%0%vx`, d.bw/8)
 }
 
 func NewHex() *Hex {
