@@ -9,5 +9,14 @@ nearest returns nearest bits to uint8-64 len
 and so on
 */
 func nearest(bitWidth uint8) uint8 {
-	return (bitWidth + (8 - 1)) & ^(bitWidth - 1)
+	if bitWidth > 64 {
+		return 64
+	} else if bitWidth > 32 {
+		return 64
+	} else if bitWidth > 16 {
+		return 32
+	} else if bitWidth > 8 {
+		return 16
+	}
+	return 8
 }
