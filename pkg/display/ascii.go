@@ -5,6 +5,9 @@ import (
 	"strings"
 )
 
+/*
+Ascii displays bytes as ASCII characters. Non-printable characters are displayed as dots ('.').
+*/
 type Ascii struct {
 	sb strings.Builder
 }

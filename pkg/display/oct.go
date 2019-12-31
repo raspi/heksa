@@ -8,6 +8,9 @@ import (
 	"strings"
 )
 
+/*
+Oct displays bytes in octal format 000-377
+*/
 type Oct struct {
 	fs        uint64 // File size
 	offFormat string // Format for offset column

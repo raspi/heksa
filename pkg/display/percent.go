@@ -7,6 +7,9 @@ import (
 	"strings"
 )
 
+/*
+Percent displays offset as 000.000% - 100.000%
+*/
 type Percent struct {
 	fs uint64 // File size
 	sb strings.Builder

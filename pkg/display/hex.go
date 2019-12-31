@@ -9,6 +9,9 @@ import (
 	"strings"
 )
 
+/*
+Hex displays bytes in hexadecimal format 00-ff.
+*/
 type Hex struct {
 	fs        uint64 // File size
 	bw        uint8  // Bit width calculated from file size

@@ -8,6 +8,9 @@ import (
 	"strings"
 )
 
+/*
+Dec displays bytes as 000-255
+*/
 type Dec struct {
 	fs        uint64
 	offFormat string // Format for offset column

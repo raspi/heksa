@@ -5,6 +5,9 @@ import (
 	"strings"
 )
 
+/*
+Bit displays bytes as bits 00000000-11111111
+*/
 type Bit struct {
 	sb strings.Builder
 }
