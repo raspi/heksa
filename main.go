@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/DavidGamba/go-getoptions"
+	clr "github.com/logrusorgru/aurora"
 	"github.com/raspi/heksa/pkg/iface"
 	"github.com/raspi/heksa/pkg/reader"
 	"io"
@@ -19,7 +20,7 @@ const AUTHOR = `Pekka Järvinen`
 const HOMEPAGE = `https://github.com/raspi/heksa`
 
 // Parse command line arguments
-func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterFormatter, offsetViewer []iface.OffsetFormatter, limit uint64, startOffset int64) {
+func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterFormatter, offsetViewer []iface.OffsetFormatter, limit uint64, startOffset int64, palette [256]clr.Color) {
 	opt := getoptions.New()
 
 	opt.HelpSynopsisArgs(`<filename>`)
@@ -86,6 +87,18 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 		os.Exit(1)
 	}
 
+	limit, err = strconv.ParseUint(*argLimit, 0, 64)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error parsing limit: %v`, err))
+		os.Exit(1)
+	}
+
+	startOffset, err = strconv.ParseInt(*argSeek, 0, 64)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error parsing seek: %v`, err))
+		os.Exit(1)
+	}
+
 	offsetViewer, err = reader.GetOffsetFormatters(strings.Split(*argOffset, `,`))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error getting offset formatter: %v`, err))
@@ -98,16 +111,15 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 		os.Exit(1)
 	}
 
-	limit, err = strconv.ParseUint(*argLimit, 0, 64)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error parsing limit: %v`, err))
-		os.Exit(1)
-	}
+	// Initialize palette
+	for i := uint8(0); i < 255; i++ {
+		color, ok := defaultCharacterColors[i]
+		if !ok {
+			// Fall back
+			color = defaultColor
+		}
 
-	startOffset, err = strconv.ParseInt(*argSeek, 0, 64)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error parsing seek: %v`, err))
-		os.Exit(1)
+		palette[i] = color
 	}
 
 	stat, _ := os.Stdin.Stat()
@@ -154,21 +166,11 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 
 	}
 
-	return source, displays, offsetViewer, limit, startOffset
+	return source, displays, offsetViewer, limit, startOffset, palette
 }
 
 func main() {
-	source, displays, offViewer, limit, startOffset := getParams()
-	palette := defaultCharacterColors
-
-	// Initialize palette
-	for i := uint8(0); i < 255; i++ {
-		_, ok := palette[i]
-		if !ok {
-			// Fall back
-			palette[i] = defaultColor
-		}
-	}
+	source, displays, offViewer, limit, startOffset, palette := getParams()
 
 	if startOffset != 0 {
 		// Seek to given offset

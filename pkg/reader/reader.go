@@ -14,11 +14,11 @@ type Reader struct {
 	offsetFormatterCount int
 	ReadBytes            uint64 // How many bytes Reader has been reading so far (for limit)
 	sb                   strings.Builder
-	Splitter             string              // Splitter character for columns
-	palette              map[uint8]clr.Color // color palette for each byte
+	Splitter             string         // Splitter character for columns
+	palette              [256]clr.Color // color palette for each byte
 }
 
-func New(r iface.ReadSeekerCloser, offsetFormatter []iface.OffsetFormatter, formatters []iface.CharacterFormatter, palette map[uint8]clr.Color) *Reader {
+func New(r iface.ReadSeekerCloser, offsetFormatter []iface.OffsetFormatter, formatters []iface.CharacterFormatter, palette [256]clr.Color) *Reader {
 	if offsetFormatter == nil {
 		panic(`nil offset formatter`)
 	}
