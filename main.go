@@ -18,6 +18,7 @@ var BUILDDATE = `0000-00-00T00:00:00+00:00`
 const AUTHOR = `Pekka Järvinen`
 const HOMEPAGE = `https://github.com/raspi/heksa`
 
+// Parse command line arguments
 func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterFormatter, offsetViewer []iface.OffsetFormatter, limit uint64, startOffset int64) {
 	opt := getoptions.New()
 
@@ -160,6 +161,7 @@ func main() {
 	source, displays, offViewer, limit, startOffset := getParams()
 	palette := defaultCharacterColors
 
+	// Initialize palette
 	for i := uint8(0); i < 255; i++ {
 		_, ok := palette[i]
 		if !ok {
@@ -169,6 +171,8 @@ func main() {
 	}
 
 	if startOffset != 0 {
+		// Seek to given offset
+
 		_, err := source.Seek(startOffset, io.SeekCurrent)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, fmt.Sprintf(`couldn't seek: %v`, err))

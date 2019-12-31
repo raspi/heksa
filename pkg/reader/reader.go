@@ -7,36 +7,36 @@ import (
 )
 
 type Reader struct {
-	r                     iface.ReadSeekerCloser
-	displays              []iface.CharacterFormatter // displayer(s) for data
-	displayFormatterCount int
-	offsetFormatter       []iface.OffsetFormatter // offset displayer
-	offsetFormatterCount  int
-	ReadBytes             uint64
-	sb                    strings.Builder
-	Splitter              string
-	palette               map[uint8]clr.Color
+	r                    iface.ReadSeekerCloser
+	charFormatters       []iface.CharacterFormatter // displayer(s) for data
+	charFormatterCount   int
+	offsetFormatter      []iface.OffsetFormatter // offset formatters (max 2) first one is displayed on the left side and second one on the right side
+	offsetFormatterCount int
+	ReadBytes            uint64 // How many bytes Reader has been reading so far (for limit)
+	sb                   strings.Builder
+	Splitter             string              // Splitter character for columns
+	palette              map[uint8]clr.Color // color palette for each byte
 }
 
 func New(r iface.ReadSeekerCloser, offsetFormatter []iface.OffsetFormatter, formatters []iface.CharacterFormatter, palette map[uint8]clr.Color) *Reader {
 	if offsetFormatter == nil {
-		panic(`nil offset displayer`)
+		panic(`nil offset formatter`)
 	}
 
 	if formatters == nil {
-		panic(`nil displayer(s)`)
+		panic(`nil formatter`)
 	}
 
 	reader := &Reader{
-		r:                     r,
-		displays:              formatters,
-		offsetFormatter:       offsetFormatter,
-		ReadBytes:             0,
-		sb:                    strings.Builder{},
-		Splitter:              `|`,
-		displayFormatterCount: len(formatters),
-		offsetFormatterCount:  len(offsetFormatter),
-		palette:               palette,
+		r:                    r,
+		charFormatters:       formatters,
+		offsetFormatter:      offsetFormatter,
+		ReadBytes:            0,
+		sb:                   strings.Builder{},
+		Splitter:             `|`,
+		charFormatterCount:   len(formatters),
+		offsetFormatterCount: len(offsetFormatter),
+		palette:              palette,
 	}
 
 	return reader
@@ -48,6 +48,7 @@ func (r *Reader) Read() (string, error) {
 	r.sb.Grow(1024)
 
 	if r.offsetFormatterCount > 0 {
+		// show offset on the left side
 		r.sb.WriteString(r.offsetFormatter[0].FormatOffset(r.r))
 		r.sb.WriteString(r.Splitter)
 	}
@@ -60,13 +61,14 @@ func (r *Reader) Read() (string, error) {
 
 	r.ReadBytes += uint64(rb)
 
-	for didx, dplay := range r.displays {
-
+	// iterate through every formatter which outputs it's own format
+	for didx, dplay := range r.charFormatters {
 		eof := []byte(dplay.EofStr())
 		eofl := len(eof)
 
 		for i := 0; i < 16; i++ {
 			if i == 8 {
+				// Add pad for better visualization
 				r.sb.WriteString(` `)
 			}
 
@@ -94,12 +96,13 @@ func (r *Reader) Read() (string, error) {
 			}
 		}
 
-		if didx < (r.displayFormatterCount - 1) {
+		if didx < (r.charFormatterCount - 1) {
 			r.sb.WriteString(r.Splitter)
 		}
 	}
 
 	if r.offsetFormatterCount > 1 {
+		// show offset on the right side
 		r.sb.WriteString(r.Splitter)
 		r.sb.WriteString(r.offsetFormatter[1].FormatOffset(r.r))
 	}
