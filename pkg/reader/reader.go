@@ -76,12 +76,15 @@ func (r *Reader) Read() (string, error) {
 				if i < 15 {
 					r.sb.WriteString(s)
 				} else {
+					// No extra space for last
 					r.sb.WriteString(strings.Trim(s, ` `))
 				}
 			} else {
+				// There is no data so we add padding
 				if i < 15 {
 					r.sb.Write(eof)
 				} else {
+					// No extra spaces for last
 					if eofl > 1 {
 						r.sb.Write(eof[0 : eofl-1])
 					} else {
