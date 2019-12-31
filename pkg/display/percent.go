@@ -21,7 +21,7 @@ func (d *Percent) SetFileSize(s int64) {
 
 func NewPercent() *Percent {
 	return &Percent{
-		fs: 8,
+		fs: 0,
 		sb: strings.Builder{},
 	}
 }
