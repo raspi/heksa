@@ -1,23 +1,60 @@
 package main
 
 import (
-	clr "github.com/logrusorgru/aurora"
+	"github.com/raspi/heksa/pkg/color"
 )
 
-var defaultColor = clr.WhiteFg
-var defaultLineColor = clr.CyanFg
-var defaultSpaceColor = clr.MagentaFg
-var defaultNULLEOFColor = clr.RedFg
-var defaultPrintableASCIIColor = clr.BlueFg
-var defaultUpperBytesColor = clr.YellowFg
+const (
+	//availFlags = "-+# 0"
+	esc   = "\033["
+	clear = esc + "0m"
+
+	LineEven = esc + "48;5;16m"
+	LineOdd  = esc + "48;5;235m"
+)
+
+var defaultColor = color.ColorGrey93_eeeeee
+var defaultLineColor = color.ColorCyan1_00ffff
+var defaultSpaceColor = color.ColorMagenta1_ff00ff
+var defaultNULLEOFColor = color.ColorRed1_ff0000
+var defaultPrintableASCIIColor = color.ColorDodgerBlue1_0087ff
+var defaultUpperBytesColor = color.ColorYellow_ffff00
 
 // Default colors for bytes 0-255
-var defaultCharacterColors = map[uint8]clr.Color{
+var defaultCharacterColors = [256]color.Color{
 	0:   defaultNULLEOFColor, // null
-	9:   defaultSpaceColor,   // tab
-	10:  defaultLineColor,    // \n
-	13:  defaultLineColor,    // \r
-	32:  defaultSpaceColor,   // space
+	1:   defaultColor,
+	2:   defaultColor,
+	3:   defaultColor,
+	4:   defaultColor,
+	5:   defaultColor,
+	6:   defaultColor,
+	7:   defaultColor,
+	8:   defaultColor,
+	9:   defaultSpaceColor, // tab
+	10:  defaultLineColor,  // \n
+	11:  defaultColor,
+	12:  defaultColor,
+	13:  defaultLineColor, // \r
+	14:  defaultColor,
+	15:  defaultColor,
+	16:  defaultColor,
+	17:  defaultColor,
+	18:  defaultColor,
+	19:  defaultColor,
+	20:  defaultColor,
+	21:  defaultColor,
+	22:  defaultColor,
+	23:  defaultColor,
+	24:  defaultColor,
+	25:  defaultColor,
+	26:  defaultColor,
+	27:  defaultColor,
+	28:  defaultColor,
+	29:  defaultColor,
+	30:  defaultColor,
+	31:  defaultColor,
+	32:  defaultSpaceColor, // space
 	33:  defaultPrintableASCIIColor,
 	34:  defaultPrintableASCIIColor,
 	35:  defaultPrintableASCIIColor,

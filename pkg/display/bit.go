@@ -1,7 +1,7 @@
 package display
 
 import (
-	clr "github.com/logrusorgru/aurora"
+	"fmt"
 	"strings"
 )
 
@@ -18,9 +18,9 @@ func NewBit() *Bit {
 	}
 }
 
-func (d *Bit) Format(b byte, color clr.Color) string {
+func (d *Bit) Format(b byte) string {
 	d.sb.Reset()
-	d.sb.WriteString(clr.Sprintf(`%08b `, clr.Colorize(b, color)))
+	d.sb.WriteString(fmt.Sprintf(`%08b `, b))
 	return d.sb.String()
 }
 

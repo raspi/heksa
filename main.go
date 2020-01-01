@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/DavidGamba/go-getoptions"
-	clr "github.com/logrusorgru/aurora"
+	"github.com/raspi/heksa/pkg/color"
 	"github.com/raspi/heksa/pkg/iface"
 	"github.com/raspi/heksa/pkg/reader"
 	"io"
@@ -20,7 +20,7 @@ const AUTHOR = `Pekka Järvinen`
 const HOMEPAGE = `https://github.com/raspi/heksa`
 
 // Parse command line arguments
-func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterFormatter, offsetViewer []iface.OffsetFormatter, limit uint64, startOffset int64, palette [256]clr.Color, showHeader bool) {
+func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterFormatter, offsetViewer []iface.OffsetFormatter, limit uint64, startOffset int64, palette [256]color.Color, showHeader bool) {
 	opt := getoptions.New()
 
 	opt.HelpSynopsisArgs(`<filename> or STDIN`)
@@ -117,16 +117,7 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 		os.Exit(1)
 	}
 
-	// Initialize palette
-	for i := uint16(0); i < 256; i++ {
-		color, ok := defaultCharacterColors[uint8(i)]
-		if !ok {
-			// Fall back
-			color = defaultColor
-		}
-
-		palette[i] = color
-	}
+	palette = defaultCharacterColors
 
 	stat, _ := os.Stdin.Stat()
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
@@ -191,6 +182,7 @@ func main() {
 	r := reader.New(source, offViewer, displays, palette, showHeader)
 	fmt.Print(r.Header())
 
+	isEven := false
 	// Dump hex
 	for {
 		s, err := r.Read()
@@ -203,7 +195,13 @@ func main() {
 			os.Exit(1)
 		}
 
-		fmt.Println(s)
+		color := LineEven
+		if isEven {
+			color = LineOdd
+		}
+		isEven = !isEven
+
+		fmt.Printf(`%s%s%s`+"\n", color, s, clear)
 
 		if limit > 0 && r.ReadBytes >= limit {
 			// Limit is set and found

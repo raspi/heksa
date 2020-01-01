@@ -1,7 +1,6 @@
 package iface
 
 import (
-	clr "github.com/logrusorgru/aurora"
 	"io"
 )
 
@@ -14,8 +13,8 @@ type OffsetFormatter interface {
 
 // CharacterFormatter displays bytes in X format
 type CharacterFormatter interface {
-	Format(b byte, c clr.Color) string // Get the colorized representation
-	EofStr() string                    // String if EOF has been reached. for lining output.
+	Format(b byte) string // Get the formatted representation
+	EofStr() string       // String if EOF has been reached. for lining output.
 	Header() string
 }
 

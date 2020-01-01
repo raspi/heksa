@@ -2,7 +2,6 @@ package display
 
 import (
 	"fmt"
-	clr "github.com/logrusorgru/aurora"
 	"github.com/raspi/heksa/pkg/iface"
 	"io"
 	"strings"
@@ -31,9 +30,9 @@ func (d *Dec) SetFileSize(s int64) {
 	d.offFormat = fmt.Sprintf(`%%0%vd`, d.zeroes)
 }
 
-func (d *Dec) Format(b byte, color clr.Color) string {
+func (d *Dec) Format(b byte) string {
 	d.sb.Reset()
-	d.sb.WriteString(clr.Sprintf(`%03d `, clr.Colorize(b, color)))
+	d.sb.WriteString(fmt.Sprintf(`%03d `, b))
 	return d.sb.String()
 }
 

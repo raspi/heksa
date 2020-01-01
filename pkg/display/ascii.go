@@ -1,7 +1,7 @@
 package display
 
 import (
-	clr "github.com/logrusorgru/aurora"
+	"fmt"
 	"strings"
 )
 
@@ -277,9 +277,9 @@ func NewAscii() *Ascii {
 	}
 }
 
-func (d *Ascii) Format(b byte, color clr.Color) string {
+func (d *Ascii) Format(b byte) string {
 	d.sb.Reset()
-	d.sb.WriteString(clr.Sprintf(`%c`, clr.Colorize(asciiByteToChar[b], color)))
+	d.sb.WriteString(fmt.Sprintf(`%c`, asciiByteToChar[b]))
 	return d.sb.String()
 }
 
