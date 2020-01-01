@@ -4,5 +4,3 @@ github.com/DavidGamba/go-getoptions/completion
 github.com/DavidGamba/go-getoptions/help
 github.com/DavidGamba/go-getoptions/option
 github.com/DavidGamba/go-getoptions/text
-# github.com/logrusorgru/aurora v0.0.0-20191116043053-66b7ad493a23
-github.com/logrusorgru/aurora
