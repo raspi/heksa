@@ -54,11 +54,8 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []iface.OffsetFormatter, form
 	return reader
 }
 
-// Read reads 16 bytes and provides string to display
-func (r *Reader) Read() (string, error) {
+func (r *Reader) getoffsetLeft() string {
 	r.sb.Reset()
-	r.sb.Grow(256)
-
 	if r.offsetFormatterCount > 0 {
 		r.sb.WriteString(r.offsetBreak)
 		// show offset on the left side
@@ -66,6 +63,30 @@ func (r *Reader) Read() (string, error) {
 		r.sb.WriteString(r.splitterBreak)
 		r.sb.WriteString(r.Splitter)
 	}
+	return r.sb.String()
+}
+
+func (r *Reader) getoffsetRight() string {
+	r.sb.Reset()
+	if r.offsetFormatterCount > 1 {
+		// show offset on the right side
+		r.sb.WriteString(r.splitterBreak)
+		r.sb.WriteString(r.Splitter)
+		r.sb.WriteString(r.offsetBreak)
+		r.sb.WriteString(r.offsetFormatter[1].FormatOffset(r.r))
+	}
+
+	return r.sb.String()
+}
+
+// Read reads 16 bytes and provides string to display
+func (r *Reader) Read() (string, error) {
+	offsetLeft := r.getoffsetLeft()
+	offsetRight := r.getoffsetRight()
+	r.sb.Reset()
+	r.sb.Grow(256)
+
+	r.sb.WriteString(offsetLeft)
 
 	tmp := make([]byte, 16)
 	rb, err := r.r.Read(tmp)
@@ -97,9 +118,12 @@ func (r *Reader) Read() (string, error) {
 				if i < 15 {
 					r.sb.WriteString(s)
 				} else {
-					//r.sb.WriteString(s)
-					// No extra space for last
-					r.sb.WriteString(strings.TrimRight(s, ` `))
+					if eofl == 1 {
+						r.sb.WriteString(s)
+					} else {
+						// No extra space for last
+						r.sb.WriteString(strings.TrimRight(s, ` `))
+					}
 				}
 			} else {
 				// There is no data so we add padding
@@ -122,13 +146,7 @@ func (r *Reader) Read() (string, error) {
 		}
 	}
 
-	if r.offsetFormatterCount > 1 {
-		// show offset on the right side
-		r.sb.WriteString(r.splitterBreak)
-		r.sb.WriteString(r.Splitter)
-		r.sb.WriteString(r.offsetBreak)
-		r.sb.WriteString(r.offsetFormatter[1].FormatOffset(r.r))
-	}
+	r.sb.WriteString(offsetRight)
 
 	return r.sb.String(), nil
 }
