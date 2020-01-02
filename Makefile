@@ -16,6 +16,7 @@ NETBSD_ARCHS := amd64 arm
 OPENBSD_ARCHS := amd64 arm arm64
 
 default: build
+
 # Helper for taking screenshot when releasing new version
 screenshot:
 	cd $(BUILDDIR); echo "% $(SCREENSHOTCMD)" > scr.txt && $(SCREENSHOTCMD) >> scr.txt && echo "% " >> scr.txt && konsole --notransparency --noclose --hide-tabbar -e cat scr.txt
@@ -79,7 +80,8 @@ copycommon:
 
 tar-everything: copycommon
 	@echo "tar-everything..."
-	for arch in $(LINUX_ARCHS); do \
+	# GNU/Linux
+	@for arch in $(LINUX_ARCHS); do \
 	  echo "GNU/Linux tar... $$arch"; \
 	  cp -v "$(PWD)/bin/linux-$$arch/${APPNAME}" "$(TMPDIR)/bin"; \
 	  cd "$(TMPDIR)"; \
@@ -87,7 +89,8 @@ tar-everything: copycommon
 	  rm "$(TMPDIR)/bin/${APPNAME}"; \
 	done
 
-	for arch in $(DARWIN_ARCHS); do \
+	# Darwin
+	@for arch in $(DARWIN_ARCHS); do \
 	  echo "Darwin tar... $$arch"; \
 	  cp -v "$(PWD)/bin/darwin-$$arch/${APPNAME}" "$(TMPDIR)/bin"; \
 	  cd "$(TMPDIR)"; \
@@ -95,7 +98,8 @@ tar-everything: copycommon
 	  rm "$(TMPDIR)/bin/${APPNAME}"; \
 	done
 
-	for arch in $(FREEBSD_ARCHS); do \
+	# FreeBSD
+	@for arch in $(FREEBSD_ARCHS); do \
 	  echo "FreeBSD tar... $$arch"; \
 	  cp -v "$(PWD)/bin/freebsd-$$arch/${APPNAME}" "$(TMPDIR)/bin"; \
 	  cd "$(TMPDIR)"; \
@@ -103,7 +107,8 @@ tar-everything: copycommon
 	  rm "$(TMPDIR)/bin/${APPNAME}"; \
 	done
 
-	for arch in $(OPENBSD_ARCHS); do \
+	# OpenBSD
+	@for arch in $(OPENBSD_ARCHS); do \
 	  echo "OpenBSD tar... $$arch"; \
 	  cp -v "$(PWD)/bin/openbsd-$$arch/${APPNAME}" "$(TMPDIR)/bin"; \
 	  cd "$(TMPDIR)"; \
@@ -111,7 +116,8 @@ tar-everything: copycommon
 	  rm "$(TMPDIR)/bin/${APPNAME}"; \
 	done
 
-	for arch in $(NETBSD_ARCHS); do \
+	# NetBSD
+	@for arch in $(NETBSD_ARCHS); do \
 	  echo "NetBSD tar... $$arch"; \
 	  cp -v "$(PWD)/bin/netbsd-$$arch/${APPNAME}" "$(TMPDIR)/bin"; \
 	  cd "$(TMPDIR)"; \
@@ -119,7 +125,8 @@ tar-everything: copycommon
 	  rm "$(TMPDIR)/bin/${APPNAME}"; \
 	done
 
-	for arch in $(WINDOWS_ARCHS); do \
+	#Windows
+	@for arch in $(WINDOWS_ARCHS); do \
 	  echo "MS Windows zip... $$arch"; \
 	  cp -v "$(PWD)/bin/windows-$$arch/${APPNAME}.exe" "$(TMPDIR)/bin"; \
 	  cd "$(TMPDIR)"; \
