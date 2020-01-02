@@ -35,6 +35,7 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 	)
 
 	argHeader := opt.Bool(`header`, false,
+		opt.Alias(`H`),
 		opt.Description(`Show offset header`),
 	)
 
