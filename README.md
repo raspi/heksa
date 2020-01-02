@@ -51,6 +51,24 @@ EXAMPLES:
 * Seek to given offset
 * Read from stdin
 
+## Requirements
+
+* Terminal with ANSI color support
+  * KDE's Konsole is currently used for development
+* Operating system
+  * GNU/Linux 
+    * amd64 arm arm64 ppc64 ppc64le
+  * Microsoft Windows
+    * amd64
+  * Darwin (Apple Mac)
+    * amd64
+  * FreeBSD
+    * amd64 arm
+  * NetBSD
+    * amd64 arm
+  * OpenBSD
+    * amd64 arm arm64
+
 ## Get source
 
     git clone https://github.com/raspi/heksa
@@ -60,7 +78,7 @@ EXAMPLES:
 1. Make changes
 1. `make build` or just `go build .`
 
-Releasing new version:
+## Releasing new version:
 
 Requirements:
 
