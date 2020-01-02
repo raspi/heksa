@@ -2,6 +2,8 @@
 
 ![Screenshot](https://github.com/raspi/heksa/blob/master/_assets/screenshot.png)
 
+[![Github All Releases](https://img.shields.io/github/downloads/raspi/heksa/total.svg)]()
+
 Hex dumper with colors
 
 ```
