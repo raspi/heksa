@@ -26,7 +26,7 @@ func NewDec() *Dec {
 
 func (d *Dec) SetFileSize(s int64) {
 	d.fs = uint64(s)
-	d.zeroes = len(string(d.fs))
+	d.zeroes = len(fmt.Sprintf(`%d`, d.fs))
 	d.offFormat = fmt.Sprintf(`%%0%vd`, d.zeroes)
 }
 
