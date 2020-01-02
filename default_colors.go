@@ -13,15 +13,28 @@ const (
 	LineOdd  = esc + "48;5;235m"
 )
 
-var defaultColor = color.ColorGrey93_eeeeee
-var defaultLineColor = color.ColorCyan1_00ffff
-var defaultSpaceColor = color.ColorMagenta1_ff00ff
-var defaultNULLEOFColor = color.ColorRed1_ff0000
-var defaultPrintableASCIIColor = color.ColorDodgerBlue1_0087ff
-var defaultUpperBytesColor = color.ColorYellow_ffff00
+var defaultColor = color.AnsiColor{Color: color.ColorGrey93_eeeeee}
+var defaultLineColor = color.AnsiColor{Color: color.ColorCyan1_00ffff}
+var defaultSpaceColor = color.AnsiColor{Color: color.ColorMagenta1_ff00ff}
+
+// 0x00 0xFF
+var defaultNULLEOFColor = color.AnsiColor{Color: color.ColorRed3_af0000}
+
+var defaultPrintableASCIIColor = color.AnsiColor{Color: color.ColorDeepSkyBlue2_00afd7}
+
+// 0-9
+var defaultPrintableASCIINumberColor = color.AnsiColor{Color: color.ColorSteelBlue_5f87af}
+
+// a-z
+var defaultPrintableASCIILowerAlphaColor = color.AnsiColor{Color: color.ColorSteelBlue3_5f87d7}
+
+// A-Z
+var defaultPrintableASCIIUpperAlphaColor = color.AnsiColor{Color: color.ColorCornflowerBlue_5f87ff}
+
+var defaultUpperBytesColor = color.AnsiColor{Color: color.ColorYellow_ffff00}
 
 // Default colors for bytes 0-255
-var defaultCharacterColors = [256]color.Color{
+var defaultCharacterColors = [256]color.AnsiColor{
 	0:   defaultNULLEOFColor, // null
 	1:   defaultColor,
 	2:   defaultColor,
@@ -70,16 +83,16 @@ var defaultCharacterColors = [256]color.Color{
 	45:  defaultPrintableASCIIColor,
 	46:  defaultPrintableASCIIColor,
 	47:  defaultPrintableASCIIColor,
-	48:  defaultPrintableASCIIColor, // 0
-	49:  defaultPrintableASCIIColor,
-	50:  defaultPrintableASCIIColor,
-	51:  defaultPrintableASCIIColor,
-	52:  defaultPrintableASCIIColor,
-	53:  defaultPrintableASCIIColor,
-	54:  defaultPrintableASCIIColor,
-	55:  defaultPrintableASCIIColor,
-	56:  defaultPrintableASCIIColor,
-	57:  defaultPrintableASCIIColor, // 9
+	48:  defaultPrintableASCIINumberColor, // 0
+	49:  defaultPrintableASCIINumberColor,
+	50:  defaultPrintableASCIINumberColor,
+	51:  defaultPrintableASCIINumberColor,
+	52:  defaultPrintableASCIINumberColor,
+	53:  defaultPrintableASCIINumberColor,
+	54:  defaultPrintableASCIINumberColor,
+	55:  defaultPrintableASCIINumberColor,
+	56:  defaultPrintableASCIINumberColor,
+	57:  defaultPrintableASCIINumberColor, // 9
 	58:  defaultPrintableASCIIColor,
 	59:  defaultPrintableASCIIColor,
 	60:  defaultPrintableASCIIColor,
@@ -87,64 +100,64 @@ var defaultCharacterColors = [256]color.Color{
 	62:  defaultPrintableASCIIColor,
 	63:  defaultPrintableASCIIColor,
 	64:  defaultPrintableASCIIColor,
-	65:  defaultPrintableASCIIColor, // A
-	66:  defaultPrintableASCIIColor,
-	67:  defaultPrintableASCIIColor,
-	68:  defaultPrintableASCIIColor,
-	69:  defaultPrintableASCIIColor,
-	70:  defaultPrintableASCIIColor,
-	71:  defaultPrintableASCIIColor,
-	72:  defaultPrintableASCIIColor,
-	73:  defaultPrintableASCIIColor,
-	74:  defaultPrintableASCIIColor,
-	75:  defaultPrintableASCIIColor,
-	76:  defaultPrintableASCIIColor,
-	77:  defaultPrintableASCIIColor,
-	78:  defaultPrintableASCIIColor,
-	79:  defaultPrintableASCIIColor,
-	80:  defaultPrintableASCIIColor,
-	81:  defaultPrintableASCIIColor,
-	82:  defaultPrintableASCIIColor,
-	83:  defaultPrintableASCIIColor,
-	84:  defaultPrintableASCIIColor,
-	85:  defaultPrintableASCIIColor,
-	86:  defaultPrintableASCIIColor,
-	87:  defaultPrintableASCIIColor,
-	88:  defaultPrintableASCIIColor,
-	89:  defaultPrintableASCIIColor,
-	90:  defaultPrintableASCIIColor, // Z
+	65:  defaultPrintableASCIIUpperAlphaColor, // A
+	66:  defaultPrintableASCIIUpperAlphaColor,
+	67:  defaultPrintableASCIIUpperAlphaColor,
+	68:  defaultPrintableASCIIUpperAlphaColor,
+	69:  defaultPrintableASCIIUpperAlphaColor,
+	70:  defaultPrintableASCIIUpperAlphaColor,
+	71:  defaultPrintableASCIIUpperAlphaColor,
+	72:  defaultPrintableASCIIUpperAlphaColor,
+	73:  defaultPrintableASCIIUpperAlphaColor,
+	74:  defaultPrintableASCIIUpperAlphaColor,
+	75:  defaultPrintableASCIIUpperAlphaColor,
+	76:  defaultPrintableASCIIUpperAlphaColor,
+	77:  defaultPrintableASCIIUpperAlphaColor,
+	78:  defaultPrintableASCIIUpperAlphaColor,
+	79:  defaultPrintableASCIIUpperAlphaColor,
+	80:  defaultPrintableASCIIUpperAlphaColor,
+	81:  defaultPrintableASCIIUpperAlphaColor,
+	82:  defaultPrintableASCIIUpperAlphaColor,
+	83:  defaultPrintableASCIIUpperAlphaColor,
+	84:  defaultPrintableASCIIUpperAlphaColor,
+	85:  defaultPrintableASCIIUpperAlphaColor,
+	86:  defaultPrintableASCIIUpperAlphaColor,
+	87:  defaultPrintableASCIIUpperAlphaColor,
+	88:  defaultPrintableASCIIUpperAlphaColor,
+	89:  defaultPrintableASCIIUpperAlphaColor,
+	90:  defaultPrintableASCIIUpperAlphaColor, // Z
 	91:  defaultPrintableASCIIColor,
 	92:  defaultPrintableASCIIColor,
 	93:  defaultPrintableASCIIColor,
 	94:  defaultPrintableASCIIColor,
 	95:  defaultPrintableASCIIColor,
 	96:  defaultPrintableASCIIColor,
-	97:  defaultPrintableASCIIColor, // a
-	98:  defaultPrintableASCIIColor,
-	99:  defaultPrintableASCIIColor,
-	100: defaultPrintableASCIIColor,
-	101: defaultPrintableASCIIColor,
-	102: defaultPrintableASCIIColor,
-	103: defaultPrintableASCIIColor,
-	104: defaultPrintableASCIIColor,
-	105: defaultPrintableASCIIColor,
-	106: defaultPrintableASCIIColor,
-	107: defaultPrintableASCIIColor,
-	108: defaultPrintableASCIIColor,
-	109: defaultPrintableASCIIColor,
-	110: defaultPrintableASCIIColor,
-	111: defaultPrintableASCIIColor,
-	112: defaultPrintableASCIIColor,
-	113: defaultPrintableASCIIColor,
-	114: defaultPrintableASCIIColor,
-	115: defaultPrintableASCIIColor,
-	116: defaultPrintableASCIIColor,
-	117: defaultPrintableASCIIColor,
-	118: defaultPrintableASCIIColor,
-	119: defaultPrintableASCIIColor,
-	120: defaultPrintableASCIIColor,
-	121: defaultPrintableASCIIColor,
-	122: defaultPrintableASCIIColor, // z
+	97:  defaultPrintableASCIILowerAlphaColor, // a
+	98:  defaultPrintableASCIILowerAlphaColor,
+	99:  defaultPrintableASCIILowerAlphaColor,
+	100: defaultPrintableASCIILowerAlphaColor,
+	101: defaultPrintableASCIILowerAlphaColor,
+	102: defaultPrintableASCIILowerAlphaColor,
+	103: defaultPrintableASCIILowerAlphaColor,
+	104: defaultPrintableASCIILowerAlphaColor,
+	105: defaultPrintableASCIILowerAlphaColor,
+	106: defaultPrintableASCIILowerAlphaColor,
+	107: defaultPrintableASCIILowerAlphaColor,
+	108: defaultPrintableASCIILowerAlphaColor,
+	109: defaultPrintableASCIILowerAlphaColor,
+	110: defaultPrintableASCIILowerAlphaColor,
+	111: defaultPrintableASCIILowerAlphaColor,
+	112: defaultPrintableASCIILowerAlphaColor,
+	113: defaultPrintableASCIILowerAlphaColor,
+	114: defaultPrintableASCIILowerAlphaColor,
+	115: defaultPrintableASCIILowerAlphaColor,
+	116: defaultPrintableASCIILowerAlphaColor,
+	117: defaultPrintableASCIILowerAlphaColor,
+	118: defaultPrintableASCIILowerAlphaColor,
+	119: defaultPrintableASCIILowerAlphaColor,
+	120: defaultPrintableASCIILowerAlphaColor,
+	121: defaultPrintableASCIILowerAlphaColor,
+	122: defaultPrintableASCIILowerAlphaColor, // z
 	123: defaultPrintableASCIIColor,
 	124: defaultPrintableASCIIColor,
 	125: defaultPrintableASCIIColor,

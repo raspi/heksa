@@ -15,16 +15,16 @@ type Reader struct {
 	offsetFormatterCount int
 	ReadBytes            uint64 // How many bytes Reader has been reading so far (for limit)
 	sb                   strings.Builder
-	Splitter             string           // Splitter character for columns
-	palette              [256]color.Color // color palette for each byte
-	showHeader           bool             //  Show formatter header?
-	SplitterColor        color.Color
-	OffsetColor          color.Color
+	Splitter             string               // Splitter character for columns
+	palette              [256]color.AnsiColor // color palette for each byte
+	showHeader           bool                 //  Show formatter header?
+	SplitterColor        color.AnsiColor
+	OffsetColor          color.AnsiColor
 	splitterBreak        string
 	offsetBreak          string
 }
 
-func New(r iface.ReadSeekerCloser, offsetFormatter []iface.OffsetFormatter, formatters []iface.CharacterFormatter, palette [256]color.Color, showHeader bool) *Reader {
+func New(r iface.ReadSeekerCloser, offsetFormatter []iface.OffsetFormatter, formatters []iface.CharacterFormatter, palette [256]color.AnsiColor, showHeader bool) *Reader {
 	if offsetFormatter == nil {
 		panic(`nil offset formatter`)
 	}
@@ -44,11 +44,12 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []iface.OffsetFormatter, form
 		offsetFormatterCount: len(offsetFormatter),
 		palette:              palette,
 		showHeader:           showHeader,
-		SplitterColor:        color.ColorGrey93_eeeeee,
-		OffsetColor:          color.ColorGrey93_eeeeee,
+		SplitterColor:        color.AnsiColor{Color: color.ColorGrey93_eeeeee},
+		OffsetColor:          color.AnsiColor{Color: color.ColorGrey93_eeeeee},
 	}
-	reader.splitterBreak = fmt.Sprintf(`%s%dm`, color.SetForeground, reader.SplitterColor)
-	reader.offsetBreak = fmt.Sprintf(`%s%dm`, color.SetForeground, reader.OffsetColor)
+
+	reader.splitterBreak = fmt.Sprintf(`%s%s`, color.SetForeground, reader.SplitterColor)
+	reader.offsetBreak = fmt.Sprintf(`%s%s`, color.SetForeground, reader.OffsetColor)
 
 	return reader
 }
@@ -90,7 +91,7 @@ func (r *Reader) Read() (string, error) {
 
 				if i == 0 || (i > 0 && tmp[i] != tmp[i-1]) {
 					// Only print on first and changed color
-					r.sb.WriteString(fmt.Sprintf(`%s%dm`, color.SetForeground, r.palette[tmp[i]]))
+					r.sb.WriteString(fmt.Sprintf(`%s%s`, color.SetForeground, r.palette[tmp[i]]))
 				}
 
 				if i < 15 {

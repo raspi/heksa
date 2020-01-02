@@ -20,7 +20,7 @@ const AUTHOR = `Pekka Järvinen`
 const HOMEPAGE = `https://github.com/raspi/heksa`
 
 // Parse command line arguments
-func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterFormatter, offsetViewer []iface.OffsetFormatter, limit uint64, startOffset int64, palette [256]color.Color, showHeader bool) {
+func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterFormatter, offsetViewer []iface.OffsetFormatter, limit uint64, startOffset int64, palette [256]color.AnsiColor, showHeader bool) {
 	opt := getoptions.New()
 
 	opt.HelpSynopsisArgs(`<filename> or STDIN`)
