@@ -57,17 +57,17 @@ EXAMPLES:
   * KDE's Konsole is currently used for development
 * Operating system
   * GNU/Linux 
-    * amd64 arm arm64 ppc64 ppc64le
+    * x64 arm arm64 ppc64 ppc64le
   * Microsoft Windows
-    * amd64
+    * x64
   * Darwin (Apple Mac)
-    * amd64
+    * x64
   * FreeBSD
-    * amd64 arm
+    * x64 arm
   * NetBSD
-    * amd64 arm
+    * x64 arm
   * OpenBSD
-    * amd64 arm arm64
+    * x64 arm arm64
 
 ## Get source
 
