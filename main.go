@@ -99,7 +99,7 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 		os.Exit(1)
 	}
 
-	startOffset, err = strconv.ParseInt(*argSeek, 0, 64)
+	startOffset, err = strconv.ParseInt(strings.Replace(*argSeek, `\`, ``, -1), 0, 64)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error parsing seek: %v`, err))
 		os.Exit(1)
@@ -167,16 +167,19 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 }
 
 func main() {
+	var err error
 	source, displays, offViewer, limit, startOffset, palette, showHeader := getParams()
 
-	if startOffset != 0 {
-		// Seek to given offset
+	// Seek to given offset
+	if startOffset > 0 {
+		_, err = source.Seek(startOffset, io.SeekCurrent)
+	} else if startOffset < 0 {
+		_, err = source.Seek(startOffset, io.SeekEnd)
+	}
 
-		_, err := source.Seek(startOffset, io.SeekCurrent)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, fmt.Sprintf(`couldn't seek: %v`, err))
-			os.Exit(1)
-		}
+	if err != nil {
+		fmt.Fprintln(os.Stderr, fmt.Sprintf(`couldn't seek to %v: %v`, startOffset, err))
+		os.Exit(1)
 	}
 
 	r := reader.New(source, offViewer, displays, palette, showHeader)

@@ -5,7 +5,7 @@ BUILD := $(shell git rev-parse $(VERSION))
 BUILDDATE := $(shell git log -1 --format=%aI $(VERSION))
 BUILDFILES?=$$(find . -mindepth 1 -maxdepth 1 -type f \( -iname "*${APPNAME}-v*" -a ! -iname "*.shasums" \))
 LDFLAGS := -ldflags "-s -w -X=main.VERSION=$(VERSION) -X=main.BUILD=$(BUILD) -X=main.BUILDDATE=$(BUILDDATE)"
-SCREENSHOTCMD := ./heksa -f hex,asc,bit -l 0x200 heksa.exe
+SCREENSHOTCMD := ./heksa --header -o hex,dec -f hex,asc,dec -l 0x180 windows-amd64/heksa.exe
 TMPDIR := $(shell mktemp -d -t ${APPNAME}-rel-XXXXXX)
 
 LINUX_ARCHS := amd64 arm arm64 ppc64 ppc64le
@@ -19,7 +19,12 @@ default: build
 
 # Helper for taking screenshot when releasing new version
 screenshot:
-	cd $(BUILDDIR); echo "% $(SCREENSHOTCMD)" > scr.txt && $(SCREENSHOTCMD) >> scr.txt && echo "% " >> scr.txt && konsole --notransparency --noclose --hide-tabbar -e cat scr.txt
+	pushd bin; \
+	echo "%" > scr.txt ; \
+	echo "% $(SCREENSHOTCMD)" >> scr.txt ; \
+	$(SCREENSHOTCMD) >> scr.txt; \
+	echo "% " >> scr.txt ; \
+	konsole --notransparency --noclose --hide-tabbar --separate -p TerminalColumns=$(shell wc -L scr.txt) -e cat scr.txt
 
 build:
 	@echo "GO BUILD..."
