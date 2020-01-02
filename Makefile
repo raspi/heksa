@@ -6,7 +6,7 @@ BUILDDATE := $(shell git log -1 --format=%aI $(VERSION))
 BUILDFILES?=$$(find . -mindepth 1 -maxdepth 1 -type f \( -iname "*${APPNAME}-v*" -a ! -iname "*.shasums" \))
 LDFLAGS := -ldflags "-s -w -X=main.VERSION=$(VERSION) -X=main.BUILD=$(BUILD) -X=main.BUILDDATE=$(BUILDDATE)"
 SCREENSHOTCMD := ./heksa -f hex,asc,bit -l 0x200 heksa.exe
-TMPDIR := $(shell mktemp -d -t heksa-rel-XXXXX)
+TMPDIR := $(shell mktemp -d -t ${APPNAME}-rel-XXXXXX)
 
 LINUX_ARCHS := amd64 arm arm64 ppc64 ppc64le
 WINDOWS_ARCHS := amd64
@@ -74,8 +74,8 @@ shasums:
 copycommon:
 	@echo "Copying common files to $(TMPDIR)"
 	@mkdir "$(TMPDIR)/bin"
-	@cp LICENSE "$(TMPDIR)"
-	@cp README.md "$(TMPDIR)"
+	@cp -v LICENSE "$(TMPDIR)"
+	@cp -v README.md "$(TMPDIR)"
 
 tar-everything: copycommon
 	@echo "tar-everything..."
