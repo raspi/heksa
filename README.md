@@ -5,17 +5,17 @@
 Hex dumper with colors
 
 ```
-heksa - hex file dumper v1.7.0 - (2019-12-31T13:35:02+02:00)
+heksa - hex file dumper v1.9.0 - (2020-01-02T07:55:55+02:00)
 (c) Pekka Järvinen 2019- [ https://github.com/raspi/heksa ]
 SYNOPSIS:
-    heksa [--format|-f <fmt1,fmt2,..>] [--header] [--help|-h|-?]
+    heksa [--format|-f <fmt1,fmt2,..>] [--header|-H] [--help|-h|-?]
           [--limit|-l <[prefix]bytes>] [--offset-format|-o <fmt1[,fmt2]>]
           [--seek|-s <[prefix]offset>] [--version] <filename> or STDIN
 
 OPTIONS:
     --format|-f <fmt1,fmt2,..>          One or multiple of: hex, dec, oct, bit (default: "hex,asc")
 
-    --header                            Show offset header (default: false)
+    --header|-H                         Show offset header (default: false)
 
     --help|-h|-?                        Show this help (default: false)
 
