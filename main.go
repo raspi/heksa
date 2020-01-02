@@ -8,6 +8,7 @@ import (
 	"github.com/raspi/heksa/pkg/reader"
 	"io"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
 )
@@ -183,12 +184,21 @@ func main() {
 		os.Exit(1)
 	}
 
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, os.Kill)
+
 	r := reader.New(source, offViewer, displays, palette, showHeader)
 	fmt.Print(r.Header())
 
 	isEven := false
 	// Dump hex
 	for {
+		select {
+		case <-stop: // Kill or ctrl-C
+			break
+		default:
+		}
+
 		s, err := r.Read()
 		if err != nil {
 			if err == io.EOF {
