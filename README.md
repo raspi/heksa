@@ -42,6 +42,31 @@ EXAMPLES:
     heksa -s 0b1010 foo.dat
 ```
 
+## Features
+
+* ANSI colors for different bytes
+* Output multiple formats at once (hexadecimal, decimal, octal, bits)
+* Multiple offset formats (hexadecimal, decimal, octal)
+* Read only N bytes
+* Seek to given offset
+* Read from stdin
+
 ## Get source
 
-    go get -u github.com/raspi/heksa
+    git clone https://github.com/raspi/heksa
+
+## Developing
+
+1. Make changes
+1. `make build` or just `go build .`
+
+Releasing new version:
+
+Requirements:
+
+* `upx` for compressing executables
+
+1. Create new version tag
+1. `make release`
+
+If there's a lot of changes you can take a new screenshot with `make screenshot` helper
