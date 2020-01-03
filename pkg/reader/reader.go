@@ -196,10 +196,6 @@ func (r *Reader) Read() (string, error) {
 				case ViewOct:
 					r.sb.WriteString(fmt.Sprintf(`%03o`, tmp[i]))
 				case ViewBit, ViewBitWithDec:
-					if byteFormatterType == ViewBitWithDec {
-						r.sb.WriteString(r.Colors.palette[tmp[i]])
-					}
-
 					for idx, ru := range fmt.Sprintf(`%08b`, tmp[i]) {
 						if idx == 0 {
 							r.sb.WriteString(color.SetUnderlineOn)
