@@ -186,7 +186,7 @@ func main() {
 	}
 
 	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt, os.Kill)
+	signal.Notify(stop, os.Interrupt)
 
 	r := reader.New(source, offViewer, displays, palette, showHeader)
 	fmt.Print(r.Header())
