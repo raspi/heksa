@@ -21,7 +21,7 @@ const AUTHOR = `Pekka Järvinen`
 const HOMEPAGE = `https://github.com/raspi/heksa`
 
 // Parse command line arguments
-func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter, offsetViewer []reader.OffsetFormatter, limit uint64, startOffset int64, palette [256]color.AnsiColor, showHeader bool, filesize int64) {
+func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter, offsetViewer []reader.OffsetFormatter, limit uint64, startOffset int64, palette [256]color.AnsiColor, filesize int64) {
 	opt := getoptions.New()
 
 	opt.HelpSynopsisArgs(`<filename> or STDIN`)
@@ -33,11 +33,6 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 
 	opt.Bool(`version`, false,
 		opt.Description(`Show version information`),
-	)
-
-	argHeader := opt.Bool(`header`, false,
-		opt.Alias(`H`),
-		opt.Description(`Show offset header`),
 	)
 
 	argOffset := opt.StringOptional(`offset-format`, `hex`,
@@ -97,8 +92,6 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 		fmt.Fprintln(os.Stderr, opt.Help(getoptions.HelpSynopsis))
 		os.Exit(1)
 	}
-
-	showHeader = *argHeader
 
 	limit, err = strconv.ParseUint(*argLimit, 0, 64)
 	if err != nil {
@@ -161,12 +154,12 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 		source = fhandle
 	}
 
-	return source, displays, offsetViewer, limit, startOffset, palette, showHeader, filesize
+	return source, displays, offsetViewer, limit, startOffset, palette, filesize
 }
 
 func main() {
 	var err error
-	source, displays, offViewer, limit, startOffset, palette, showHeader, filesize := getParams()
+	source, displays, offViewer, limit, startOffset, palette, filesize := getParams()
 
 	// Seek to given offset
 	if startOffset > 0 {
@@ -183,8 +176,7 @@ func main() {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
 
-	r := reader.New(source, offViewer, displays, palette, showHeader, filesize)
-	fmt.Print(r.Header())
+	r := reader.New(source, offViewer, displays, palette, filesize)
 
 	isEven := false
 	// Dump hex

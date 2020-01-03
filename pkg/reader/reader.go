@@ -28,14 +28,13 @@ type Reader struct {
 	ReadBytes             uint64                     // How many bytes Reader has been reading so far (for limit)
 	sb                    strings.Builder            // Faster than concatenating strings
 	Splitter              string                     // Splitter character for columns
-	showHeader            bool                       //  Show formatter header?
 	offsetFormatterFormat map[OffsetFormatter]string // Printf format
 	offsetFormatterWidth  map[OffsetFormatter]int    // How much padding width needed
 	Colors                Colors                     // Colors
 	growHint              int                        // Grow hint for strings.Builder for speed
 }
 
-func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters []ByteFormatter, palette [256]color.AnsiColor, showHeader bool, filesize int64) *Reader {
+func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters []ByteFormatter, palette [256]color.AnsiColor, filesize int64) *Reader {
 	if formatters == nil {
 		panic(`nil formatter`)
 	}
@@ -56,7 +55,6 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters
 		Splitter:             `┊`,
 		charFormatterCount:   len(formatters),
 		offsetFormatterCount: len(offsetFormatter),
-		showHeader:           showHeader,
 		Colors: Colors{
 			palette:       calcpalette,
 			SplitterColor: color.AnsiColor{Color: color.ColorGrey93_eeeeee},
@@ -276,71 +274,4 @@ func (r *Reader) Read() (string, error) {
 	r.sb.WriteString(offsetRight)
 
 	return r.sb.String(), nil
-}
-
-func (r *Reader) offsetHeader(otype OffsetFormatter) string {
-	width := r.offsetFormatterWidth[otype]
-	return strings.Repeat(`_`, width)
-}
-
-func (r *Reader) header(l uint8) (out string) {
-	format := fmt.Sprintf(`%%0%dx`, l)
-	for i := uint8(0); i < 16; i++ {
-		if i == 8 {
-			out += ` `
-		}
-		out += fmt.Sprintf(format, i)
-		if l > 1 && i < 15 {
-			out += ` `
-		}
-	}
-
-	return out
-}
-
-func (r *Reader) Header() (out string) {
-	if !r.showHeader {
-		return ``
-	}
-
-	if r.offsetFormatterCount > 0 {
-		// show offset on the left side
-		out += r.Colors.offsetBreak
-		out += r.offsetHeader(r.offsetFormatter[0])
-		out += r.Colors.splitterBreak
-		out += r.Splitter
-	}
-
-	// iterate through every formatter which outputs it's own header
-	for didx, dplay := range r.charFormatters {
-		out += r.Colors.offsetBreak
-
-		switch dplay {
-		case ViewHex:
-			out += r.header(2)
-		case ViewASCII:
-			out += r.header(1)
-		case ViewDec, ViewOct:
-			out += r.header(3)
-		case ViewBit:
-			out += r.header(8)
-		}
-
-		if didx < (r.charFormatterCount - 1) {
-			out += r.Colors.splitterBreak
-			out += r.Splitter
-		}
-	}
-
-	if r.offsetFormatterCount > 1 {
-		// show offset on the right side
-		out += r.Colors.splitterBreak
-		out += r.Splitter
-		out += r.Colors.offsetBreak
-		out += r.offsetHeader(r.offsetFormatter[1])
-	}
-
-	out += "\n"
-
-	return out
 }
