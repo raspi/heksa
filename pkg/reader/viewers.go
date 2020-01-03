@@ -12,15 +12,19 @@ const (
 	ViewOct
 	ViewASCII
 	ViewBit
+	ViewHexWithASCII
+	//ViewDecWithASCII
 )
 
 // Get enum from string
 var formatterStringToEnumMap = map[string]ByteFormatter{
-	`hex`: ViewHex,
-	`asc`: ViewASCII,
-	`bit`: ViewBit,
-	`dec`: ViewDec,
-	`oct`: ViewOct,
+	`hex`:     ViewHex,
+	`asc`:     ViewASCII,
+	`bit`:     ViewBit,
+	`dec`:     ViewDec,
+	`oct`:     ViewOct,
+	`hexwasc`: ViewHexWithASCII,
+	//`decwasc`: ViewDecWithASCII,
 }
 
 // getViewers returns viewers from string separated by ','

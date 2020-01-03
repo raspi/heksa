@@ -8,25 +8,30 @@ import (
 	"strings"
 )
 
-type Reader struct {
-	r                    iface.ReadSeekerCloser
-	charFormatters       []ByteFormatter // list of byte displayer(s) for data
-	charFormatterCount   int
-	offsetFormatter      []OffsetFormatter // offset formatters (max 2) first one is displayed on the left side and second one on the right side
-	offsetFormatterCount int
-	fileSize             int64  // file size reference
-	ReadBytes            uint64 // How many bytes Reader has been reading so far (for limit)
-	sb                   strings.Builder
-	Splitter             string               // Splitter character for columns
-	palette              [256]color.AnsiColor // color palette for each byte
-	showHeader           bool                 //  Show formatter header?
-	SplitterColor        color.AnsiColor
-	OffsetColor          color.AnsiColor
-	splitterBreak        string
-	offsetBreak          string
+type colors struct {
+	palette       [256]color.AnsiColor // color palette for each byte
+	SplitterColor color.AnsiColor
+	OffsetColor   color.AnsiColor
+	splitterBreak string
+	offsetBreak   string
+	specialBreak  string
+	hilightBreak  string
+}
 
+type Reader struct {
+	r                     iface.ReadSeekerCloser
+	charFormatters        []ByteFormatter // list of byte displayer(s) for data
+	charFormatterCount    int
+	offsetFormatter       []OffsetFormatter // offset formatters (max 2) first one is displayed on the left side and second one on the right side
+	offsetFormatterCount  int
+	fileSize              int64  // file size reference
+	ReadBytes             uint64 // How many bytes Reader has been reading so far (for limit)
+	sb                    strings.Builder
+	Splitter              string                     // Splitter character for columns
+	showHeader            bool                       //  Show formatter header?
 	offsetFormatterFormat map[OffsetFormatter]string // Printf format
 	offsetFormatterWidth  map[OffsetFormatter]int    // How much padding width needed
+	colors                colors
 }
 
 func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters []ByteFormatter, palette [256]color.AnsiColor, showHeader bool, filesize int64) *Reader {
@@ -44,17 +49,21 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters
 		Splitter:             `┊`,
 		charFormatterCount:   len(formatters),
 		offsetFormatterCount: len(offsetFormatter),
-		palette:              palette,
 		showHeader:           showHeader,
-		SplitterColor:        color.AnsiColor{Color: color.ColorGrey93_eeeeee},
-		OffsetColor:          color.AnsiColor{Color: color.ColorGrey93_eeeeee},
+		colors: colors{
+			palette:       palette,
+			SplitterColor: color.AnsiColor{Color: color.ColorGrey93_eeeeee},
+			OffsetColor:   color.AnsiColor{Color: color.ColorGrey93_eeeeee},
+			specialBreak:  fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey35_585858}),
+			hilightBreak:  fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey100_ffffff}),
+		},
 	}
 
 	reader.offsetFormatterFormat = make(map[OffsetFormatter]string, reader.offsetFormatterCount)
 	reader.offsetFormatterWidth = make(map[OffsetFormatter]int, reader.offsetFormatterCount)
 
-	reader.splitterBreak = fmt.Sprintf(`%s%s`, color.SetForeground, reader.SplitterColor)
-	reader.offsetBreak = fmt.Sprintf(`%s%s`, color.SetForeground, reader.OffsetColor)
+	reader.colors.splitterBreak = fmt.Sprintf(`%s%s`, color.SetForeground, reader.colors.SplitterColor)
+	reader.colors.offsetBreak = fmt.Sprintf(`%s%s`, color.SetForeground, reader.colors.OffsetColor)
 
 	for _, f := range reader.offsetFormatter {
 		_, ok := reader.offsetFormatterWidth[f]
@@ -109,10 +118,10 @@ func (r *Reader) formatOffset(formatter OffsetFormatter, offset int64) {
 func (r *Reader) getoffsetLeft(offset int64) string {
 	r.sb.Reset()
 	if r.offsetFormatterCount > 0 {
-		r.sb.WriteString(r.offsetBreak)
+		r.sb.WriteString(r.colors.offsetBreak)
 		// show offset on the left side
 		r.formatOffset(r.offsetFormatter[0], offset)
-		r.sb.WriteString(r.splitterBreak)
+		r.sb.WriteString(r.colors.splitterBreak)
 		r.sb.WriteString(r.Splitter)
 	}
 
@@ -123,9 +132,9 @@ func (r *Reader) getoffsetRight(offset int64) string {
 	r.sb.Reset()
 	if r.offsetFormatterCount > 1 {
 		// show offset on the right side
-		r.sb.WriteString(r.splitterBreak)
+		r.sb.WriteString(r.colors.splitterBreak)
 		r.sb.WriteString(r.Splitter)
-		r.sb.WriteString(r.offsetBreak)
+		r.sb.WriteString(r.colors.offsetBreak)
 		r.formatOffset(r.offsetFormatter[1], offset)
 	}
 
@@ -166,25 +175,31 @@ func (r *Reader) Read() (string, error) {
 			if rb > i {
 				if i == 0 || (i > 0 && tmp[i] != tmp[i-1]) {
 					// Only print on first and changed color
-					r.sb.WriteString(fmt.Sprintf(`%s%s`, color.SetForeground, r.palette[tmp[i]]))
+					r.sb.WriteString(fmt.Sprintf(`%s%s`, color.SetForeground, r.colors.palette[tmp[i]]))
 				}
-
-				var s string
 
 				switch byteFormatterType {
 				case ViewHex:
-					s = fmt.Sprintf(`%02x`, tmp[i])
+					r.sb.WriteString(fmt.Sprintf(`%02x`, tmp[i]))
 				case ViewDec:
-					s = fmt.Sprintf(`%03d`, tmp[i])
+					r.sb.WriteString(fmt.Sprintf(`%03d`, tmp[i]))
 				case ViewOct:
-					s = fmt.Sprintf(`%03o`, tmp[i])
+					r.sb.WriteString(fmt.Sprintf(`%03o`, tmp[i]))
 				case ViewBit:
-					s = fmt.Sprintf(`%08b`, tmp[i])
+					r.sb.WriteString(fmt.Sprintf(`%08b`, tmp[i]))
 				case ViewASCII:
-					s = fmt.Sprintf(`%c`, asciiByteToChar[tmp[i]])
+					r.sb.WriteString(fmt.Sprintf(`%c`, asciiByteToChar[tmp[i]]))
+				case ViewHexWithASCII:
+					r.sb.WriteString(fmt.Sprintf(`%s%s`, color.SetForeground, r.colors.palette[tmp[i]]))
+					r.sb.WriteString(fmt.Sprintf(`%02x `, tmp[i]))
+					r.sb.WriteString(r.colors.specialBreak)
+					r.sb.WriteString(`[`)
+					r.sb.WriteString(r.colors.hilightBreak)
+					r.sb.WriteString(fmt.Sprintf(`%c`, asciiByteToChar[tmp[i]]))
+					r.sb.WriteString(r.colors.specialBreak)
+					r.sb.WriteString(`]`)
 				}
 
-				r.sb.WriteString(s)
 				if i < 15 {
 					switch byteFormatterType {
 					case ViewASCII:
@@ -197,7 +212,7 @@ func (r *Reader) Read() (string, error) {
 				// There is no data so we add padding
 				if i == 0 || (i > 0 && tmp[i] != tmp[i-1]) {
 					// Only print on first and changed color
-					r.sb.WriteString(fmt.Sprintf(`%s%s`, color.SetForeground, r.palette[0]))
+					r.sb.WriteString(fmt.Sprintf(`%s%s`, color.SetForeground, r.colors.palette[0]))
 				}
 
 				switch byteFormatterType {
@@ -207,13 +222,15 @@ func (r *Reader) Read() (string, error) {
 					r.sb.WriteString(`‡‡‡`)
 				case ViewASCII:
 					r.sb.WriteString(`‡`)
+				case ViewHexWithASCII:
+					r.sb.WriteString(`‡‡ ‡‡‡`)
 				}
 
 				if i < 15 {
 					switch byteFormatterType {
-					case ViewHex:
-						r.sb.WriteString(` `)
-					case ViewOct, ViewDec:
+					case ViewASCII:
+						continue
+					default:
 						r.sb.WriteString(` `)
 					}
 				}
@@ -221,7 +238,7 @@ func (r *Reader) Read() (string, error) {
 		}
 
 		if didx < (r.charFormatterCount - 1) {
-			r.sb.WriteString(r.splitterBreak)
+			r.sb.WriteString(r.colors.splitterBreak)
 			r.sb.WriteString(r.Splitter)
 		}
 	}
@@ -258,15 +275,15 @@ func (r *Reader) Header() (out string) {
 
 	if r.offsetFormatterCount > 0 {
 		// show offset on the left side
-		out += r.offsetBreak
+		out += r.colors.offsetBreak
 		out += r.offsetHeader(r.offsetFormatter[0])
-		out += r.splitterBreak
+		out += r.colors.splitterBreak
 		out += r.Splitter
 	}
 
 	// iterate through every formatter which outputs it's own header
 	for didx, dplay := range r.charFormatters {
-		out += r.offsetBreak
+		out += r.colors.offsetBreak
 
 		switch dplay {
 		case ViewHex:
@@ -280,16 +297,16 @@ func (r *Reader) Header() (out string) {
 		}
 
 		if didx < (r.charFormatterCount - 1) {
-			out += r.splitterBreak
+			out += r.colors.splitterBreak
 			out += r.Splitter
 		}
 	}
 
 	if r.offsetFormatterCount > 1 {
 		// show offset on the right side
-		out += r.splitterBreak
+		out += r.colors.splitterBreak
 		out += r.Splitter
-		out += r.offsetBreak
+		out += r.colors.offsetBreak
 		out += r.offsetHeader(r.offsetFormatter[1])
 	}
 
