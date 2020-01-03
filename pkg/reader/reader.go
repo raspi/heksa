@@ -24,14 +24,14 @@ type Reader struct {
 	charFormatterCount    int
 	offsetFormatter       []OffsetFormatter // offset formatters (max 2) first one is displayed on the left side and second one on the right side
 	offsetFormatterCount  int
-	fileSize              int64  // file size reference
-	ReadBytes             uint64 // How many bytes Reader has been reading so far (for limit)
-	sb                    strings.Builder
+	fileSize              int64                      // file size reference
+	ReadBytes             uint64                     // How many bytes Reader has been reading so far (for limit)
+	sb                    strings.Builder            // Faster than concatenating strings
 	Splitter              string                     // Splitter character for columns
 	showHeader            bool                       //  Show formatter header?
 	offsetFormatterFormat map[OffsetFormatter]string // Printf format
 	offsetFormatterWidth  map[OffsetFormatter]int    // How much padding width needed
-	colors                colors
+	colors                colors                     // Colors
 }
 
 func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters []ByteFormatter, palette [256]color.AnsiColor, showHeader bool, filesize int64) *Reader {
