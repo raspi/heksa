@@ -63,7 +63,7 @@ func GetViewers(viewers []string) (ds []ByteFormatter, err error) {
 }
 
 func GetViewerList() (viewers []string) {
-	for s, _ := range formatterStringToEnumMap {
+	for s := range formatterStringToEnumMap {
 		viewers = append(viewers, s)
 	}
 

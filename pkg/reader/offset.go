@@ -53,7 +53,7 @@ func GetOffsetFormatters(viewerStr []string) (formatters []OffsetFormatter, err 
 }
 
 func GetOffsetViewerList() (viewers []string) {
-	for s, _ := range offsetFormattersStringToEnumMap {
+	for s := range offsetFormattersStringToEnumMap {
 		viewers = append(viewers, s)
 	}
 
