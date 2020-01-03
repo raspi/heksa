@@ -28,6 +28,16 @@ var formatterStringToEnumMap = map[string]ByteFormatter{
 	`decwasc`: ViewDecWithASCII,
 }
 
+var formatterPaddingMap = map[ByteFormatter]string{
+	ViewASCII:        `‡`,
+	ViewHex:          `‡‡`,
+	ViewDec:          `‡‡‡`,
+	ViewOct:          `‡‡‡`,
+	ViewHexWithASCII: `‡‡‡‡‡‡`,
+	ViewDecWithASCII: `‡‡‡‡‡‡‡`,
+	ViewBit:          `‡‡‡‡‡‡‡‡`,
+}
+
 // getViewers returns viewers from string separated by ','
 func GetViewers(viewers []string) (ds []ByteFormatter, err error) {
 	for _, v := range viewers {
