@@ -184,38 +184,36 @@ func (r *Reader) Read() (string, error) {
 					s = fmt.Sprintf(`%c`, asciiByteToChar[tmp[i]])
 				}
 
+				r.sb.WriteString(s)
 				if i < 15 {
-					r.sb.WriteString(s)
 					switch byteFormatterType {
 					case ViewASCII:
 						continue
 					default:
 						r.sb.WriteString(` `)
 					}
-				} else {
-					switch byteFormatterType {
-					case ViewHex, ViewBit, ViewOct, ViewDec:
-					}
-					r.sb.WriteString(s)
 				}
 			} else {
 				// There is no data so we add padding
+				if i == 0 || (i > 0 && tmp[i] != tmp[i-1]) {
+					// Only print on first and changed color
+					r.sb.WriteString(fmt.Sprintf(`%s%s`, color.SetForeground, r.palette[0]))
+				}
+
+				switch byteFormatterType {
+				case ViewHex:
+					r.sb.WriteString(`‡‡`)
+				case ViewDec, ViewOct:
+					r.sb.WriteString(`‡‡‡`)
+				case ViewASCII:
+					r.sb.WriteString(`‡`)
+				}
+
 				if i < 15 {
 					switch byteFormatterType {
 					case ViewHex:
-						r.sb.WriteString(`-- `)
-					case ViewOct, ViewDec:
-						r.sb.WriteString(`--- `)
-					case ViewASCII:
 						r.sb.WriteString(` `)
-					}
-				} else {
-					switch byteFormatterType {
-					case ViewHex:
-						r.sb.WriteString(`--`)
-					case ViewDec, ViewOct:
-						r.sb.WriteString(`---`)
-					case ViewASCII:
+					case ViewOct, ViewDec:
 						r.sb.WriteString(` `)
 					}
 				}
