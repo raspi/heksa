@@ -17,6 +17,7 @@ const (
 	ViewDecWithASCII // Displays dec and ascii at same time
 	ViewBitWithDec   // Displays bits and decimal at same time
 	ViewBitWithHex   // Displays bits and hex at same time
+	ViewBitWithAsc   // Displays bits and ASCII at same time
 )
 
 // Get enum from string
@@ -30,6 +31,7 @@ var formatterStringToEnumMap = map[string]ByteFormatter{
 	`decwasc`: ViewDecWithASCII,
 	`bitwdec`: ViewBitWithDec,
 	`bitwhex`: ViewBitWithHex,
+	`bitwasc`: ViewBitWithAsc,
 }
 
 var formatterPaddingMap = map[ByteFormatter]string{
@@ -42,6 +44,7 @@ var formatterPaddingMap = map[ByteFormatter]string{
 	ViewBit:          `‡‡‡‡‡‡‡‡`,
 	ViewBitWithHex:   `‡‡‡‡‡‡‡‡‡‡‡`,
 	ViewBitWithDec:   `‡‡‡‡‡‡‡‡‡‡‡‡`,
+	ViewBitWithAsc:   `‡‡‡‡‡‡‡‡‡‡‡‡`,
 }
 
 // getViewers returns viewers from string separated by ','
