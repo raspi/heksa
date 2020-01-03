@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
-type colors struct {
-	palette       [256]string // color palette for each byte
+type Colors struct {
+	palette       [256]string // precalculated color palette for each byte
 	SplitterColor color.AnsiColor
 	OffsetColor   color.AnsiColor
 	splitterBreak string
@@ -31,7 +31,8 @@ type Reader struct {
 	showHeader            bool                       //  Show formatter header?
 	offsetFormatterFormat map[OffsetFormatter]string // Printf format
 	offsetFormatterWidth  map[OffsetFormatter]int    // How much padding width needed
-	colors                colors                     // Colors
+	Colors                Colors                     // Colors
+	growHint              int                        // Grow hint for strings.Builder for speed
 }
 
 func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters []ByteFormatter, palette [256]color.AnsiColor, showHeader bool, filesize int64) *Reader {
@@ -56,7 +57,7 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters
 		charFormatterCount:   len(formatters),
 		offsetFormatterCount: len(offsetFormatter),
 		showHeader:           showHeader,
-		colors: colors{
+		Colors: Colors{
 			palette:       calcpalette,
 			SplitterColor: color.AnsiColor{Color: color.ColorGrey93_eeeeee},
 			OffsetColor:   color.AnsiColor{Color: color.ColorGrey93_eeeeee},
@@ -68,44 +69,47 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters
 	reader.offsetFormatterFormat = make(map[OffsetFormatter]string, reader.offsetFormatterCount)
 	reader.offsetFormatterWidth = make(map[OffsetFormatter]int, reader.offsetFormatterCount)
 
-	reader.colors.splitterBreak = fmt.Sprintf(`%s%s`, color.SetForeground, reader.colors.SplitterColor)
-	reader.colors.offsetBreak = fmt.Sprintf(`%s%s`, color.SetForeground, reader.colors.OffsetColor)
+	reader.Colors.splitterBreak = fmt.Sprintf(`%s%s`, color.SetForeground, reader.Colors.SplitterColor)
+	reader.Colors.offsetBreak = fmt.Sprintf(`%s%s`, color.SetForeground, reader.Colors.OffsetColor)
+
+	for _, f := range reader.charFormatters {
+		switch f {
+		case ViewHex:
+			reader.growHint += 49
+		case ViewDec, ViewOct:
+			reader.growHint += 65
+		case ViewASCII:
+			reader.growHint += 18
+		case ViewDecWithASCII:
+			reader.growHint += 129
+		case ViewHexWithASCII:
+			reader.growHint += 113
+		}
+	}
 
 	for _, f := range reader.offsetFormatter {
-		_, ok := reader.offsetFormatterWidth[f]
-
-		if ok {
-			continue
-		}
-
 		switch f {
 		case OffsetHex:
-			reader.offsetFormatterWidth[f] = len(fmt.Sprintf(`%x`, filesize))
-		case OffsetDec:
-			reader.offsetFormatterWidth[f] = len(fmt.Sprintf(`%x`, filesize))
-		case OffsetOct:
-			reader.offsetFormatterWidth[f] = len(fmt.Sprintf(`%x`, filesize))
-		case OffsetPercent:
-			reader.offsetFormatterWidth[f] = 8
-		}
-
-		width, ok := reader.offsetFormatterWidth[f]
-
-		if !ok {
-			panic(fmt.Errorf(`couldn't find width??`))
-		}
-
-		switch f {
-		case OffsetHex:
+			width := len(fmt.Sprintf(`%x`, filesize))
+			reader.growHint += width + 1
+			reader.offsetFormatterWidth[f] = width
 			reader.offsetFormatterFormat[f] = fmt.Sprintf(`%%0%dx`, width)
 		case OffsetDec:
+			width := len(fmt.Sprintf(`%d`, filesize))
+			reader.growHint += width + 1
+			reader.offsetFormatterWidth[f] = width
 			reader.offsetFormatterFormat[f] = fmt.Sprintf(`%%0%dd`, width)
 		case OffsetOct:
+			width := len(fmt.Sprintf(`%o`, filesize))
+			reader.growHint += width + 1
+			reader.offsetFormatterWidth[f] = width
 			reader.offsetFormatterFormat[f] = fmt.Sprintf(`%%0%do`, width)
 		case OffsetPercent:
+			width := 9
+			reader.growHint += width
+			reader.offsetFormatterWidth[f] = width
 			reader.offsetFormatterFormat[f] = `%07.3f%%`
 		}
-
 	}
 
 	return reader
@@ -124,10 +128,10 @@ func (r *Reader) formatOffset(formatter OffsetFormatter, offset int64) {
 func (r *Reader) getoffsetLeft(offset int64) string {
 	r.sb.Reset()
 	if r.offsetFormatterCount > 0 {
-		r.sb.WriteString(r.colors.offsetBreak)
+		r.sb.WriteString(r.Colors.offsetBreak)
 		// show offset on the left side
 		r.formatOffset(r.offsetFormatter[0], offset)
-		r.sb.WriteString(r.colors.splitterBreak)
+		r.sb.WriteString(r.Colors.splitterBreak)
 		r.sb.WriteString(r.Splitter)
 	}
 
@@ -138,9 +142,9 @@ func (r *Reader) getoffsetRight(offset int64) string {
 	r.sb.Reset()
 	if r.offsetFormatterCount > 1 {
 		// show offset on the right side
-		r.sb.WriteString(r.colors.splitterBreak)
+		r.sb.WriteString(r.Colors.splitterBreak)
 		r.sb.WriteString(r.Splitter)
-		r.sb.WriteString(r.colors.offsetBreak)
+		r.sb.WriteString(r.Colors.offsetBreak)
 		r.formatOffset(r.offsetFormatter[1], offset)
 	}
 
@@ -157,7 +161,7 @@ func (r *Reader) Read() (string, error) {
 	offsetLeft := r.getoffsetLeft(offset)
 	offsetRight := r.getoffsetRight(offset)
 	r.sb.Reset()
-	r.sb.Grow(128)
+	r.sb.Grow(r.growHint)
 
 	r.sb.WriteString(offsetLeft)
 
@@ -181,7 +185,7 @@ func (r *Reader) Read() (string, error) {
 			if rb > i {
 				if i == 0 || (i > 0 && tmp[i] != tmp[i-1]) {
 					// Only print on first and changed color
-					r.sb.WriteString(r.colors.palette[tmp[i]])
+					r.sb.WriteString(r.Colors.palette[tmp[i]])
 				}
 
 				switch byteFormatterType {
@@ -196,22 +200,22 @@ func (r *Reader) Read() (string, error) {
 				case ViewASCII:
 					r.sb.WriteString(fmt.Sprintf(`%c`, asciiByteToChar[tmp[i]]))
 				case ViewHexWithASCII:
-					r.sb.WriteString(r.colors.palette[tmp[i]])
+					r.sb.WriteString(r.Colors.palette[tmp[i]])
 					r.sb.WriteString(fmt.Sprintf(`%02x `, tmp[i]))
-					r.sb.WriteString(r.colors.specialBreak)
+					r.sb.WriteString(r.Colors.specialBreak)
 					r.sb.WriteString(`[`)
-					r.sb.WriteString(r.colors.hilightBreak)
+					r.sb.WriteString(r.Colors.hilightBreak)
 					r.sb.WriteString(fmt.Sprintf(`%c`, asciiByteToChar[tmp[i]]))
-					r.sb.WriteString(r.colors.specialBreak)
+					r.sb.WriteString(r.Colors.specialBreak)
 					r.sb.WriteString(`]`)
 				case ViewDecWithASCII:
-					r.sb.WriteString(r.colors.palette[tmp[i]])
+					r.sb.WriteString(r.Colors.palette[tmp[i]])
 					r.sb.WriteString(fmt.Sprintf(`%03d `, tmp[i]))
-					r.sb.WriteString(r.colors.specialBreak)
+					r.sb.WriteString(r.Colors.specialBreak)
 					r.sb.WriteString(`[`)
-					r.sb.WriteString(r.colors.hilightBreak)
+					r.sb.WriteString(r.Colors.hilightBreak)
 					r.sb.WriteString(fmt.Sprintf(`%c`, asciiByteToChar[tmp[i]]))
-					r.sb.WriteString(r.colors.specialBreak)
+					r.sb.WriteString(r.Colors.specialBreak)
 					r.sb.WriteString(`]`)
 				}
 
@@ -227,7 +231,7 @@ func (r *Reader) Read() (string, error) {
 				// There is no data so we add padding
 				if i == 0 || (i > 0 && tmp[i] != tmp[i-1]) {
 					// Only print on first and changed color
-					r.sb.WriteString(r.colors.palette[0])
+					r.sb.WriteString(r.Colors.palette[0])
 				}
 
 				switch byteFormatterType {
@@ -255,7 +259,7 @@ func (r *Reader) Read() (string, error) {
 		}
 
 		if didx < (r.charFormatterCount - 1) {
-			r.sb.WriteString(r.colors.splitterBreak)
+			r.sb.WriteString(r.Colors.splitterBreak)
 			r.sb.WriteString(r.Splitter)
 		}
 	}
@@ -292,15 +296,15 @@ func (r *Reader) Header() (out string) {
 
 	if r.offsetFormatterCount > 0 {
 		// show offset on the left side
-		out += r.colors.offsetBreak
+		out += r.Colors.offsetBreak
 		out += r.offsetHeader(r.offsetFormatter[0])
-		out += r.colors.splitterBreak
+		out += r.Colors.splitterBreak
 		out += r.Splitter
 	}
 
 	// iterate through every formatter which outputs it's own header
 	for didx, dplay := range r.charFormatters {
-		out += r.colors.offsetBreak
+		out += r.Colors.offsetBreak
 
 		switch dplay {
 		case ViewHex:
@@ -314,16 +318,16 @@ func (r *Reader) Header() (out string) {
 		}
 
 		if didx < (r.charFormatterCount - 1) {
-			out += r.colors.splitterBreak
+			out += r.Colors.splitterBreak
 			out += r.Splitter
 		}
 	}
 
 	if r.offsetFormatterCount > 1 {
 		// show offset on the right side
-		out += r.colors.splitterBreak
+		out += r.Colors.splitterBreak
 		out += r.Splitter
-		out += r.colors.offsetBreak
+		out += r.Colors.offsetBreak
 		out += r.offsetHeader(r.offsetFormatter[1])
 	}
 
