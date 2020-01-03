@@ -67,23 +67,23 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 	remainingArgs, err := opt.Parse(os.Args[1:])
 
 	if opt.Called("help") {
-		fmt.Fprintf(os.Stdout, fmt.Sprintf(`heksa - hex file dumper %v - (%v)`+"\n", VERSION, BUILDDATE))
-		fmt.Fprintf(os.Stdout, fmt.Sprintf(`(c) %v 2019- [ %v ]`+"\n", AUTHOR, HOMEPAGE))
-		fmt.Fprintf(os.Stdout, opt.Help())
-		fmt.Fprintf(os.Stdout, fmt.Sprintf(`NOTES:`)+"\n")
-		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    - You can use prefixes for seek and limit. 0x = hex, 0b = binary, 0o = octal.`)+"\n")
-		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    - Use 'no' or '' for offset formatter for disabling offset output.`)+"\n")
-		fmt.Fprintf(os.Stdout, "\n")
-		fmt.Fprintf(os.Stdout, fmt.Sprintf(`EXAMPLES:`)+"\n")
-		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -f hex,asc,bit foo.dat`)+"\n")
-		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -o hex,per -f hex,asc foo.dat`)+"\n")
-		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -o hex -f hex,asc,bit foo.dat`)+"\n")
-		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -o no -f bit foo.dat`)+"\n")
-		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -l 0x1024 foo.dat`)+"\n")
-		fmt.Fprintf(os.Stdout, fmt.Sprintf(`    heksa -s 0b1010 foo.dat`)+"\n")
+		fmt.Fprintf(os.Stdout, `heksa - hex file dumper %v - (%v)`+"\n", VERSION, BUILDDATE)
+		fmt.Fprintf(os.Stdout, `(c) %v 2019- [ %v ]`+"\n", AUTHOR, HOMEPAGE)
+		fmt.Fprintln(os.Stdout, opt.Help())
+		fmt.Fprintln(os.Stdout, `NOTES:`)
+		fmt.Fprintln(os.Stdout, `    - You can use prefixes for seek and limit. 0x = hex, 0b = binary, 0o = octal.`)
+		fmt.Fprintln(os.Stdout, `    - Use 'no' or '' for offset formatter for disabling offset output.`)
+		fmt.Fprintln(os.Stdout)
+		fmt.Fprintln(os.Stdout, `EXAMPLES:`)
+		fmt.Fprintln(os.Stdout, `    heksa -f hex,asc,bit foo.dat`)
+		fmt.Fprintln(os.Stdout, `    heksa -o hex,per -f hex,asc foo.dat`)
+		fmt.Fprintln(os.Stdout, `    heksa -o hex -f hex,asc,bit foo.dat`)
+		fmt.Fprintln(os.Stdout, `    heksa -o no -f bit foo.dat`)
+		fmt.Fprintln(os.Stdout, `    heksa -l 0x1024 foo.dat`)
+		fmt.Fprintln(os.Stdout, `    heksa -s 0b1010 foo.dat`)
 		os.Exit(0)
 	} else if opt.Called("version") {
-		fmt.Fprintf(os.Stdout, fmt.Sprintf(`%v build %v on %v`+"\n", VERSION, BUILD, BUILDDATE))
+		fmt.Fprintf(os.Stdout, `%v build %v on %v`+"\n", VERSION, BUILD, BUILDDATE)
 		os.Exit(0)
 	}
 
@@ -97,25 +97,25 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 
 	limit, err = strconv.ParseUint(*argLimit, 0, 64)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error parsing limit: %v`, err))
+		fmt.Fprintf(os.Stderr, `error parsing limit: %v`, err)
 		os.Exit(1)
 	}
 
 	startOffset, err = strconv.ParseInt(strings.Replace(*argSeek, `\`, ``, -1), 0, 64)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error parsing seek: %v`, err))
+		fmt.Fprintf(os.Stderr, `error parsing seek: %v`, err)
 		os.Exit(1)
 	}
 
 	offsetViewer, err = reader.GetOffsetFormatters(strings.Split(*argOffset, `,`))
 	if err != nil {
-		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error getting offset formatter: %v`, err))
+		fmt.Fprintf(os.Stderr, `error getting offset formatter: %v`, err)
 		os.Exit(1)
 	}
 
 	displays, err = reader.GetViewers(strings.Split(*argFormat, `,`))
 	if err != nil {
-		fmt.Fprintln(os.Stderr, fmt.Sprintf(`error getting formatter: %v`, err))
+		fmt.Fprintf(os.Stderr, `error getting formatter: %v`, err)
 		os.Exit(1)
 	}
 
@@ -133,7 +133,7 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 	} else {
 		// Read file
 		if len(remainingArgs) != 1 {
-			fmt.Fprintln(os.Stderr, fmt.Sprintf(`error: no file given as argument, see --help`))
+			fmt.Fprintln(os.Stderr, `error: no file given as argument, see --help`)
 			os.Exit(1)
 		}
 
@@ -141,18 +141,18 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 
 		fhandle, err := os.Open(fpath)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, fmt.Sprintf(`error opening file: %v`, err))
+			fmt.Fprintf(os.Stderr, `error opening file: %v`, err)
 			os.Exit(1)
 		}
 
 		fi, err := fhandle.Stat()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, fmt.Sprintf(`error stat'ing file: %v`, err))
+			fmt.Fprintf(os.Stderr, `error stat'ing file: %v`, err)
 			os.Exit(1)
 		}
 
 		if fi.IsDir() {
-			fmt.Fprintln(os.Stderr, fmt.Sprintf(`error: %v is directory`, fpath))
+			fmt.Fprintf(os.Stderr, `error: %v is directory`, fpath)
 			os.Exit(1)
 		}
 
@@ -180,7 +180,7 @@ func main() {
 	}
 
 	if err != nil {
-		fmt.Fprintln(os.Stderr, fmt.Sprintf(`couldn't seek to %v: %v`, startOffset, err))
+		fmt.Fprintf(os.Stderr, `couldn't seek to %v: %v`, startOffset, err)
 		os.Exit(1)
 	}
 
