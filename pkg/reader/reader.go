@@ -234,18 +234,7 @@ func (r *Reader) Read() (string, error) {
 					r.sb.WriteString(r.Colors.palette[0])
 				}
 
-				switch byteFormatterType {
-				case ViewHex:
-					r.sb.WriteString(`‡‡`)
-				case ViewDec, ViewOct:
-					r.sb.WriteString(`‡‡‡`)
-				case ViewASCII:
-					r.sb.WriteString(`‡`)
-				case ViewHexWithASCII:
-					r.sb.WriteString(`‡‡‡‡‡‡`)
-				case ViewDecWithASCII:
-					r.sb.WriteString(`‡‡‡‡‡‡‡`)
-				}
+				r.sb.WriteString(formatterPaddingMap[byteFormatterType])
 
 				if i < 15 {
 					switch byteFormatterType {
