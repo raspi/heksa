@@ -10,7 +10,9 @@ const (
 )
 
 const (
-	SetForeground = esc + "38;5;"
+	SetForeground   = esc + "38;5;"
+	SetUnderlineOn  = esc + "4m"
+	SetUnderlineOff = esc + "24m"
 	//FgWhite Color = setForeground + "7m"
 )
 
