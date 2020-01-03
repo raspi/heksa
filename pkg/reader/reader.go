@@ -9,7 +9,7 @@ import (
 )
 
 type colors struct {
-	palette       [256]color.AnsiColor // color palette for each byte
+	palette       [256]string // color palette for each byte
 	SplitterColor color.AnsiColor
 	OffsetColor   color.AnsiColor
 	splitterBreak string
@@ -39,6 +39,12 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters
 		panic(`nil formatter`)
 	}
 
+	var calcpalette [256]string
+
+	for idx := range palette {
+		calcpalette[idx] = fmt.Sprintf(`%s%s`, color.SetForeground, palette[idx].String())
+	}
+
 	reader := &Reader{
 		r:                    r,
 		fileSize:             filesize,
@@ -51,7 +57,7 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters
 		offsetFormatterCount: len(offsetFormatter),
 		showHeader:           showHeader,
 		colors: colors{
-			palette:       palette,
+			palette:       calcpalette,
 			SplitterColor: color.AnsiColor{Color: color.ColorGrey93_eeeeee},
 			OffsetColor:   color.AnsiColor{Color: color.ColorGrey93_eeeeee},
 			specialBreak:  fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey35_585858}),
@@ -175,7 +181,7 @@ func (r *Reader) Read() (string, error) {
 			if rb > i {
 				if i == 0 || (i > 0 && tmp[i] != tmp[i-1]) {
 					// Only print on first and changed color
-					r.sb.WriteString(fmt.Sprintf(`%s%s`, color.SetForeground, r.colors.palette[tmp[i]]))
+					r.sb.WriteString(r.colors.palette[tmp[i]])
 				}
 
 				switch byteFormatterType {
@@ -190,7 +196,7 @@ func (r *Reader) Read() (string, error) {
 				case ViewASCII:
 					r.sb.WriteString(fmt.Sprintf(`%c`, asciiByteToChar[tmp[i]]))
 				case ViewHexWithASCII:
-					r.sb.WriteString(fmt.Sprintf(`%s%s`, color.SetForeground, r.colors.palette[tmp[i]]))
+					r.sb.WriteString(r.colors.palette[tmp[i]])
 					r.sb.WriteString(fmt.Sprintf(`%02x `, tmp[i]))
 					r.sb.WriteString(r.colors.specialBreak)
 					r.sb.WriteString(`[`)
@@ -199,7 +205,7 @@ func (r *Reader) Read() (string, error) {
 					r.sb.WriteString(r.colors.specialBreak)
 					r.sb.WriteString(`]`)
 				case ViewDecWithASCII:
-					r.sb.WriteString(fmt.Sprintf(`%s%s`, color.SetForeground, r.colors.palette[tmp[i]]))
+					r.sb.WriteString(r.colors.palette[tmp[i]])
 					r.sb.WriteString(fmt.Sprintf(`%03d `, tmp[i]))
 					r.sb.WriteString(r.colors.specialBreak)
 					r.sb.WriteString(`[`)
@@ -221,7 +227,7 @@ func (r *Reader) Read() (string, error) {
 				// There is no data so we add padding
 				if i == 0 || (i > 0 && tmp[i] != tmp[i-1]) {
 					// Only print on first and changed color
-					r.sb.WriteString(fmt.Sprintf(`%s%s`, color.SetForeground, r.colors.palette[0]))
+					r.sb.WriteString(r.colors.palette[0])
 				}
 
 				switch byteFormatterType {
