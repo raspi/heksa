@@ -128,7 +128,7 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 		source = os.Stdin
 
 		// No clue of file size when streaming from stdin
-		for idx, _ := range offsetViewer {
+		for idx := range offsetViewer {
 			offsetViewer[idx].SetFileSize(0)
 		}
 	} else {
@@ -158,7 +158,7 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 		}
 
 		// Hint offset viewer
-		for idx, _ := range offsetViewer {
+		for idx := range offsetViewer {
 			offsetViewer[idx].SetFileSize(fi.Size())
 		}
 
