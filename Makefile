@@ -77,7 +77,8 @@ release: linux-build darwin-build freebsd-build openbsd-build netbsd-build windo
 	@echo "release done..."
 
 shasums:
-	@pushd bin && shasum -a 256 $(BUILDFILES) > ${APPNAME}-${VERSION}.shasums
+	@echo "Checksumming..."
+	@pushd "release/${VERSION}" && shasum -a 256 $(BUILDFILES) > ${APPNAME}-${VERSION}.shasums
 
 # Copy common files to release directory
 copycommon:
@@ -88,13 +89,15 @@ copycommon:
 
 # Move all to temporary directory and compress with common files
 tar-everything: copycommon
+	@mkdir --parents "$(PWD)/release/${VERSION}"
+
 	@echo "tar-everything..."
 	# GNU/Linux
 	@for arch in $(LINUX_ARCHS); do \
 	  echo "GNU/Linux tar... $$arch"; \
 	  cp -v "$(PWD)/bin/linux-$$arch/${APPNAME}" "$(TMPDIR)/bin"; \
 	  cd "$(TMPDIR)"; \
-	  tar -zcvf "$(PWD)/bin/${APPNAME}-${VERSION}-linux-$$arch.tar.gz" . ; \
+	  tar -zcvf "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-linux-$$arch.tar.gz" . ; \
 	  rm "$(TMPDIR)/bin/${APPNAME}"; \
 	done
 
@@ -103,7 +106,7 @@ tar-everything: copycommon
 	  echo "Darwin tar... $$arch"; \
 	  cp -v "$(PWD)/bin/darwin-$$arch/${APPNAME}" "$(TMPDIR)/bin"; \
 	  cd "$(TMPDIR)"; \
-	  tar -zcvf "$(PWD)/bin/${APPNAME}-${VERSION}-darwin-$$arch.tar.gz" . ; \
+	  tar -zcvf "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-darwin-$$arch.tar.gz" . ; \
 	  rm "$(TMPDIR)/bin/${APPNAME}"; \
 	done
 
@@ -112,7 +115,7 @@ tar-everything: copycommon
 	  echo "FreeBSD tar... $$arch"; \
 	  cp -v "$(PWD)/bin/freebsd-$$arch/${APPNAME}" "$(TMPDIR)/bin"; \
 	  cd "$(TMPDIR)"; \
-	  tar -zcvf "$(PWD)/bin/${APPNAME}-${VERSION}-freebsd-$$arch.tar.gz" . ; \
+	  tar -zcvf "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-freebsd-$$arch.tar.gz" . ; \
 	  rm "$(TMPDIR)/bin/${APPNAME}"; \
 	done
 
@@ -121,7 +124,7 @@ tar-everything: copycommon
 	  echo "OpenBSD tar... $$arch"; \
 	  cp -v "$(PWD)/bin/openbsd-$$arch/${APPNAME}" "$(TMPDIR)/bin"; \
 	  cd "$(TMPDIR)"; \
-	  tar -zcvf "$(PWD)/bin/${APPNAME}-${VERSION}-openbsd-$$arch.tar.gz" . ; \
+	  tar -zcvf "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-openbsd-$$arch.tar.gz" . ; \
 	  rm "$(TMPDIR)/bin/${APPNAME}"; \
 	done
 
@@ -130,7 +133,7 @@ tar-everything: copycommon
 	  echo "NetBSD tar... $$arch"; \
 	  cp -v "$(PWD)/bin/netbsd-$$arch/${APPNAME}" "$(TMPDIR)/bin"; \
 	  cd "$(TMPDIR)"; \
-	  tar -zcvf "$(PWD)/bin/${APPNAME}-${VERSION}-netbsd-$$arch.tar.gz" . ; \
+	  tar -zcvf "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-netbsd-$$arch.tar.gz" . ; \
 	  rm "$(TMPDIR)/bin/${APPNAME}"; \
 	done
 
@@ -139,7 +142,7 @@ tar-everything: copycommon
 	  echo "MS Windows zip... $$arch"; \
 	  cp -v "$(PWD)/bin/windows-$$arch/${APPNAME}.exe" "$(TMPDIR)/bin"; \
 	  cd "$(TMPDIR)"; \
-	  zip -9 -y -r $(PWD)/bin/${APPNAME}-${VERSION}-windows-$$arch.zip . ; \
+	  zip -9 -y -r "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-windows-$$arch.zip" . ; \
 	  rm "$(TMPDIR)/bin/${APPNAME}.exe"; \
 	done
 
