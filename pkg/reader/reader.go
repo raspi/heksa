@@ -195,7 +195,7 @@ func (r *Reader) Read() (string, error) {
 					r.sb.WriteString(fmt.Sprintf(`%03d`, tmp[i]))
 				case ViewOct:
 					r.sb.WriteString(fmt.Sprintf(`%03o`, tmp[i]))
-				case ViewBit, ViewBitWithDec:
+				case ViewBit, ViewBitWithDec, ViewBitWithHex:
 					for idx, ru := range fmt.Sprintf(`%08b`, tmp[i]) {
 						if idx == 0 {
 							r.sb.WriteString(color.SetUnderlineOn)
@@ -208,9 +208,13 @@ func (r *Reader) Read() (string, error) {
 						}
 					}
 
-					if byteFormatterType == ViewBitWithDec {
+					switch byteFormatterType {
+					case ViewBitWithDec:
 						r.sb.WriteString(` `)
 						r.sb.WriteString(fmt.Sprintf(`%03d`, tmp[i]))
+					case ViewBitWithHex:
+						r.sb.WriteString(` `)
+						r.sb.WriteString(fmt.Sprintf(`%02x`, tmp[i]))
 					}
 
 				case ViewASCII:
