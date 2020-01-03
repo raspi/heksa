@@ -2,18 +2,19 @@ package reader
 
 import (
 	"fmt"
+	"sort"
 )
 
 type ByteFormatter uint8
 
 const (
-	ViewHex ByteFormatter = iota
-	ViewDec
-	ViewOct
+	ViewHex ByteFormatter = iota // Hexadecimal
+	ViewDec                      // Decimal
+	ViewOct                      // Octal
 	ViewASCII
-	ViewBit
-	ViewHexWithASCII
-	ViewDecWithASCII
+	ViewBit          // Bits 00000000-11111111
+	ViewHexWithASCII // Displays hex and ascii at same time
+	ViewDecWithASCII // Displays dec and ascii at same time
 )
 
 // Get enum from string
@@ -29,7 +30,6 @@ var formatterStringToEnumMap = map[string]ByteFormatter{
 
 // getViewers returns viewers from string separated by ','
 func GetViewers(viewers []string) (ds []ByteFormatter, err error) {
-
 	for _, v := range viewers {
 		en, ok := formatterStringToEnumMap[v]
 		if !ok {
@@ -44,4 +44,13 @@ func GetViewers(viewers []string) (ds []ByteFormatter, err error) {
 	}
 
 	return ds, nil
+}
+
+func GetViewerList() (viewers []string) {
+	for s, _ := range formatterStringToEnumMap {
+		viewers = append(viewers, s)
+	}
+
+	sort.Strings(viewers)
+	return viewers
 }

@@ -43,13 +43,17 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 	argOffset := opt.StringOptional(`offset-format`, `hex`,
 		opt.Alias(`o`),
 		opt.ArgName(`fmt1[,fmt2]`),
-		opt.Description(`One or two of: hex, dec, oct, per, no, ''. First one is displayed on the left side and second one on right side after formatters`),
+		opt.Description(
+			`One or two of: `+strings.Join(reader.GetOffsetViewerList(), `, `)+`, no, ''.`+
+				"\n"+
+				`First one is displayed on the left side and second one on right side after formatters.`,
+		),
 	)
 
 	argFormat := opt.StringOptional(`format`, `hex,asc`,
 		opt.Alias(`f`),
 		opt.ArgName(`fmt1,fmt2,..`),
-		opt.Description(`One or multiple of: hex, dec, oct, bit`),
+		opt.Description(`One or multiple of: `+strings.Join(reader.GetViewerList(), `, `)),
 	)
 
 	argLimit := opt.StringOptional(`limit`, `0`,

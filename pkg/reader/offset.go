@@ -2,15 +2,16 @@ package reader
 
 import (
 	"fmt"
+	"sort"
 )
 
 type OffsetFormatter uint8
 
 const (
-	OffsetHex OffsetFormatter = iota
-	OffsetDec
-	OffsetOct
-	OffsetPercent
+	OffsetHex     OffsetFormatter = iota // Hexadecimal
+	OffsetDec                            // Decimal
+	OffsetOct                            // Octal
+	OffsetPercent                        // Percentage 0-100 from offset and filesize
 )
 
 // Get enum from string
@@ -49,4 +50,13 @@ func GetOffsetFormatters(viewerStr []string) (formatters []OffsetFormatter, err 
 	}
 
 	return formatters, nil
+}
+
+func GetOffsetViewerList() (viewers []string) {
+	for s, _ := range offsetFormattersStringToEnumMap {
+		viewers = append(viewers, s)
+	}
+
+	sort.Strings(viewers)
+	return viewers
 }
