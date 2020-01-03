@@ -198,6 +198,15 @@ func (r *Reader) Read() (string, error) {
 					r.sb.WriteString(fmt.Sprintf(`%c`, asciiByteToChar[tmp[i]]))
 					r.sb.WriteString(r.colors.specialBreak)
 					r.sb.WriteString(`]`)
+				case ViewDecWithASCII:
+					r.sb.WriteString(fmt.Sprintf(`%s%s`, color.SetForeground, r.colors.palette[tmp[i]]))
+					r.sb.WriteString(fmt.Sprintf(`%03d `, tmp[i]))
+					r.sb.WriteString(r.colors.specialBreak)
+					r.sb.WriteString(`[`)
+					r.sb.WriteString(r.colors.hilightBreak)
+					r.sb.WriteString(fmt.Sprintf(`%c`, asciiByteToChar[tmp[i]]))
+					r.sb.WriteString(r.colors.specialBreak)
+					r.sb.WriteString(`]`)
 				}
 
 				if i < 15 {
@@ -223,7 +232,9 @@ func (r *Reader) Read() (string, error) {
 				case ViewASCII:
 					r.sb.WriteString(`‡`)
 				case ViewHexWithASCII:
-					r.sb.WriteString(`‡‡ ‡‡‡`)
+					r.sb.WriteString(`‡‡‡‡‡‡`)
+				case ViewDecWithASCII:
+					r.sb.WriteString(`‡‡‡‡‡‡‡`)
 				}
 
 				if i < 15 {

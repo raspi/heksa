@@ -13,7 +13,7 @@ const (
 	ViewASCII
 	ViewBit
 	ViewHexWithASCII
-	//ViewDecWithASCII
+	ViewDecWithASCII
 )
 
 // Get enum from string
@@ -24,7 +24,7 @@ var formatterStringToEnumMap = map[string]ByteFormatter{
 	`dec`:     ViewDec,
 	`oct`:     ViewOct,
 	`hexwasc`: ViewHexWithASCII,
-	//`decwasc`: ViewDecWithASCII,
+	`decwasc`: ViewDecWithASCII,
 }
 
 // getViewers returns viewers from string separated by ','
