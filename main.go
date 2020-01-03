@@ -21,7 +21,7 @@ const AUTHOR = `Pekka Järvinen`
 const HOMEPAGE = `https://github.com/raspi/heksa`
 
 // Parse command line arguments
-func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterFormatter, offsetViewer []iface.OffsetFormatter, limit uint64, startOffset int64, palette [256]color.AnsiColor, showHeader bool) {
+func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter, offsetViewer []reader.OffsetFormatter, limit uint64, startOffset int64, palette [256]color.AnsiColor, showHeader bool, filesize int64) {
 	opt := getoptions.New()
 
 	opt.HelpSynopsisArgs(`<filename> or STDIN`)
@@ -126,11 +126,7 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
 		// Stdin has data
 		source = os.Stdin
-
-		// No clue of file size when streaming from stdin
-		for idx := range offsetViewer {
-			offsetViewer[idx].SetFileSize(0)
-		}
+		filesize = -1
 	} else {
 		// Read file
 		if len(remainingArgs) != 1 {
@@ -157,21 +153,16 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 			os.Exit(1)
 		}
 
-		// Hint offset viewer
-		for idx := range offsetViewer {
-			offsetViewer[idx].SetFileSize(fi.Size())
-		}
-
+		filesize = fi.Size()
 		source = fhandle
-
 	}
 
-	return source, displays, offsetViewer, limit, startOffset, palette, showHeader
+	return source, displays, offsetViewer, limit, startOffset, palette, showHeader, filesize
 }
 
 func main() {
 	var err error
-	source, displays, offViewer, limit, startOffset, palette, showHeader := getParams()
+	source, displays, offViewer, limit, startOffset, palette, showHeader, filesize := getParams()
 
 	// Seek to given offset
 	if startOffset > 0 {
@@ -188,7 +179,7 @@ func main() {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
 
-	r := reader.New(source, offViewer, displays, palette, showHeader)
+	r := reader.New(source, offViewer, displays, palette, showHeader, filesize)
 	fmt.Print(r.Header())
 
 	isEven := false
