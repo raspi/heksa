@@ -21,7 +21,7 @@ const AUTHOR = `Pekka Järvinen`
 const HOMEPAGE = `https://github.com/raspi/heksa`
 
 // Parse command line arguments
-func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter, offsetViewer []reader.OffsetFormatter, limit uint64, startOffset int64, palette [256]color.AnsiColor, filesize int64) {
+func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter, offsetViewer []reader.OffsetFormatter, limit uint64, palette [256]color.AnsiColor, filesize int64) {
 	opt := getoptions.New()
 
 	opt.HelpSynopsisArgs(`<filename> or STDIN`)
@@ -99,7 +99,7 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 		os.Exit(1)
 	}
 
-	startOffset, err = strconv.ParseInt(strings.Replace(*argSeek, `\`, ``, -1), 0, 64)
+	startOffset, err := strconv.ParseInt(strings.Replace(*argSeek, `\`, ``, -1), 0, 64)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, `error parsing seek: %v`, err)
 		os.Exit(1)
@@ -150,28 +150,27 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 			os.Exit(1)
 		}
 
+		// Seek to given offset
+		if startOffset > 0 {
+			_, err = fhandle.Seek(startOffset, io.SeekCurrent)
+		} else if startOffset < 0 {
+			_, err = fhandle.Seek(startOffset, io.SeekEnd)
+		}
+
+		if err != nil {
+			fmt.Fprintf(os.Stderr, `couldn't seek to %v: %v`, startOffset, err)
+			os.Exit(1)
+		}
+
 		filesize = fi.Size()
 		source = fhandle
 	}
 
-	return source, displays, offsetViewer, limit, startOffset, palette, filesize
+	return source, displays, offsetViewer, limit, palette, filesize
 }
 
 func main() {
-	var err error
-	source, displays, offViewer, limit, startOffset, palette, filesize := getParams()
-
-	// Seek to given offset
-	if startOffset > 0 {
-		_, err = source.Seek(startOffset, io.SeekCurrent)
-	} else if startOffset < 0 {
-		_, err = source.Seek(startOffset, io.SeekEnd)
-	}
-
-	if err != nil {
-		fmt.Fprintf(os.Stderr, `couldn't seek to %v: %v`, startOffset, err)
-		os.Exit(1)
-	}
+	source, displays, offViewer, limit, palette, filesize := getParams()
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
