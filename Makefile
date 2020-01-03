@@ -1,4 +1,5 @@
 APPNAME?=heksa
+
 # version from last tag
 VERSION := $(shell git describe --abbrev=0 --always --tags)
 BUILD := $(shell git rev-parse $(VERSION))
@@ -8,6 +9,7 @@ LDFLAGS := -ldflags "-s -w -X=main.VERSION=$(VERSION) -X=main.BUILD=$(BUILD) -X=
 SCREENSHOTCMD := ./heksa --header -o hex,dec -f hex,asc,dec -l 0x180 windows-amd64/heksa.exe
 TMPDIR := $(shell mktemp -d -t ${APPNAME}-rel-XXXXXX)
 
+# https://golang.org/doc/install/source#environment
 LINUX_ARCHS := amd64 arm arm64 ppc64 ppc64le
 WINDOWS_ARCHS := amd64
 DARWIN_ARCHS := amd64
@@ -77,12 +79,14 @@ release: linux-build darwin-build freebsd-build openbsd-build netbsd-build windo
 shasums:
 	@pushd bin && shasum -a 256 $(BUILDFILES) > ${APPNAME}-${VERSION}.shasums
 
+# Copy common files to release directory
 copycommon:
 	@echo "Copying common files to $(TMPDIR)"
 	@mkdir "$(TMPDIR)/bin"
 	@cp -v LICENSE "$(TMPDIR)"
 	@cp -v README.md "$(TMPDIR)"
 
+# Move all to temporary directory and compress with common files
 tar-everything: copycommon
 	@echo "tar-everything..."
 	# GNU/Linux
