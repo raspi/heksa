@@ -283,14 +283,6 @@ func (d *Ascii) Format(b byte) string {
 	return d.sb.String()
 }
 
-// non-printable characters as dot ('.')
-func (d *Ascii) toChar(b byte) byte {
-	if b < 32 || b > 126 {
-		return '.'
-	}
-	return b
-}
-
 func (d *Ascii) EofStr() string {
 	return ` `
 }
