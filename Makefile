@@ -9,6 +9,8 @@ LDFLAGS := -ldflags "-s -w -X=main.VERSION=$(VERSION) -X=main.BUILD=$(BUILD) -X=
 SCREENSHOTCMD := ./heksa --header -o hex,dec -f hex,asc,dec -l 0x180 windows-amd64/heksa.exe
 TMPDIR := $(shell mktemp -d -t ${APPNAME}-rel-XXXXXX)
 
+UPXFLAGS := -v -9
+
 # https://golang.org/doc/install/source#environment
 LINUX_ARCHS := amd64 arm arm64 ppc64 ppc64le
 WINDOWS_ARCHS := amd64
@@ -69,9 +71,9 @@ windows-build:
 	done
 
 upx-pack:
-	@upx -v -9 ./bin/linux-amd64/${APPNAME}
-	@upx -v -9 ./bin/linux-arm/${APPNAME}
-	@upx -v -9 ./bin/windows-amd64/${APPNAME}.exe
+	@upx $(UPXFLAGS) ./bin/linux-amd64/${APPNAME}
+	@upx $(UPXFLAGS) ./bin/linux-arm/${APPNAME}
+	@upx $(UPXFLAGS) ./bin/windows-amd64/${APPNAME}.exe
 
 release: linux-build darwin-build freebsd-build openbsd-build netbsd-build windows-build upx-pack tar-everything shasums
 	@echo "release done..."
