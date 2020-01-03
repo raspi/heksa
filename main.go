@@ -89,7 +89,7 @@ func getParams() (source iface.ReadSeekerCloser, displays []iface.CharacterForma
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR: %s\n\n", err)
-		fmt.Fprintf(os.Stderr, opt.Help(getoptions.HelpSynopsis))
+		fmt.Fprintln(os.Stderr, opt.Help(getoptions.HelpSynopsis))
 		os.Exit(1)
 	}
 
