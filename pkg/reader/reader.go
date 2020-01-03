@@ -157,7 +157,7 @@ func (r *Reader) Read() (string, error) {
 	offsetLeft := r.getoffsetLeft(offset)
 	offsetRight := r.getoffsetRight(offset)
 	r.sb.Reset()
-	r.sb.Grow(256)
+	r.sb.Grow(128)
 
 	r.sb.WriteString(offsetLeft)
 
