@@ -1,19 +1,14 @@
 package color
 
 const (
-	//availFlags = "-+# 0"
 	esc   = "\033["
 	clear = esc + "0m"
-
-	BackgroundBlack    = esc + "48;5;16m"
-	BackgroundDarkGrey = esc + "48;5;235m"
 )
 
 const (
 	SetForeground   = esc + "38;5;"
 	SetUnderlineOn  = esc + "4m"
 	SetUnderlineOff = esc + "24m"
-	//FgWhite Color = setForeground + "7m"
 )
 
 type Color uint8
