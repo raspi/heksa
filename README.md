@@ -2,7 +2,9 @@
 
 ![Screenshot](https://github.com/raspi/heksa/blob/master/_assets/screenshot.png)
 
-[![Github All Releases](https://img.shields.io/github/downloads/raspi/heksa/total.svg)]()
+![GitHub All Releases](https://img.shields.io/github/downloads/raspi/heksa/total?style=for-the-badge)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/raspi/heksa?style=for-the-badge)
+![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/raspi/heksa?style=for-the-badge)
 
 Hex dumper with colors
 
