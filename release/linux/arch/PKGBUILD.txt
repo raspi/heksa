@@ -1,0 +1,39 @@
+
+{{- /* PKGBUILD template for Arch Linux - https://www.archlinux.org/ */ -}}
+{{- /* See: Makefile on root directory */ -}}
+{{- define "tpl" -}}
+# Maintainer: {{.Maintainer}} <>
+# {{.Url}}
+# Rename this file to PKGBUILD and run makepkg -si to install
+# Or makepkg -si -p <file>
+pkgname={{.PkgName}}
+pkgver={{.Version}}
+pkgrel=1
+epoch=
+pkgdesc="{{.PkgDescription}}"
+arch=('{{.PkgArch}}')
+url="{{.Url}}"
+license=('{{.PkgLicense}}')
+groups=()
+depends=()
+makedepends=()
+checkdepends=()
+optdepends=()
+provides=()
+conflicts=()
+replaces=()
+backup=()
+options=()
+install=
+changelog=
+source=("{{.Source}}")
+noextract=()
+md5sums=()
+sha256sums=({{.Sha256Checksums}})
+validpgpkeys=()
+
+{{.PrepareSteps}}
+{{.BuildSteps}}
+{{.CheckSteps}}
+{{.PackageSteps}}
+{{end}}

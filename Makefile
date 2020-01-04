@@ -75,8 +75,12 @@ upx-pack:
 	@upx $(UPXFLAGS) ./bin/linux-arm/${APPNAME}
 	@upx $(UPXFLAGS) ./bin/windows-amd64/${APPNAME}.exe
 
-release: linux-build darwin-build freebsd-build openbsd-build netbsd-build windows-build upx-pack tar-everything shasums
+release: linux-build darwin-build freebsd-build openbsd-build netbsd-build windows-build upx-pack tar-everything shasums release-ldistros
 	@echo "release done..."
+
+# Linux distributions
+release-ldistros: ldistro-arch
+	@echo "Linux distros release done..."
 
 shasums:
 	@echo "Checksumming..."
@@ -147,5 +151,9 @@ tar-everything: copycommon
 	  zip -9 -y -r "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-windows-$$arch.zip" . ; \
 	  rm "$(TMPDIR)/bin/${APPNAME}.exe"; \
 	done
+
+# Distro: Arch linux - https://www.archlinux.org/
+ldistro-arch:
+	pushd release/linux/arch && go run . -version ${VERSION}
 
 .PHONY: all clean test default
