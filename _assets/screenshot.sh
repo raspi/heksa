@@ -34,9 +34,10 @@ while IFS= read -r -u9 cmd; do
   tmpfile=../_assets/$(mktemp -u scrshot.XXXXX)
   echo "% " > $tmpfile.txt
   echo "% $cmd" >> $tmpfile.txt
+  # Run command
   eval "$cmd" >> $tmpfile.txt
   echo "% " >> $tmpfile.txt
-  echo "% " >> $tmpfile.txt
+  echo -e "% " >> $tmpfile.txt
   konsole --notransparency --noclose --hide-tabbar --hide-menubar --separate -e cat $tmpfile.txt &
   take_shot $! $tmpfile
   sleep 1
