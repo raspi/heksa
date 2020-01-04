@@ -25,7 +25,6 @@ var masterTemplate = TemplateRaw{
 	PkgName:        `heksa`,
 	Version:        `v0.0.0`, // Dynamic
 	PkgDescription: `hex dumper with colors`,
-	PkgArch:        nil, // Dynamic
 	PkgLicense:     "Apache 2.0",
 	Url:            `https://github.com/raspi/heksa`,
 	SourceDyn:      "https://github.com/raspi/heksa/releases/download/$pkgver/$pkgname-$pkgver-linux-<ARCH>.tar.gz", // Dynamic
@@ -43,13 +42,12 @@ var masterTemplate = TemplateRaw{
 }
 
 type TemplateRaw struct {
-	Maintainer     string   // Package maintainer
-	PkgName        string   // Package name (app name)
-	Version        string   // App version
-	PkgDescription string   // App description
-	PkgArch        []string // CPU arch
-	PkgLicense     string   // License
-	Url            string   // Homepage URL
+	Maintainer     string // Package maintainer
+	PkgName        string // Package name (app name)
+	Version        string // App version
+	PkgDescription string // App description
+	PkgLicense     string // License
+	Url            string // Homepage URL
 	SourceDyn      string
 	Source         Sources  // Source URL
 	PrepareSteps   []string // prepare(){}
