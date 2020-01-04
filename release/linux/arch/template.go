@@ -15,6 +15,7 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"sort"
 	"strings"
 	"text/template"
 )
@@ -24,10 +25,10 @@ var masterTemplate = TemplateRaw{
 	PkgName:        `heksa`,
 	Version:        `v0.0.0`, // Dynamic
 	PkgDescription: `hex dumper with colors`,
-	PkgArch:        "???", // Dynamic
+	PkgArch:        nil, // Dynamic
 	PkgLicense:     "Apache 2.0",
 	Url:            `https://github.com/raspi/heksa`,
-	Source:         "https://github.com/raspi/heksa/releases/download/$pkgver/$pkgname-$pkgver-linux-<ARCH>.tar.gz", // Dynamic
+	SourceDyn:      "https://github.com/raspi/heksa/releases/download/$pkgver/$pkgname-$pkgver-linux-<ARCH>.tar.gz", // Dynamic
 	PrepareSteps:   []string{},
 	BuildSteps:     []string{},
 	CheckSteps:     []string{},
@@ -42,35 +43,34 @@ var masterTemplate = TemplateRaw{
 }
 
 type TemplateRaw struct {
-	Maintainer      string   // Package maintainer
-	PkgName         string   // Package name (app name)
-	Version         string   // App version
-	PkgDescription  string   // App description
-	PkgArch         string   // CPU arch
-	PkgLicense      string   // License
-	Url             string   // Homepage URL
-	Source          string   // Source URL
-	PrepareSteps    []string // prepare(){}
-	BuildSteps      []string // build(){}
-	CheckSteps      []string // check(){}
-	PackageSteps    []string // package(){}
-	Sha256Checksums []string // SHA256 checksums
+	Maintainer     string   // Package maintainer
+	PkgName        string   // Package name (app name)
+	Version        string   // App version
+	PkgDescription string   // App description
+	PkgArch        []string // CPU arch
+	PkgLicense     string   // License
+	Url            string   // Homepage URL
+	SourceDyn      string
+	Source         Sources  // Source URL
+	PrepareSteps   []string // prepare(){}
+	BuildSteps     []string // build(){}
+	CheckSteps     []string // check(){}
+	PackageSteps   []string // package(){}
 }
 
 type Template struct {
-	Maintainer      string // Package maintainer
-	PkgName         string // Package name (app name)
-	Version         string // App version
-	PkgDescription  string // App description
-	PkgArch         string // CPU arch
-	PkgLicense      string // License
-	Url             string // Homepage URL
-	Source          string // Source URL
-	PrepareSteps    string // prepare(){}
-	BuildSteps      string // build(){}
-	CheckSteps      string // check(){}
-	PackageSteps    string // package(){}
-	Sha256Checksums string // SHA256 checksums
+	Maintainer     string // Package maintainer
+	PkgName        string // Package name (app name)
+	Version        string // App version
+	PkgDescription string // App description
+	PkgArch        string // CPU arch
+	PkgLicense     string // License
+	Url            string // Homepage URL
+	Source         string // Source URL
+	PrepareSteps   string // prepare(){}
+	BuildSteps     string // build(){}
+	CheckSteps     string // check(){}
+	PackageSteps   string // package(){}
 }
 
 // Rewrite Go's arch names to Linux ones
@@ -82,11 +82,15 @@ var GoArchToLinuxArch = map[string]string{
 	`ppc64le`: `ppc64le`,
 }
 
-func (rt TemplateRaw) ToTemplate() Template {
-	sha256checksums := fmt.Sprintf(`%q`, rt.Sha256Checksums)
-	sha256checksums = strings.ReplaceAll(sha256checksums, `[`, ``)
-	sha256checksums = strings.ReplaceAll(sha256checksums, `]`, ``)
+type Source struct {
+	Url      string
+	Checksum string
+	File     string
+}
 
+type Sources = map[string]Source
+
+func (rt TemplateRaw) ToTemplate() Template {
 	prepare := ``
 	if len(rt.PrepareSteps) > 0 {
 		prepare += `prepare() {` + "\n"
@@ -119,20 +123,42 @@ func (rt TemplateRaw) ToTemplate() Template {
 		pack += `}` + "\n"
 	}
 
+	source := ``
+
+	archList := []string{}
+
+	for k, v := range rt.Source {
+		log.Printf(`adding source arch %v %v %v`, k, v.Checksum, v.File)
+		archList = append(archList, k)
+		source += fmt.Sprintf(`source_%v=("`, k)
+		source += v.Url
+		source += `")` + "\n"
+		source += fmt.Sprintf(`sha256sums_%v=('`, k)
+		source += v.Checksum
+		source += `')` + "\n"
+
+	}
+
+	sort.Strings(archList)
+
+	archStrlist := fmt.Sprintf(`%q`, archList)
+	archStrlist = strings.ReplaceAll(archStrlist, `[`, ``)
+	archStrlist = strings.ReplaceAll(archStrlist, `]`, ``)
+	archStrlist = strings.ReplaceAll(archStrlist, `"`, `'`)
+
 	return Template{
-		Maintainer:      rt.Maintainer,
-		PkgName:         rt.PkgName,
-		Version:         rt.Version,
-		PkgDescription:  rt.PkgDescription,
-		PkgArch:         rt.PkgArch,
-		PkgLicense:      rt.PkgLicense,
-		Url:             rt.Url,
-		Source:          rt.Source,
-		PrepareSteps:    prepare,
-		BuildSteps:      build,
-		CheckSteps:      check,
-		PackageSteps:    pack,
-		Sha256Checksums: sha256checksums,
+		Maintainer:     rt.Maintainer,
+		PkgName:        rt.PkgName,
+		Version:        rt.Version,
+		PkgDescription: rt.PkgDescription,
+		PkgArch:        archStrlist,
+		PkgLicense:     rt.PkgLicense,
+		Url:            rt.Url,
+		Source:         source,
+		PrepareSteps:   prepare,
+		BuildSteps:     build,
+		CheckSteps:     check,
+		PackageSteps:   pack,
 	}
 }
 
@@ -149,11 +175,6 @@ func main() {
 
 	releasePath := path.Join(`..`, `..`, *versionArg)
 
-	files, err := ioutil.ReadDir(releasePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	sumsFile, err := ioutil.ReadFile(path.Join(releasePath, fmt.Sprintf(`%s-%s.shasums`, masterTemplate.PkgName, *versionArg)))
 	if err != nil {
 		log.Fatal(err)
@@ -161,7 +182,7 @@ func main() {
 
 	sc := bufio.NewScanner(bytes.NewReader(sumsFile))
 
-	var checksums = make(map[string]string)
+	sources := make(map[string]Source)
 
 	for sc.Scan() {
 		line := sc.Text()
@@ -194,56 +215,40 @@ func main() {
 		}
 
 		goarch := fmatches[1]
-
-		checksums[goarch] = checksum
-	}
-
-	for _, file := range files {
-		if !strings.Contains(file.Name(), `linux`) {
-			continue
-		}
-
-		mre := regexp.MustCompile(`linux-([^.]*)\.`)
-		matches := mre.FindStringSubmatch(file.Name())
-
-		if matches == nil {
-			continue
-		}
-
-		goarch := matches[1]
-
-		tplcopy := masterTemplate
-
-		arch, ok := GoArchToLinuxArch[goarch]
-
+		linuxarch, ok := GoArchToLinuxArch[goarch]
 		if !ok {
-			continue
+			log.Fatalf(`architecture %v not found`, goarch)
 		}
 
-		tplcopy.Source = strings.ReplaceAll(tplcopy.Source, `<ARCH>`, goarch)
-		tplcopy.PkgArch = arch
-		tplcopy.Sha256Checksums = append(tplcopy.Sha256Checksums, checksums[goarch])
-		tplcopy.Version = *versionArg
-
-		var tmpw bytes.Buffer
-		tpl, err := template.New(``).ParseFiles(`./PKGBUILD.txt`)
-		if err != nil {
-			panic(err)
+		sources[linuxarch] = Source{
+			Checksum: checksum,
+			File:     fname,
+			Url:      strings.ReplaceAll(masterTemplate.SourceDyn, `<ARCH>`, goarch),
 		}
 
-		err = tpl.ExecuteTemplate(&tmpw, `tpl`, tplcopy.ToTemplate())
-		if err != nil {
-			panic(err)
-		}
-
-		pkgfile, err := os.Create(path.Join(releasePath, fmt.Sprintf(`%v-%v-linux-Arch-%s.PKGBUILD`, tplcopy.PkgName, tplcopy.Version, arch)))
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		pkgfile.Write(tmpw.Bytes())
-		pkgfile.Close()
-
-		log.Printf(`wrote %v`, pkgfile.Name())
 	}
+
+	masterTemplate.Source = sources
+	masterTemplate.Version = *versionArg
+
+	var tmpw bytes.Buffer
+	tpl, err := template.New(``).ParseFiles(`./PKGBUILD.txt`)
+	if err != nil {
+		panic(err)
+	}
+
+	err = tpl.ExecuteTemplate(&tmpw, `tpl`, masterTemplate.ToTemplate())
+	if err != nil {
+		panic(err)
+	}
+
+	pkgfile, err := os.Create(path.Join(releasePath, fmt.Sprintf(`%v-%v-linux-Arch.PKGBUILD`, masterTemplate.PkgName, masterTemplate.Version)))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	pkgfile.Write(tmpw.Bytes())
+	pkgfile.Close()
+
+	log.Printf(`wrote %v`, pkgfile.Name())
 }

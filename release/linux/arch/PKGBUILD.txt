@@ -4,6 +4,7 @@
 {{- define "tpl" -}}
 # Maintainer: {{.Maintainer}} <>
 # {{.Url}}
+# Package for Arch Linux - https://www.archlinux.org/
 # Rename this file to PKGBUILD and run makepkg -si to install
 # Or makepkg -si -p <file>
 pkgname={{.PkgName}}
@@ -11,7 +12,7 @@ pkgver={{.Version}}
 pkgrel=1
 epoch=
 pkgdesc="{{.PkgDescription}}"
-arch=('{{.PkgArch}}')
+arch=({{.PkgArch}})
 url="{{.Url}}"
 license=('{{.PkgLicense}}')
 groups=()
@@ -26,11 +27,11 @@ backup=()
 options=()
 install=
 changelog=
-source=("{{.Source}}")
 noextract=()
-md5sums=()
-sha256sums=({{.Sha256Checksums}})
+#md5sums=()
 validpgpkeys=()
+
+{{.Source}}
 
 {{.PrepareSteps}}
 {{.BuildSteps}}
