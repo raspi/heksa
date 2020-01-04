@@ -44,6 +44,8 @@ EXAMPLES:
     heksa -s 0b1010 foo.dat
 ```
 
+![Screenshot](https://github.com/raspi/heksa/blob/master/_assets/screenshot2.png)
+
 ## Features
 
 * ANSI colors for different bytes
