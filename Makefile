@@ -21,15 +21,6 @@ OPENBSD_ARCHS := amd64 arm arm64
 
 default: build
 
-# Helper for taking screenshot when releasing new version
-screenshot:
-	pushd bin; \
-	echo "%" > scr.txt ; \
-	echo "% $(SCREENSHOTCMD)" >> scr.txt ; \
-	$(SCREENSHOTCMD) >> scr.txt; \
-	echo "% " >> scr.txt ; \
-	konsole --notransparency --noclose --hide-tabbar --separate -p TerminalColumns=$(shell wc -L scr.txt) -e cat scr.txt
-
 build:
 	@echo "GO BUILD..."
 	@CGO_ENABLED=0 go build $(LDFLAGS) -v -o ./bin/${APPNAME} .

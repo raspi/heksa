@@ -1,0 +1,2 @@
+./heksa -f hex,asc,dec -l 0x180 windows-amd64/heksa.exe
+./heksa -o hex,dec -f asc,hexwasc -l 200 ../Makefile
