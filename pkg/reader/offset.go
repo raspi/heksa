@@ -3,6 +3,7 @@ package reader
 import (
 	"fmt"
 	"sort"
+	"strings"
 )
 
 type OffsetFormatter uint8
@@ -42,7 +43,7 @@ func GetOffsetFormatters(viewerStr []string) (formatters []OffsetFormatter, err 
 
 		en, ok := offsetFormattersStringToEnumMap[v]
 		if !ok {
-			return nil, fmt.Errorf(`invalid: %v`, viewerStr)
+			return nil, fmt.Errorf(`invalid: %q, valid: %v`, v, strings.Join(GetOffsetViewerList(), `, `))
 		}
 
 		formatters = append(formatters, en)

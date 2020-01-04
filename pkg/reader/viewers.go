@@ -3,6 +3,7 @@ package reader
 import (
 	"fmt"
 	"sort"
+	"strings"
 )
 
 type ByteFormatter uint8
@@ -52,7 +53,7 @@ func GetViewers(viewers []string) (ds []ByteFormatter, err error) {
 	for _, v := range viewers {
 		en, ok := formatterStringToEnumMap[v]
 		if !ok {
-			return nil, fmt.Errorf(`invalid: %v`, v)
+			return nil, fmt.Errorf(`invalid: %q, valid: %v`, v, strings.Join(GetViewerList(), `, `))
 		}
 
 		ds = append(ds, en)
