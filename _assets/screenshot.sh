@@ -32,7 +32,7 @@ pushd ../bin
 
 while IFS= read -r -u9 cmd; do
   tmpfile=../_assets/$(mktemp -u scrshot.XXXXX)
-  echo "% " > $tmpfile.txt
+  echo " " > $tmpfile.txt
   echo "% $cmd" >> $tmpfile.txt
   # Run command
   eval "$cmd" >> $tmpfile.txt
