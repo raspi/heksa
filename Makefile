@@ -144,6 +144,6 @@ tar-everything: copycommon
 
 # Distro: Arch linux - https://www.archlinux.org/
 ldistro-arch:
-	pushd release/linux/arch && go run . -version ${VERSION}
+	pushd release/linux/arch && go run . -version ${VERSION} > "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-linux-Arch.PKGBUILD"
 
 .PHONY: all clean test default

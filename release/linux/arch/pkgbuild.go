@@ -6,7 +6,6 @@ import (
 	"github.com/raspi/go-PKGBUILD"
 	"io/ioutil"
 	"log"
-	"os"
 	"path"
 )
 
@@ -39,14 +38,5 @@ func main() {
 		PKGBUILD.ReplaceFromChecksumFilename+`.tar.gz`,
 	)
 
-	pkgfile, err := os.Create(path.Join(releasePath, fmt.Sprintf(`%v-%v-linux-Arch.PKGBUILD`, packageName, basetpl.Version)))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	pkgfile.WriteString(basetpl.String())
-	pkgfile.Close()
-
-	log.Printf(`wrote %v`, pkgfile.Name())
-
+	fmt.Println(basetpl)
 }
