@@ -4,3 +4,5 @@ github.com/DavidGamba/go-getoptions/completion
 github.com/DavidGamba/go-getoptions/help
 github.com/DavidGamba/go-getoptions/option
 github.com/DavidGamba/go-getoptions/text
+# github.com/raspi/go-PKGBUILD v0.0.1
+github.com/raspi/go-PKGBUILD
