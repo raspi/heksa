@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="PKGBUILD template" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="heksa" />
+    <working_directory value="$PROJECT_DIR$/release/linux/arch/" />
+    <go_parameters value="-i" />
+    <parameters value="-version v1.10.0" />
+    <kind value="DIRECTORY" />
+    <filePath value="home/pekka/go/src/github.com/raspi/heksa/release/linux/arch/pkgbuild.go" />
+    <package value="github.com/raspi/heksa" />
+    <directory value="$PROJECT_DIR$/release/linux/arch" />
+    <method v="2" />
+  </configuration>
+</component>
