@@ -6,7 +6,6 @@ BUILD := $(shell git rev-parse $(VERSION))
 BUILDDATE := $(shell git log -1 --format=%aI $(VERSION))
 BUILDFILES?=$$(find . -mindepth 1 -maxdepth 1 -type f \( -iname "*${APPNAME}-v*" -a ! -iname "*.shasums" \))
 LDFLAGS := -ldflags "-s -w -X=main.VERSION=$(VERSION) -X=main.BUILD=$(BUILD) -X=main.BUILDDATE=$(BUILDDATE)"
-SCREENSHOTCMD := ./heksa --header -o hex,dec -f hex,asc,dec -l 0x180 windows-amd64/heksa.exe
 TMPDIR := $(shell mktemp -d -t ${APPNAME}-rel-XXXXXX)
 
 UPXFLAGS := -v -9
