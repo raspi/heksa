@@ -91,4 +91,4 @@ Requirements:
 1. Create new version tag
 1. `make release`
 
-If there's a lot of changes you can take a new screenshot with `make screenshot` helper
+If there's a lot of visual changes you can take new screenshots with `screenshot.sh` script in [_assets](_assets) directory
