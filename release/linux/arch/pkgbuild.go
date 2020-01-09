@@ -1,5 +1,7 @@
 package main
 
+// Generate Arch Linux PKGBUILD file from package.json
+
 import (
 	"flag"
 	"fmt"
