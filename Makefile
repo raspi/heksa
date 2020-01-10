@@ -154,6 +154,8 @@ tar-everything: copycommon
 ldistro-arch:
 	pushd release/linux/arch && go run . -version ${VERSION} > "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-linux-Arch.PKGBUILD"
 
+# FreeBSD pkg https://github.com/freebsd/pkg
+# pkg help create
 bsd-freebsd:
 	@for arch in $(FREEBSD_ARCHS); do \
 	  echo "Generate FreeBSD package... $$arch"; \
