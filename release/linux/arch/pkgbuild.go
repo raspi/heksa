@@ -44,5 +44,14 @@ func main() {
 		log.Fatal(err)
 	}
 
+	verrs := basetpl.Validate()
+	if len(verrs) > 0 {
+		for _, E := range verrs {
+			log.Print(E)
+		}
+
+		log.Fatal(`error(s) found. aborting.`)
+	}
+
 	fmt.Println(basetpl)
 }
