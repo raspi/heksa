@@ -154,4 +154,26 @@ tar-everything: copycommon
 ldistro-arch:
 	pushd release/linux/arch && go run . -version ${VERSION} > "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-linux-Arch.PKGBUILD"
 
+bsd-freebsd:
+	@for arch in $(FREEBSD_ARCHS); do \
+	  echo "Generate FreeBSD package... $$arch"; \
+	  cd "$(TMPDIR)"; \
+	  tar -xzf "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-freebsd-$$arch.tar.gz" . ; \
+	  mkdir -p ./usr/local/bin ; \
+	  mv ./bin/${APPNAME} ./usr/local/bin ; \
+	  rm -rf ./bin ; \
+	  find . ; \
+	  cp "$(PWD)/release/freebsd/manifest.sh" /tmp/__manifest.sh; \
+	  sed -i 's/<VERSION>/${VERSION}/' /tmp/__manifest.sh ; \
+	  sed -i "s/<ARCH>/$$arch/" /tmp/__manifest.sh ; \
+	  cat /tmp/__manifest.sh ; \
+	  pkg create --verbose --format txz --root-dir $(TMPDIR) --manifest /tmp/__manifest.sh && \
+	  cp "${APPNAME}-${VERSION}.txz" "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-freebsd-pkg-$$arch.txz" ; \
+	  rm -rf "$(TMPDIR)/*"; \
+	  echo ""; \
+	  echo "------------------------------------------------------------"; \
+	  echo ""; \
+	done
+
+
 .PHONY: all clean test default
