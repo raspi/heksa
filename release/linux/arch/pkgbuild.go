@@ -35,7 +35,8 @@ func main() {
 	basetpl.Version = *versionArg
 	basetpl.Files = PKGBUILD.GetChecksumsFromFile(
 		PKGBUILD.Sha256,
-		path.Join(releasePath, fmt.Sprintf(`%s-%s.shasums`, packageName, basetpl.Version)), basetpl.DefaultChecksumFilesFunc,
+		path.Join(releasePath, fmt.Sprintf(`%s-%s.shasums`, packageName, basetpl.Version)),
+		basetpl.DefaultChecksumFilesFunc,
 	)
 
 	basetpl.Commands.Install, err = PKGBUILD.GetLinesFromFile(`install.sh`)
