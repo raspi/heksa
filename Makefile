@@ -148,6 +148,8 @@ tar-everything: copycommon
 	  rm "$(TMPDIR)/bin/${APPNAME}.exe"; \
 	done
 
+	rm -rf "$(TMPDIR)/*"
+
 # Distro: Arch linux - https://www.archlinux.org/
 ldistro-arch:
 	pushd release/linux/arch && go run . -version ${VERSION} > "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-linux-Arch.PKGBUILD"
