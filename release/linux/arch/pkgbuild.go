@@ -35,10 +35,13 @@ func main() {
 	basetpl.Version = *versionArg
 	basetpl.Files = PKGBUILD.GetChecksumsFromFile(
 		PKGBUILD.Sha256,
-		path.Join(releasePath, fmt.Sprintf(`%s-%s.shasums`, packageName, basetpl.Version)),
-		`https://github.com/raspi/heksa/releases/download/$pkgver/$pkgname-$pkgver-linux-`,
-		PKGBUILD.ReplaceFromChecksumFilename+`.tar.gz`,
+		path.Join(releasePath, fmt.Sprintf(`%s-%s.shasums`, packageName, basetpl.Version)), basetpl.DefaultChecksumFilesFunc,
 	)
+
+	basetpl.Commands.Install, err = PKGBUILD.GetLinesFromFile(`install.sh`)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	fmt.Println(basetpl)
 }

@@ -61,6 +61,10 @@ func (t Template) Validate() (errs []error) {
 		errs = append(errs, fmt.Errorf(`url is empty`))
 	}
 
+	if len(t.Files) == 0 {
+		errs = append(errs, fmt.Errorf(`no files`))
+	}
+
 	return errs
 }
 

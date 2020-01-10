@@ -14,13 +14,6 @@
     "Apache 2.0"
   ],
   "url": "https://github.com/raspi/heksa",
-  "files": {},
-  "commands": {
-    "install": [
-      "cd \"$srcdir\"",
-      "install -Dm644 \"LICENSE\" -t \"$pkgdir/usr/share/licenses/$pkgname\"",
-      "install -Dm644 \"README.md\" -t \"$pkgdir/usr/share/doc/$pkgname\"",
-      "install -Dm755 \"bin/$pkgname\" -t \"$pkgdir/usr/bin\""
-    ]
-  }
+  "pkg_url_prefix": "https://github.com/raspi/heksa/releases/download/$pkgver/",
+  "files": {}
 }

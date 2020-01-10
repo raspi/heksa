@@ -24,6 +24,12 @@ build:
 	@echo "GO BUILD..."
 	@CGO_ENABLED=0 go build $(LDFLAGS) -v -o ./bin/${APPNAME} .
 
+# Update go module(s)
+modup:
+	@go get -u github.com/raspi/go-PKGBUILD@v0.0.5
+	@go mod vendor
+	@go mod tidy
+
 linux-build:
 	@for arch in $(LINUX_ARCHS); do \
 	  echo "GNU/Linux build... $$arch"; \

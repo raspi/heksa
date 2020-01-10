@@ -40,7 +40,7 @@ type Provider struct {
 }
 
 type Meta struct {
-	Version string `json:"ver"`
+	Version string `json:"_ver"` // Version of template (for possible future checks)
 }
 
 type Template struct {
@@ -60,15 +60,16 @@ type Template struct {
 	// outputs the new package version. This is run after downloading and extracting the Files and
 	// running the prepare() function (if present), so it can use those files in determining the new pkgver.
 	// This is most useful when used with Files from version control systems.
-	Version          string                       `json:"version"`                // $pkgver Package version
-	Release          uint64                       `json:"release"`                // $pkgrel Increment after each PKGBUILD release
-	ReleaseTime      time.Time                    `json:"release_time,omitempty"` // [OPTIONAL] $epoch ReleaseTime for hinting newer release
-	ShortDescription string                       `json:"short_description"`      // $pkgdesc Short one line description about the package
-	Licenses         []string                     `json:"licenses"`               // $license License(s)
-	URL              string                       `json:"url"`                    // $url Package homepage URL
-	ChangeLogFile    string                       `json:"changelog_file"`         // $changelog [OPTIONAL]
-	Groups           []string                     `json:"groups"`
-	Dependencies     map[string]Depends           `json:"dependencies"`                // [OPTIONAL] [architecture]Dependencies..
+	Version          string                       `json:"version"`                     // $pkgver Package version
+	Release          uint64                       `json:"release"`                     // $pkgrel Increment after each PKGBUILD release
+	ReleaseTime      time.Time                    `json:"release_time,omitempty"`      // [OPTIONAL] $epoch ReleaseTime for hinting newer release
+	ShortDescription string                       `json:"short_description"`           // $pkgdesc Short one line description about the package
+	Licenses         []string                     `json:"licenses"`                    // $license License(s)
+	URL              string                       `json:"url"`                         // $url Package homepage URL
+	PackageURLPrefix string                       `json:"pkg_url_prefix,omitempty"`    // URL prefix for sources
+	ChangeLogFile    string                       `json:"changelog_file,omitempty"`    // $changelog [OPTIONAL]
+	Groups           []string                     `json:"groups,omitempty"`            // for example {"kde", ...}
+	Dependencies     map[string]Depends           `json:"dependencies,omitempty"`      // [OPTIONAL] [architecture]Dependencies..
 	OptionalPackages map[string][]OptionalPackage `json:"optional_packages,omitempty"` // PKGBUILD $optdepends
 
 	// An array of “virtual provisions” this package provides. This allows a package to provide dependencies other
@@ -83,7 +84,7 @@ type Template struct {
 	// built package and append the correct version. Appending the version yourself disables automatic detection.
 	//
 	// Additional architecture-specific provides can be added by appending an underscore and the architecture name e.g., provides_x86_64=().
-	Provides  map[string]Provider `json:"provides"`            // [OPTIONAL]
+	Provides  map[string]Provider `json:"provides,omitempty"`  // [OPTIONAL]
 	Conflicts map[string][]string `json:"conflicts,omitempty"` // [OPTIONAL] [arch][]{pkg1,pkg2, ..}
 
 	// An array of packages this package should replace. This can be used to handle renamed/combined packages.
@@ -102,7 +103,7 @@ type Template struct {
 	// Specifies a special install script that is to be included in the package. This file should reside in the same
 	// directory as the PKGBUILD and will be copied into the package by makepkg. It does not need to be included in
 	// the source array (e.g., install=$pkgname.install).
-	Install string `json:"install"`
+	Install string `json:"install,omitempty"`
 
 	// An array of file names corresponding to those from the source array. Files listed here will not be extracted
 	// with the rest of the source files. This is useful for packages that use compressed data directly.
@@ -120,13 +121,15 @@ type Template struct {
 	Backup []string `json:"backup,omitempty"`
 	Files  Files    `json:"files"` // [architecture][]{file1, file2, ..}
 
-	Commands Commands `json:"commands"`
+	Commands Commands `json:"commands,omitempty"`
 }
+
+const VERSION = `v1.0.0`
 
 func New(sources Files, cmds Commands, depends map[string]Depends, optional map[string][]OptionalPackage, options []string) Template {
 	return Template{
 		Meta: Meta{
-			Version: "v1.0.0",
+			Version: VERSION,
 		},
 		Files:            sources,
 		Dependencies:     depends,
