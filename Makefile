@@ -151,6 +151,7 @@ tar-everything: copycommon
 	rm -rf "$(TMPDIR)/*"
 
 # Distro: Arch linux - https://www.archlinux.org/
+# Generates multi-arch PKGBUILD
 ldistro-arch:
 	pushd release/linux/arch && go run . -version ${VERSION} > "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-linux-Arch.PKGBUILD"
 
