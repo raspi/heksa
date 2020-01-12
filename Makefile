@@ -155,6 +155,20 @@ tar-everything: copycommon
 ldistro-arch:
 	pushd release/linux/arch && go run . -version ${VERSION} > "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-linux-Arch.PKGBUILD"
 
+# RPM
+ldistro-rpm:
+	@for arch in $(LINUX_ARCHS); do \
+	  echo "Generating RPM... $$arch"; \
+	  cd "$(TMPDIR)"; \
+	  echo "  Extracting source package.." ; \
+	  tar -xzf "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-linux-$$arch.tar.gz" . ; \
+	  rpmbuild --define "_builddir $(TMPDIR)" --define "_version ${VERSION}" --define "buildarch $$arch" -bb "$(PWD)/release/linux/rpm/package.spec" ; \
+	  rm -rf "$(TMPDIR)/*"; \
+	  echo ""; \
+	  echo "------------------------------------------------------------"; \
+	  echo ""; \
+	done
+
 # Create FreeBSD binary release package
 # uses FreeBSD's pkg https://github.com/freebsd/pkg
 # pkg help create
