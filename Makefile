@@ -154,21 +154,24 @@ tar-everything: copycommon
 ldistro-arch:
 	pushd release/linux/arch && go run . -version ${VERSION} > "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-linux-Arch.PKGBUILD"
 
-# FreeBSD pkg https://github.com/freebsd/pkg
+# Create FreeBSD binary release package
+# uses FreeBSD's pkg https://github.com/freebsd/pkg
 # pkg help create
 bsd-freebsd:
 	@for arch in $(FREEBSD_ARCHS); do \
 	  echo "Generate FreeBSD package... $$arch"; \
 	  cd "$(TMPDIR)"; \
+	  echo "  Extracting source package.." ; \
 	  tar -xzf "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-freebsd-$$arch.tar.gz" . ; \
+	  echo "  Creating directory structure for package.." ; \
 	  mkdir -p ./usr/local/bin ; \
 	  mv ./bin/${APPNAME} ./usr/local/bin ; \
 	  rm -rf ./bin ; \
-	  find . ; \
 	  cp "$(PWD)/release/freebsd/manifest.sh" /tmp/__manifest.sh; \
 	  sed -i 's/<VERSION>/${VERSION}/' /tmp/__manifest.sh ; \
 	  sed -i "s/<ARCH>/$$arch/" /tmp/__manifest.sh ; \
 	  cat /tmp/__manifest.sh ; \
+	  echo "  Creating pkg binary release package.." ; \
 	  pkg create --verbose --format txz --root-dir $(TMPDIR) --manifest /tmp/__manifest.sh && \
 	  cp "${APPNAME}-${VERSION}.txz" "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-freebsd-pkg-$$arch.txz" ; \
 	  rm -rf "$(TMPDIR)/*"; \
