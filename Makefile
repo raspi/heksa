@@ -6,9 +6,11 @@ BUILD := $(shell git rev-parse $(VERSION))
 BUILDDATE := $(shell git log -1 --format=%aI $(VERSION))
 BUILDFILES?=$$(find . -mindepth 1 -maxdepth 1 -type f \( -iname "*${APPNAME}-v*" -a ! -iname "*.shasums" \))
 LDFLAGS := -ldflags "-s -w -X=main.VERSION=$(VERSION) -X=main.BUILD=$(BUILD) -X=main.BUILDDATE=$(BUILDDATE)"
-TMPDIR := $(shell mktemp -d -t ${APPNAME}-rel-XXXXXX)
+RELEASETMPDIR := $(shell mktemp -d -t ${APPNAME}-rel-XXXXXX)
+APPANDVER := ${APPNAME}-$(VERSION)
 
 UPXFLAGS := -v -9
+XZCOMPRESSFLAGS := --verbose --keep --compress --threads 0 --extreme -9
 
 # https://golang.org/doc/install/source#environment
 LINUX_ARCHS := amd64 arm arm64 ppc64 ppc64le
@@ -72,7 +74,7 @@ upx-pack:
 	@upx $(UPXFLAGS) ./bin/linux-arm/${APPNAME}
 	@upx $(UPXFLAGS) ./bin/windows-amd64/${APPNAME}.exe
 
-release: linux-build darwin-build freebsd-build openbsd-build netbsd-build windows-build upx-pack tar-everything shasums release-ldistros
+release: linux-build darwin-build freebsd-build openbsd-build netbsd-build windows-build upx-pack compress-everything shasums release-ldistros
 	@echo "release done..."
 
 # Linux distributions
@@ -81,90 +83,95 @@ release-ldistros: ldistro-arch
 
 shasums:
 	@echo "Checksumming..."
-	@pushd "release/${VERSION}" && shasum -a 256 $(BUILDFILES) > ${APPNAME}-${VERSION}.shasums
+	@pushd "release/${VERSION}" && shasum -a 256 $(BUILDFILES) > $(APPANDVER).shasums
 
 # Copy common files to release directory
 copycommon:
-	@echo "Copying common files to $(TMPDIR)"
-	@mkdir "$(TMPDIR)/bin"
-	@cp -v LICENSE "$(TMPDIR)"
-	@cp -v README.md "$(TMPDIR)"
-
-# Move all to temporary directory and compress with common files
-tar-everything: copycommon
+	@echo "Copying common files to temporary release directory '$(RELEASETMPDIR)'.."
+	@mkdir "$(RELEASETMPDIR)/bin"
+	@cp -v "LICENSE" "$(RELEASETMPDIR)"
+	@cp -v "README.md" "$(RELEASETMPDIR)"
 	@mkdir --parents "$(PWD)/release/${VERSION}"
 
-	@echo "tar-everything..."
-	# GNU/Linux
+# Compress files: FreeBSD
+compress-freebsd:
+	@for arch in $(FREEBSD_ARCHS); do \
+	  echo "FreeBSD xz... $$arch"; \
+	  cp -v "$(PWD)/bin/freebsd-$$arch/${APPNAME}" "$(RELEASETMPDIR)/bin"; \
+	  cd "$(RELEASETMPDIR)"; \
+	  tar --numeric-owner --owner=0 --group=0 -cf - . | xz $(XZCOMPRESSFLAGS) - > "$(PWD)/release/${VERSION}/$(APPANDVER)-freebsd-$$arch.tar.xz" ; \
+	  rm "$(RELEASETMPDIR)/bin/${APPNAME}"; \
+	done
+
+# Compress files: OpenBSD
+compress-openbsd:
+	@for arch in $(OPENBSD_ARCHS); do \
+	  echo "OpenBSD xz... $$arch"; \
+	  cp -v "$(PWD)/bin/openbsd-$$arch/${APPNAME}" "$(RELEASETMPDIR)/bin"; \
+	  cd "$(RELEASETMPDIR)"; \
+	  tar --numeric-owner --owner=0 --group=0 -cf - . | xz $(XZCOMPRESSFLAGS) - > "$(PWD)/release/${VERSION}/$(APPANDVER)-openbsd-$$arch.tar.xz" ; \
+	  rm "$(RELEASETMPDIR)/bin/${APPNAME}"; \
+	done
+
+# Compress files: NetBSD
+compress-netbsd:
+	@for arch in $(NETBSD_ARCHS); do \
+	  echo "NetBSD xz... $$arch"; \
+	  cp -v "$(PWD)/bin/netbsd-$$arch/${APPNAME}" "$(RELEASETMPDIR)/bin"; \
+	  cd "$(RELEASETMPDIR)"; \
+	  tar --numeric-owner --owner=0 --group=0 -cf - . | xz $(XZCOMPRESSFLAGS) - > "$(PWD)/release/${VERSION}/$(APPANDVER)-netbsd-$$arch.tar.xz" ; \
+	  rm "$(RELEASETMPDIR)/bin/${APPNAME}"; \
+	done
+
+# Compress files: GNU/Linux
+compress-linux:
 	@for arch in $(LINUX_ARCHS); do \
 	  echo "GNU/Linux tar... $$arch"; \
-	  cp -v "$(PWD)/bin/linux-$$arch/${APPNAME}" "$(TMPDIR)/bin"; \
-	  cd "$(TMPDIR)"; \
-	  tar -zcvf "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-linux-$$arch.tar.gz" . ; \
-	  rm "$(TMPDIR)/bin/${APPNAME}"; \
+	  cp -v "$(PWD)/bin/linux-$$arch/${APPNAME}" "$(RELEASETMPDIR)/bin"; \
+	  cd "$(RELEASETMPDIR)"; \
+	  tar --numeric-owner --owner=0 --group=0 -zcvf "$(PWD)/release/${VERSION}/$(APPANDVER)-linux-$$arch.tar.gz" . ; \
+	  rm "$(RELEASETMPDIR)/bin/${APPNAME}"; \
 	done
 
-	# Darwin
+# Compress files: Darwin
+compress-darwin:
 	@for arch in $(DARWIN_ARCHS); do \
 	  echo "Darwin tar... $$arch"; \
-	  cp -v "$(PWD)/bin/darwin-$$arch/${APPNAME}" "$(TMPDIR)/bin"; \
-	  cd "$(TMPDIR)"; \
-	  tar -zcvf "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-darwin-$$arch.tar.gz" . ; \
-	  rm "$(TMPDIR)/bin/${APPNAME}"; \
+	  cp -v "$(PWD)/bin/darwin-$$arch/${APPNAME}" "$(RELEASETMPDIR)/bin"; \
+	  cd "$(RELEASETMPDIR)"; \
+	  tar --owner=0 --group=0 -zcvf "$(PWD)/release/${VERSION}/$(APPANDVER)-darwin-$$arch.tar.gz" . ; \
+	  rm "$(RELEASETMPDIR)/bin/${APPNAME}"; \
 	done
 
-	# FreeBSD
-	@for arch in $(FREEBSD_ARCHS); do \
-	  echo "FreeBSD tar... $$arch"; \
-	  cp -v "$(PWD)/bin/freebsd-$$arch/${APPNAME}" "$(TMPDIR)/bin"; \
-	  cd "$(TMPDIR)"; \
-	  tar -zcvf "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-freebsd-$$arch.tar.gz" . ; \
-	  rm "$(TMPDIR)/bin/${APPNAME}"; \
-	done
-
-	# OpenBSD
-	@for arch in $(OPENBSD_ARCHS); do \
-	  echo "OpenBSD tar... $$arch"; \
-	  cp -v "$(PWD)/bin/openbsd-$$arch/${APPNAME}" "$(TMPDIR)/bin"; \
-	  cd "$(TMPDIR)"; \
-	  tar -zcvf "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-openbsd-$$arch.tar.gz" . ; \
-	  rm "$(TMPDIR)/bin/${APPNAME}"; \
-	done
-
-	# NetBSD
-	@for arch in $(NETBSD_ARCHS); do \
-	  echo "NetBSD tar... $$arch"; \
-	  cp -v "$(PWD)/bin/netbsd-$$arch/${APPNAME}" "$(TMPDIR)/bin"; \
-	  cd "$(TMPDIR)"; \
-	  tar -zcvf "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-netbsd-$$arch.tar.gz" . ; \
-	  rm "$(TMPDIR)/bin/${APPNAME}"; \
-	done
-
-	#Windows
+# Compress files: Microsoft Windows
+compress-windows:
 	@for arch in $(WINDOWS_ARCHS); do \
 	  echo "MS Windows zip... $$arch"; \
-	  cp -v "$(PWD)/bin/windows-$$arch/${APPNAME}.exe" "$(TMPDIR)/bin"; \
-	  cd "$(TMPDIR)"; \
-	  zip -9 -y -r "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-windows-$$arch.zip" . ; \
-	  rm "$(TMPDIR)/bin/${APPNAME}.exe"; \
+	  cp -v "$(PWD)/bin/windows-$$arch/${APPNAME}.exe" "$(RELEASETMPDIR)/bin"; \
+	  cd "$(RELEASETMPDIR)"; \
+	  zip -9 -y -r "$(PWD)/release/${VERSION}/$(APPANDVER)-windows-$$arch.zip" . ; \
+	  rm "$(RELEASETMPDIR)/bin/${APPNAME}.exe"; \
 	done
 
-	rm -rf "$(TMPDIR)/*"
+# Move all to temporary directory and compress with common files
+compress-everything: copycommon compress-linux compress-windows compress-freebsd compress-netbsd compress-openbsd
+	@echo "tar-everything..."
+	rm -rf "$(RELEASETMPDIR)/*"
 
 # Distro: Arch linux - https://www.archlinux.org/
 # Generates multi-arch PKGBUILD
 ldistro-arch:
-	pushd release/linux/arch && go run . -version ${VERSION} > "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-linux-Arch.PKGBUILD"
+	pushd release/linux/arch && go run . -version ${VERSION} > "$(PWD)/release/${VERSION}/$(APPANDVER)-linux-Arch.PKGBUILD"
 
 # RPM
 ldistro-rpm:
 	@for arch in $(LINUX_ARCHS); do \
 	  echo "Generating RPM... $$arch"; \
-	  cd "$(TMPDIR)"; \
+	  cd "$(RELEASETMPDIR)"; \
 	  echo "  Extracting source package.." ; \
-	  tar -xzf "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-linux-$$arch.tar.gz" . ; \
-	  rpmbuild --define "_builddir $(TMPDIR)" --define "_version ${VERSION}" --define "buildarch $$arch" -bb "$(PWD)/release/linux/rpm/package.spec" ; \
-	  rm -rf "$(TMPDIR)/*"; \
+	  tar -xzf "$(PWD)/release/${VERSION}/$(APPANDVER)-linux-$$arch.tar.gz" . ; \
+	  rpmbuild --verbose --define "_builddir $(RELEASETMPDIR)" --define "_version ${VERSION}" --define "buildarch $$arch" -bb "$(PWD)/release/linux/rpm/package.spec" ; \
+	  rm -rf "$(RELEASETMPDIR)/*"; \
 	  echo ""; \
 	  echo "------------------------------------------------------------"; \
 	  echo ""; \
@@ -176,21 +183,22 @@ ldistro-rpm:
 bsd-freebsd:
 	@for arch in $(FREEBSD_ARCHS); do \
 	  echo "Generate FreeBSD package... $$arch"; \
-	  cd "$(TMPDIR)"; \
-	  echo "  Extracting source package.." ; \
-	  tar -xzf "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-freebsd-$$arch.tar.gz" . ; \
+	  tempdir=$$(shell mktemp -d -t $(APPANDVER)-freebsd-XXXXXX) && \
+	  tempmanifest=$$(shell mktemp -t $(APPANDVER)-freebsd-manifest-XXXXXX) && \
+	  cd "$$tempdir"; \
+	  echo "  Extracting source package to '$$tempdir'.." ; \
+	  xz --verbose --keep --decompress "$(PWD)/release/${VERSION}/$(APPANDVER)-freebsd-$$arch.xz" . ; \
 	  echo "  Creating directory structure for package.." ; \
 	  mkdir -p ./usr/local/bin ; \
 	  mv ./bin/${APPNAME} ./usr/local/bin ; \
 	  rm -rf ./bin ; \
-	  cp "$(PWD)/release/freebsd/manifest.sh" /tmp/__manifest.sh; \
-	  sed -i 's/<VERSION>/${VERSION}/' /tmp/__manifest.sh ; \
-	  sed -i "s/<ARCH>/$$arch/" /tmp/__manifest.sh ; \
-	  cat /tmp/__manifest.sh ; \
+	  cp "$(PWD)/release/freebsd/manifest.sh" "$$tempmanifest" ; \
+	  sed -i 's/<VERSION>/${VERSION}/' "$$tempmanifest" ; \
+	  sed -i "s/<ARCH>/$$arch/" "$$tempmanifest" ; \
+	  cat "$$tempmanifest" ; \
 	  echo "  Creating pkg binary release package.." ; \
-	  pkg create --verbose --format txz --root-dir $(TMPDIR) --manifest /tmp/__manifest.sh && \
-	  cp "${APPNAME}-${VERSION}.txz" "$(PWD)/release/${VERSION}/${APPNAME}-${VERSION}-freebsd-pkg-$$arch.txz" ; \
-	  rm -rf "$(TMPDIR)/*"; \
+	  pkg create --verbose --format txz --root-dir "$$tempdir" --manifest "$$tempmanifest" && \
+	  cp "$(APPANDVER).txz" "$(PWD)/release/${VERSION}/$(APPANDVER)-freebsd-pkg-$$arch.txz" ; \
 	  echo ""; \
 	  echo "------------------------------------------------------------"; \
 	  echo ""; \
