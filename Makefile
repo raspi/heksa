@@ -149,7 +149,12 @@ compress-windows:
 	  echo "MS Windows zip... $$arch"; \
 	  cp -v "$(PWD)/bin/windows-$$arch/${APPNAME}.exe" "$(RELEASETMPDIR)/bin"; \
 	  cd "$(RELEASETMPDIR)"; \
-	  zip -9 -y -r "$(PWD)/release/${VERSION}/$(APPANDVER)-windows-$$arch.zip" . ; \
+	  mv LICENSE LICENSE.txt && \
+	  pandoc --standalone --to rtf --output LICENSE.rtf LICENSE.txt && \
+	  mv LICENSE.txt LICENSE ; \
+	  zip -v -9 -r -o -x LICENSE -9  "$(PWD)/release/${VERSION}/$(APPANDVER)-windows-$$arch.zip" . ; \
+	  rm LICENSE.rtf; \
+	  cp -v "$(PWD)/LICENSE" "$(RELEASETMPDIR)" ; \
 	  rm "$(RELEASETMPDIR)/bin/${APPNAME}.exe"; \
 	done
 
