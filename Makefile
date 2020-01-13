@@ -160,7 +160,7 @@ compress-windows:
 
 # Move all to temporary directory and compress with common files
 compress-everything: copycommon compress-linux compress-windows compress-freebsd compress-netbsd compress-openbsd
-	@echo "tar-everything..."
+	@echo "$@ ..."
 	rm -rf "$(RELEASETMPDIR)/*"
 
 # Distro: Arch linux - https://www.archlinux.org/
