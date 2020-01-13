@@ -183,11 +183,11 @@ ldistro-rpm:
 bsd-freebsd:
 	@for arch in $(FREEBSD_ARCHS); do \
 	  echo "Generate FreeBSD package... $$arch"; \
-	  tempdir=$$(shell mktemp -d -t $(APPANDVER)-freebsd-XXXXXX) && \
-	  tempmanifest=$$(shell mktemp -t $(APPANDVER)-freebsd-manifest-XXXXXX) && \
+	  tempdir=$$(mktemp -d -t $(APPANDVER)-freebsd-XXXXXX) && \
+	  tempmanifest=$$(mktemp -t $(APPANDVER)-freebsd-manifest-XXXXXX) && \
 	  cd "$$tempdir"; \
 	  echo "  Extracting source package to '$$tempdir'.." ; \
-	  xz --verbose --keep --decompress "$(PWD)/release/${VERSION}/$(APPANDVER)-freebsd-$$arch.xz" . ; \
+	  tar -xJf "$(PWD)/release/${VERSION}/$(APPANDVER)-freebsd-$$arch.tar.xz" . ; \
 	  echo "  Creating directory structure for package.." ; \
 	  mkdir -p ./usr/local/bin ; \
 	  mv ./bin/${APPNAME} ./usr/local/bin ; \
