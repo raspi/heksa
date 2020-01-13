@@ -66,6 +66,7 @@ windows-build:
 	  CGO_ENABLED=0 GOOS=windows GOARCH=$$arch go build $(LDFLAGS) -v -o ./bin/windows-$$arch/${APPNAME}.exe . 2>/dev/null; \
 	done
 
+# Compress executables
 upx-pack:
 	@upx $(UPXFLAGS) ./bin/linux-amd64/${APPNAME}
 	@upx $(UPXFLAGS) ./bin/linux-arm/${APPNAME}
