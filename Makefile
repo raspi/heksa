@@ -168,15 +168,30 @@ compress-everything: copycommon compress-linux compress-windows compress-freebsd
 ldistro-arch:
 	pushd release/linux/arch && go run . -version ${VERSION} > "$(PWD)/release/${VERSION}/$(APPANDVER)-linux-Arch.PKGBUILD"
 
-# RPM
+# Create RPM package
+# https://rpm.org/
+# https://rpm-packaging-guide.github.io/
 ldistro-rpm:
 	@for arch in $(LINUX_ARCHS); do \
 	  echo "Generating RPM... $$arch"; \
-	  cd "$(RELEASETMPDIR)"; \
-	  echo "  Extracting source package.." ; \
+	  tempdir=$$(mktemp -d -t $(APPANDVER)-rpm-XXXXXX) && \
+	  cd "$$tempdir"; \
+	  mkdir -p {SOURCES,RPMS,SPECS,SRPMS,BUILD} ; \
+	  cd "SOURCES"; \
+	  echo "  >> Extracting source binary package.." ; \
 	  tar -xzf "$(PWD)/release/${VERSION}/$(APPANDVER)-linux-$$arch.tar.gz" . ; \
-	  rpmbuild --verbose --define "_builddir $(RELEASETMPDIR)" --define "_version ${VERSION}" --define "buildarch $$arch" -bb "$(PWD)/release/linux/rpm/package.spec" ; \
-	  rm -rf "$(RELEASETMPDIR)/*"; \
+	  echo "  >> Generating directory structure.." ; \
+	  mkdir -p ./usr/bin ; \
+	  mv bin/${APPNAME} ./usr/bin ; \
+	  rm -rf ./bin ; \
+	  mkdir -p ./usr/share/licenses/${APPNAME}/ ; \
+	  mv LICENSE ./usr/share/licenses/${APPNAME} ; \
+	  mkdir -p ./usr/share/doc/${APPNAME}/ ; \
+	  mv README.md ./usr/share/doc/${APPNAME} ; \
+	  cd .. ; \
+	  echo "  >> Building RPM package.." ; \
+	  rpmbuild --verbose --dbpath "$$tempdir/RPMS" --buildroot "$$tempdir/SOURCES" --target $$arch --nobuild --noprep --nocheck --define "_topdir $$tempdir" --define "_version ${VERSION}" -bb "$(PWD)/release/linux/rpm/package.spec" ; \
+	  find . ; \
 	  echo ""; \
 	  echo "------------------------------------------------------------"; \
 	  echo ""; \
