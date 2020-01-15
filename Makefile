@@ -176,13 +176,14 @@ ldistro-rpm:
 	  echo "Generating RPM... $$arch"; \
 	  tempdir=$$(mktemp -d -t $(APPANDVER)-rpm-XXXXXX) && \
 	  cd "$$tempdir"; \
-	  mkdir -p {SOURCES,RPMS,SPECS,SRPMS,BUILD} ; \
-	  cd "SOURCES"; \
+	  mkdir -p {SOURCES,RPMS,SPECS,SRPMS,BUILD,tmp} ; \
+	  cp "$(PWD)/release/linux/rpm/package.spec" "SPECS/${APPNAME}" ; \
+	  cd "BUILD"; \
 	  echo "  >> Extracting source binary package.." ; \
 	  tar -xzf "$(PWD)/release/${VERSION}/$(APPANDVER)-linux-$$arch.tar.gz" . ; \
 	  echo "  >> Generating directory structure.." ; \
-	  mkdir -p ./usr/bin ; \
-	  mv bin/${APPNAME} ./usr/bin ; \
+	  mkdir -p ./usr/bin/ ; \
+	  mv ./bin/${APPNAME} ./usr/bin/ ; \
 	  rm -rf ./bin ; \
 	  mkdir -p ./usr/share/licenses/${APPNAME}/ ; \
 	  mv LICENSE ./usr/share/licenses/${APPNAME} ; \
@@ -190,8 +191,9 @@ ldistro-rpm:
 	  mv README.md ./usr/share/doc/${APPNAME} ; \
 	  cd .. ; \
 	  echo "  >> Building RPM package.." ; \
-	  rpmbuild --verbose --dbpath "$$tempdir/RPMS" --buildroot "$$tempdir/SOURCES" --target $$arch --nobuild --noprep --nocheck --define "_topdir $$tempdir" --define "_version ${VERSION}" -bb "$(PWD)/release/linux/rpm/package.spec" ; \
-	  find . ; \
+	  sudo rpmbuild -vv --nosignature --nodebuginfo --dbpath "$$tempdir" --root "$$tempdir" --buildroot "./BUILD" --target $$arch --define "_tmppath /tmp" --define "_topdir ." --define "_version ${VERSION}" --define "_buildhost localhost" --define "_rpmfilename $(APPANDVER)-$$arch.rpm" -bb "SPECS/${APPNAME}" && \
+	  rpm -qlp --info "./RPMS/$(APPANDVER)-$$arch.rpm" && \
+	  cp "./RPMS/$(APPANDVER)-$$arch.rpm" "$(PWD)/release/${VERSION}/" ; \
 	  echo ""; \
 	  echo "------------------------------------------------------------"; \
 	  echo ""; \
@@ -223,6 +225,5 @@ bsd-freebsd:
 	  echo "------------------------------------------------------------"; \
 	  echo ""; \
 	done
-
 
 .PHONY: all clean test default
