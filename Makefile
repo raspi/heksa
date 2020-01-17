@@ -91,6 +91,7 @@ shasums:
 	@pushd "release/${VERSION}" && shasum -a 256 $(BUILDFILES) > $(APPANDVER).shasums
 
 # Copy common files to release directory
+# Creates $(APPNAME)-$(VERSION) directory prefix where everything will be copied by compress-$OS targets
 copycommon:
 	@echo "Copying common files to temporary release directory '$(RELEASETMPAPPDIR)'.."
 	@mkdir -p "$(RELEASETMPAPPDIR)/bin"
