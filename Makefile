@@ -174,31 +174,4 @@ compress-everything: copycommon compress-linux compress-windows compress-freebsd
 ldistro-arch:
 	pushd release/linux/arch && go run . -version ${VERSION} > "$(PWD)/release/${VERSION}/$(APPANDVER)-linux-Arch.PKGBUILD"
 
-# Create FreeBSD binary release package
-# uses FreeBSD's pkg https://github.com/freebsd/pkg
-# pkg help create
-bsd-freebsd:
-	@for arch in $(FREEBSD_ARCHS); do \
-	  echo "Generate FreeBSD package... $$arch"; \
-	  tempdir=$$(mktemp -d -t $(APPANDVER)-freebsd-XXXXXX) && \
-	  tempmanifest=$$(mktemp -t $(APPANDVER)-freebsd-manifest-XXXXXX) && \
-	  cd "$$tempdir"; \
-	  echo "  Extracting source package to '$$tempdir'.." ; \
-	  tar -xJf "$(PWD)/release/${VERSION}/$(APPANDVER)-freebsd-$$arch.tar.xz" . ; \
-	  echo "  Creating directory structure for package.." ; \
-	  mkdir -p ./usr/local/bin ; \
-	  mv ./bin/${APPNAME} ./usr/local/bin ; \
-	  rm -rf ./bin ; \
-	  cp "$(PWD)/release/freebsd/manifest.sh" "$$tempmanifest" ; \
-	  sed -i 's/<VERSION>/${VERSION}/' "$$tempmanifest" ; \
-	  sed -i "s/<ARCH>/$$arch/" "$$tempmanifest" ; \
-	  cat "$$tempmanifest" ; \
-	  echo "  Creating pkg binary release package.." ; \
-	  pkg create --verbose --format txz --root-dir "$$tempdir" --manifest "$$tempmanifest" && \
-	  cp "$(APPANDVER).txz" "$(PWD)/release/${VERSION}/$(APPANDVER)-freebsd-pkg-$$arch.txz" ; \
-	  echo ""; \
-	  echo "------------------------------------------------------------"; \
-	  echo ""; \
-	done
-
 .PHONY: all clean test default
