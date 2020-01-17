@@ -179,17 +179,20 @@ ldistro-arch:
 # https://rpm-packaging-guide.github.io/
 ldistro-rpm:
 	@for arch in $(LINUX_ARCHS); do \
-	  echo "Generating RPM... $$arch"; \
-	  tempdir=$$(mktemp -d -t $(APPANDVER)-rpm-XXXXXX) && \
+	  echo "Generating RPM... $$arch" ; \
+	  tempdir=$$(mktemp -d -t $(APPANDVER)-rpm-XXXXXX) ; \
 	  cd "$$tempdir" ; \
-	  mkdir -p {SOURCES,RPMS,SPECS,SRPMS,BUILD,BUILDROOT,tmp} ; \
+	  mkdir -p {SOURCES,SPECS} ; \
 	  cp "$(PWD)/release/linux/rpm/package.spec" "./SPECS/spec" ; \
 	  cp "$(PWD)/release/$(VERSION)/$(APPANDVER)-linux-$$arch.tar.gz" "./SOURCES/src.tar.gz" ; \
-	  echo "  >> Building RPM package.." ; \
-	  sudo rpmbuild -vv --nosignature --nodebuginfo --dbpath "$$tempdir" --root "$$tempdir" --buildroot "$$tempdir/BUILD" --define "_tmppath /tmp" --define "_topdir $$tempdir" --define "_version ${VERSION}" --define "_buildhost localhost" --define "_rpmfilename $(APPANDVER)-$$arch.rpm" --define "_docdir_fmt %{NAME}" --target "$$arch" -bb "SPECS/spec" && \
+	  echo "----- SOURCE directory structure $$(pwd):" ; \
+	  find . ; \
+	  echo "  >> Building RPM package at $$(pwd) .." ; \
+	  sudo rpmbuild -vv --nosignature --dbpath "$$tempdir" --root "$$tempdir" --define "_topdir ." --define "_version ${VERSION}" --define "_buildhost localhost" --define "_rpmfilename $(APPANDVER)-$$arch.rpm" --define "_docdir_fmt %{NAME}" --target "$$arch" -bb "SPECS/spec" || exit 1 ; \
 	  rpm -qlp --info "./RPMS/$(APPANDVER)-$$arch.rpm" ; \
-	  find .  ; \
 	  cp "./RPMS/$(APPANDVER)-$$arch.rpm" "$(PWD)/release/${VERSION}/" ; \
+	  echo "----- RUNNING FIND TO LIST directory structure:" ; \
+	  find . ; \
 	  echo ""; \
 	  echo "------------------------------------------------------------"; \
 	  echo ""; \

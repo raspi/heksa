@@ -14,6 +14,7 @@ heksa is a command line hex binary dumper which uses ANSI colors
 %autosetup
 
 %install
+cd "%{buildroot}/%{NAME}-%{VERSION}"
 install -Dm755 bin/%{name} -t %{buildroot}/%{_bindir}
 
 %files
