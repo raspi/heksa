@@ -1,24 +1,25 @@
-Name: heksa
-Version: %{_version}
-Release: 1%{?dist}
-Summary: CLI hex dumper with colors
-URL: https://github.com/raspi/heksa
+Name:      heksa
+Version:   %{_version}
+Release:   1%{?dist}
+Summary:   CLI hex dumper with colors
+URL:       https://github.com/raspi/heksa
+Source0:   src.tar.gz
 
-Group: Applications/Utilities
 License: Apache-2.0
 
 %description
 heksa is a command line hex binary dumper which uses ANSI colors
 
-%setup -q
-
-%clean
-
-%files
-%license /usr/share/licenses/%{NAME}/LICENSE
-%doc /usr/share/doc/%{NAME}/README.md
-
-/usr/bin/heksa
+%prep
+%autosetup
 
 %install
-install -Dm755 "usr/bin/%{NAME}" -t "/usr/bin"
+install -Dm755 bin/%{name} -t %{buildroot}/%{_bindir}
+
+%files
+%license LICENSE
+%doc README.md
+
+%{_bindir}/%{name}
+
+%changelog

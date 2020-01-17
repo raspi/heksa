@@ -1,5 +1,9 @@
 APPNAME?=heksa
 
+# ????
+# makepkg --printsrcinfo > .SRCINFO; git add PKGBUILD .SRCINFO; git commit; git push
+#
+
 # version from last tag
 VERSION := $(shell git describe --abbrev=0 --always --tags)
 BUILD := $(shell git rev-parse $(VERSION))
@@ -175,24 +179,14 @@ ldistro-rpm:
 	@for arch in $(LINUX_ARCHS); do \
 	  echo "Generating RPM... $$arch"; \
 	  tempdir=$$(mktemp -d -t $(APPANDVER)-rpm-XXXXXX) && \
-	  cd "$$tempdir"; \
-	  mkdir -p {SOURCES,RPMS,SPECS,SRPMS,BUILD,tmp} ; \
-	  cp "$(PWD)/release/linux/rpm/package.spec" "SPECS/${APPNAME}" ; \
-	  cd "BUILD"; \
-	  echo "  >> Extracting source binary package.." ; \
-	  tar -xzf "$(PWD)/release/${VERSION}/$(APPANDVER)-linux-$$arch.tar.gz" . ; \
-	  echo "  >> Generating directory structure.." ; \
-	  mkdir -p ./usr/bin/ ; \
-	  mv ./bin/${APPNAME} ./usr/bin/ ; \
-	  rm -rf ./bin ; \
-	  mkdir -p ./usr/share/licenses/${APPNAME}/ ; \
-	  mv LICENSE ./usr/share/licenses/${APPNAME} ; \
-	  mkdir -p ./usr/share/doc/${APPNAME}/ ; \
-	  mv README.md ./usr/share/doc/${APPNAME} ; \
-	  cd .. ; \
+	  cd "$$tempdir" ; \
+	  mkdir -p {SOURCES,RPMS,SPECS,SRPMS,BUILD,BUILDROOT,tmp} ; \
+	  cp "$(PWD)/release/linux/rpm/package.spec" "./SPECS/spec" ; \
+	  cp "$(PWD)/release/$(VERSION)/$(APPANDVER)-linux-$$arch.tar.gz" "./SOURCES/src.tar.gz" ; \
 	  echo "  >> Building RPM package.." ; \
-	  sudo rpmbuild -vv --nosignature --nodebuginfo --dbpath "$$tempdir" --root "$$tempdir" --buildroot "./BUILD" --target $$arch --define "_tmppath /tmp" --define "_topdir ." --define "_version ${VERSION}" --define "_buildhost localhost" --define "_rpmfilename $(APPANDVER)-$$arch.rpm" -bb "SPECS/${APPNAME}" && \
-	  rpm -qlp --info "./RPMS/$(APPANDVER)-$$arch.rpm" && \
+	  sudo rpmbuild -vv --nosignature --nodebuginfo --dbpath "$$tempdir" --root "$$tempdir" --buildroot "$$tempdir/BUILD" --define "_tmppath /tmp" --define "_topdir $$tempdir" --define "_version ${VERSION}" --define "_buildhost localhost" --define "_rpmfilename $(APPANDVER)-$$arch.rpm" --define "_docdir_fmt %{NAME}" --target "$$arch" -bb "SPECS/spec" && \
+	  rpm -qlp --info "./RPMS/$(APPANDVER)-$$arch.rpm" ; \
+	  find .  ; \
 	  cp "./RPMS/$(APPANDVER)-$$arch.rpm" "$(PWD)/release/${VERSION}/" ; \
 	  echo ""; \
 	  echo "------------------------------------------------------------"; \
