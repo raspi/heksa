@@ -12,6 +12,7 @@ BUILDFILES?=$$(find . -mindepth 1 -maxdepth 1 -type f \( -iname "*${APPNAME}-v*"
 LDFLAGS := -ldflags "-s -w -X=main.VERSION=$(VERSION) -X=main.BUILD=$(BUILD) -X=main.BUILDDATE=$(BUILDDATE)"
 RELEASETMPDIR := $(shell mktemp -d -t ${APPNAME}-rel-XXXXXX)
 APPANDVER := ${APPNAME}-$(VERSION)
+RELEASETMPAPPDIR := $(RELEASETMPDIR)/$(APPANDVER)
 
 UPXFLAGS := -v -9
 XZCOMPRESSFLAGS := --verbose --keep --compress --threads 0 --extreme -9
@@ -91,75 +92,76 @@ shasums:
 
 # Copy common files to release directory
 copycommon:
-	@echo "Copying common files to temporary release directory '$(RELEASETMPDIR)'.."
-	@mkdir "$(RELEASETMPDIR)/bin"
-	@cp -v "LICENSE" "$(RELEASETMPDIR)"
-	@cp -v "README.md" "$(RELEASETMPDIR)"
+	@echo "Copying common files to temporary release directory '$(RELEASETMPAPPDIR)'.."
+	@mkdir -p "$(RELEASETMPAPPDIR)/bin"
+	@cp -v "./LICENSE" "$(RELEASETMPAPPDIR)"
+	@cp -v "./README.md" "$(RELEASETMPAPPDIR)"
 	@mkdir --parents "$(PWD)/release/${VERSION}"
 
 # Compress files: FreeBSD
 compress-freebsd:
 	@for arch in $(FREEBSD_ARCHS); do \
 	  echo "FreeBSD xz... $$arch"; \
-	  cp -v "$(PWD)/bin/freebsd-$$arch/${APPNAME}" "$(RELEASETMPDIR)/bin"; \
+	  cp -v "$(PWD)/bin/freebsd-$$arch/${APPNAME}" "$(RELEASETMPAPPDIR)/bin"; \
 	  cd "$(RELEASETMPDIR)"; \
 	  tar --numeric-owner --owner=0 --group=0 -cf - . | xz $(XZCOMPRESSFLAGS) - > "$(PWD)/release/${VERSION}/$(APPANDVER)-freebsd-$$arch.tar.xz" ; \
-	  rm "$(RELEASETMPDIR)/bin/${APPNAME}"; \
+	  rm "$(RELEASETMPAPPDIR)/bin/${APPNAME}"; \
 	done
 
 # Compress files: OpenBSD
 compress-openbsd:
 	@for arch in $(OPENBSD_ARCHS); do \
 	  echo "OpenBSD xz... $$arch"; \
-	  cp -v "$(PWD)/bin/openbsd-$$arch/${APPNAME}" "$(RELEASETMPDIR)/bin"; \
+	  cp -v "$(PWD)/bin/openbsd-$$arch/${APPNAME}" "$(RELEASETMPAPPDIR)/bin"; \
 	  cd "$(RELEASETMPDIR)"; \
 	  tar --numeric-owner --owner=0 --group=0 -cf - . | xz $(XZCOMPRESSFLAGS) - > "$(PWD)/release/${VERSION}/$(APPANDVER)-openbsd-$$arch.tar.xz" ; \
-	  rm "$(RELEASETMPDIR)/bin/${APPNAME}"; \
+	  rm "$(RELEASETMPAPPDIR)/bin/${APPNAME}"; \
 	done
 
 # Compress files: NetBSD
 compress-netbsd:
 	@for arch in $(NETBSD_ARCHS); do \
 	  echo "NetBSD xz... $$arch"; \
-	  cp -v "$(PWD)/bin/netbsd-$$arch/${APPNAME}" "$(RELEASETMPDIR)/bin"; \
+	  cp -v "$(PWD)/bin/netbsd-$$arch/${APPNAME}" "$(RELEASETMPAPPDIR)/bin"; \
 	  cd "$(RELEASETMPDIR)"; \
 	  tar --numeric-owner --owner=0 --group=0 -cf - . | xz $(XZCOMPRESSFLAGS) - > "$(PWD)/release/${VERSION}/$(APPANDVER)-netbsd-$$arch.tar.xz" ; \
-	  rm "$(RELEASETMPDIR)/bin/${APPNAME}"; \
+	  rm "$(RELEASETMPAPPDIR)/bin/${APPNAME}"; \
 	done
 
 # Compress files: GNU/Linux
 compress-linux:
 	@for arch in $(LINUX_ARCHS); do \
 	  echo "GNU/Linux tar... $$arch"; \
-	  cp -v "$(PWD)/bin/linux-$$arch/${APPNAME}" "$(RELEASETMPDIR)/bin"; \
+	  cp -v "$(PWD)/bin/linux-$$arch/${APPNAME}" "$(RELEASETMPAPPDIR)/bin"; \
 	  cd "$(RELEASETMPDIR)"; \
 	  tar --numeric-owner --owner=0 --group=0 -zcvf "$(PWD)/release/${VERSION}/$(APPANDVER)-linux-$$arch.tar.gz" . ; \
-	  rm "$(RELEASETMPDIR)/bin/${APPNAME}"; \
+	  rm "$(RELEASETMPAPPDIR)/bin/${APPNAME}"; \
 	done
 
 # Compress files: Darwin
 compress-darwin:
 	@for arch in $(DARWIN_ARCHS); do \
 	  echo "Darwin tar... $$arch"; \
-	  cp -v "$(PWD)/bin/darwin-$$arch/${APPNAME}" "$(RELEASETMPDIR)/bin"; \
+	  cp -v "$(PWD)/bin/darwin-$$arch/${APPNAME}" "$(RELEASETMPAPPDIR)/bin"; \
 	  cd "$(RELEASETMPDIR)"; \
 	  tar --owner=0 --group=0 -zcvf "$(PWD)/release/${VERSION}/$(APPANDVER)-darwin-$$arch.tar.gz" . ; \
-	  rm "$(RELEASETMPDIR)/bin/${APPNAME}"; \
+	  rm "$(RELEASETMPAPPDIR)/bin/${APPNAME}"; \
 	done
 
 # Compress files: Microsoft Windows
 compress-windows:
 	@for arch in $(WINDOWS_ARCHS); do \
 	  echo "MS Windows zip... $$arch"; \
-	  cp -v "$(PWD)/bin/windows-$$arch/${APPNAME}.exe" "$(RELEASETMPDIR)/bin"; \
-	  cd "$(RELEASETMPDIR)"; \
-	  mv LICENSE LICENSE.txt && \
+	  cp -v "$(PWD)/bin/windows-$$arch/${APPNAME}.exe" "$(RELEASETMPAPPDIR)/bin"; \
+	  cd "$(RELEASETMPAPPDIR)"; \
+	  mv "LICENSE" "LICENSE.txt" && \
 	  pandoc --standalone --to rtf --output LICENSE.rtf LICENSE.txt && \
-	  mv LICENSE.txt LICENSE ; \
-	  zip -v -9 -r -o -x LICENSE -9  "$(PWD)/release/${VERSION}/$(APPANDVER)-windows-$$arch.zip" . ; \
-	  rm LICENSE.rtf; \
-	  cp -v "$(PWD)/LICENSE" "$(RELEASETMPDIR)" ; \
-	  rm "$(RELEASETMPDIR)/bin/${APPNAME}.exe"; \
+	  rm "LICENSE.txt" ; \
+	  cd "$(RELEASETMPDIR)" ; \
+	  zip -v -9 -r -o -9 "$(PWD)/release/${VERSION}/$(APPANDVER)-windows-$$arch.zip" . ; \
+	  rm "$(RELEASETMPAPPDIR)/LICENSE.rtf"; \
+	  cp -v "$(PWD)/LICENSE" "$(RELEASETMPAPPDIR)" ; \
+	  rm "$(RELEASETMPAPPDIR)/bin/${APPNAME}.exe"; \
 	done
 
 # Move all to temporary directory and compress with common files
