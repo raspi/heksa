@@ -36,7 +36,7 @@ modup:
 linux-build:
 	@for arch in $(LINUX_ARCHS); do \
 	  echo "GNU/Linux build... $$arch"; \
-	  CGO_ENABLED=0 GOOS=linux GOARCH=$$arch go build $(LDFLAGS) -v -o ./bin/linux-$$arch/${APPNAME} . 2>/dev/null; \
+	  CGO_ENABLED=0 GOOS=linux GOARCH=$$arch go build $(LDFLAGS) -v -o ./bin/linux-$$arch/${APPNAME} . ; \
 	done
 
 darwin-build:
@@ -48,25 +48,25 @@ darwin-build:
 freebsd-build:
 	@for arch in $(FREEBSD_ARCHS); do \
 	  echo "FreeBSD build... $$arch"; \
-	  CGO_ENABLED=0 GOOS=freebsd GOARCH=$$arch go build $(LDFLAGS) -v -o ./bin/freebsd-$$arch/${APPNAME} . 2>/dev/null; \
+	  CGO_ENABLED=0 GOOS=freebsd GOARCH=$$arch go build $(LDFLAGS) -v -o ./bin/freebsd-$$arch/${APPNAME} . ; \
 	done
 
 netbsd-build:
 	@for arch in $(NETBSD_ARCHS); do \
 	  echo "NetBSD build... $$arch"; \
-	  CGO_ENABLED=0 GOOS=netbsd GOARCH=$$arch go build $(LDFLAGS) -v -o ./bin/netbsd-$$arch/${APPNAME} . 2>/dev/null; \
+	  CGO_ENABLED=0 GOOS=netbsd GOARCH=$$arch go build $(LDFLAGS) -v -o ./bin/netbsd-$$arch/${APPNAME} . ; \
 	done
 
 openbsd-build:
 	@for arch in $(OPENBSD_ARCHS); do \
 	  echo "OpenBSD build... $$arch"; \
-	  CGO_ENABLED=0 GOOS=openbsd GOARCH=$$arch go build $(LDFLAGS) -v -o ./bin/openbsd-$$arch/${APPNAME} . 2>/dev/null; \
+	  CGO_ENABLED=0 GOOS=openbsd GOARCH=$$arch go build $(LDFLAGS) -v -o ./bin/openbsd-$$arch/${APPNAME} . ; \
 	done
 
 windows-build:
 	@for arch in $(WINDOWS_ARCHS); do \
 	  echo "MS Windows build... $$arch"; \
-	  CGO_ENABLED=0 GOOS=windows GOARCH=$$arch go build $(LDFLAGS) -v -o ./bin/windows-$$arch/${APPNAME}.exe . 2>/dev/null; \
+	  CGO_ENABLED=0 GOOS=windows GOARCH=$$arch go build $(LDFLAGS) -v -o ./bin/windows-$$arch/${APPNAME}.exe . ; \
 	done
 
 # Compress executables
