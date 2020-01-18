@@ -6,10 +6,10 @@ import (
 	"github.com/raspi/heksa/pkg/color"
 	"github.com/raspi/heksa/pkg/iface"
 	"github.com/raspi/heksa/pkg/reader"
+	"github.com/raspi/heksa/pkg/units"
 	"io"
 	"os"
 	"os/signal"
-	"strconv"
 	"strings"
 )
 
@@ -53,13 +53,13 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 
 	argLimit := opt.StringOptional(`limit`, `0`,
 		opt.Alias("l"),
-		opt.ArgName(`[prefix]bytes`),
+		opt.ArgName(`[prefix]bytes[unit]`),
 		opt.Description(`Read only N bytes (0 = no limit). See NOTES.`),
 	)
 
 	argSeek := opt.StringOptional(`seek`, `0`,
 		opt.Alias("s"),
-		opt.ArgName(`[prefix]offset`),
+		opt.ArgName(`[prefix]offset[unit]`),
 		opt.Description(`Start reading from certain offset. See NOTES.`),
 	)
 
@@ -73,6 +73,7 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 		fmt.Fprintln(os.Stdout, `    - You can use prefixes for seek and limit. 0x = hex, 0b = binary, 0o = octal`)
 		fmt.Fprintln(os.Stdout, `    - Use 'no' or '' for offset formatter for disabling offset output`)
 		fmt.Fprintln(os.Stdout, `    - Use '--seek \-[prefix]1000' for seeking to end of file`)
+		fmt.Fprintln(os.Stdout, `    - Offset and seek parameters supports units (KB, KiB, MB, MiB, GB, GiB, TB, TiB)`)
 		fmt.Fprintln(os.Stdout)
 		fmt.Fprintln(os.Stdout, `EXAMPLES:`)
 		fmt.Fprintln(os.Stdout, `    heksa -f hex,asc,bit foo.dat`)
@@ -81,6 +82,7 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 		fmt.Fprintln(os.Stdout, `    heksa -o no -f bit foo.dat`)
 		fmt.Fprintln(os.Stdout, `    heksa -l 0x1024 foo.dat`)
 		fmt.Fprintln(os.Stdout, `    heksa -s 0b1010 foo.dat`)
+		fmt.Fprintln(os.Stdout, `    heksa -s 4321KiB foo.dat`)
 		os.Exit(0)
 	} else if opt.Called("version") {
 		fmt.Fprintf(os.Stdout, `%v build %v on %v`+"\n", VERSION, BUILD, BUILDDATE)
@@ -93,13 +95,14 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 		os.Exit(1)
 	}
 
-	limit, err = strconv.ParseUint(*argLimit, 0, 64)
+	limitTmp, err := units.Parse(*argLimit)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, `error parsing limit: %v`, err)
 		os.Exit(1)
 	}
+	limit = uint64(limitTmp)
 
-	startOffset, err := strconv.ParseInt(strings.Replace(*argSeek, `\`, ``, -1), 0, 64)
+	startOffset, err := units.Parse(strings.Replace(*argSeek, `\`, ``, -1))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, `error parsing seek: %v`, err)
 		os.Exit(1)
