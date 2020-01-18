@@ -1,9 +1,5 @@
 APPNAME?=heksa
 
-# ????
-# makepkg --printsrcinfo > .SRCINFO; git add PKGBUILD .SRCINFO; git commit; git push
-#
-
 # version from last tag
 VERSION := $(shell git describe --abbrev=0 --always --tags)
 BUILD := $(shell git rev-parse $(VERSION))
