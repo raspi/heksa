@@ -66,6 +66,7 @@ func GetViewers(viewers []string) (ds []ByteFormatter, err error) {
 	return ds, nil
 }
 
+// GetViewerList lists byte formatters as strings for usage information
 func GetViewerList() (viewers []string) {
 	for s := range formatterStringToEnumMap {
 		viewers = append(viewers, s)
