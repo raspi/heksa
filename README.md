@@ -8,6 +8,25 @@
 
 Hex dumper with colors
 
+## Features
+
+* ANSI colors for different byte groups such as 
+  * Printable: A-Z, a-z, 0-9
+  * Spaces: space, tab, new line
+  * Special: 0x00, 0xFF
+* Output multiple formats at once (hexadecimal, decimal, octal, bits or special combination formats)
+* Multiple offset formats (hexadecimal, decimal, octal, percentage)
+  * First one is displayed on left side and second one on the right side
+* Read only N bytes
+* Seek to given offset
+  * also reads from end of file when using minus sign
+* Seek and limit supports 
+  * Prefixes hex (`0x`), octal (`0o`) and binary (`0b`)
+  * Units (KB, KiB, MB, MiB, GB, GiB, TB, TiB)
+* Read from stdin
+
+## heksa --help
+
 ```
 heksa - hex file dumper v1.11.0 - (2020-01-18T19:33:11+02:00)
 (c) Pekka Järvinen 2019- [ https://github.com/raspi/heksa ]
@@ -48,15 +67,6 @@ EXAMPLES:
 ```
 
 ![Screenshot](https://github.com/raspi/heksa/blob/master/_assets/screenshot2.png)
-
-## Features
-
-* ANSI colors for different bytes
-* Output multiple formats at once (hexadecimal, decimal, octal, bits)
-* Multiple offset formats (hexadecimal, decimal, octal)
-* Read only N bytes
-* Seek to given offset
-* Read from stdin
 
 ## Requirements
 
