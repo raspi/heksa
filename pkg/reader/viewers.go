@@ -35,6 +35,7 @@ var formatterStringToEnumMap = map[string]ByteFormatter{
 	`bitwasc`: ViewBitWithAsc,
 }
 
+// Padding when we are at EOF
 var formatterPaddingMap = map[ByteFormatter]string{
 	ViewASCII:        `‡`,
 	ViewHex:          `‡‡`,
