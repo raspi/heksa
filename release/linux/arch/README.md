@@ -1,0 +1,1 @@
+This is a helper for generating Arch Linux PKGBUILD file. See `Makefile` in the root directory.
