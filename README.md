@@ -25,6 +25,8 @@ Hex dumper with colors
   * Units (KB, KiB, MB, MiB, GB, GiB, TB, TiB)
 * Read from stdin
 
+![Screenshot](https://github.com/raspi/heksa/blob/master/_assets/screenshot2.png)
+
 ## heksa --help
 
 ```
@@ -65,8 +67,6 @@ EXAMPLES:
     heksa -s 0b1010 foo.dat
     heksa -s 4321KiB foo.dat
 ```
-
-![Screenshot](https://github.com/raspi/heksa/blob/master/_assets/screenshot2.png)
 
 ## Requirements
 
