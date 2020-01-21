@@ -93,6 +93,8 @@ copycommon:
 	@mkdir -p "$(RELEASETMPAPPDIR)/bin"
 	@cp -v "./LICENSE" "$(RELEASETMPAPPDIR)"
 	@cp -v "./README.md" "$(RELEASETMPAPPDIR)"
+	@cp -v "./CODE_OF_CONDUCT.md" "$(RELEASETMPAPPDIR)"
+	@cp -v "./CONTRIBUTING.md" "$(RELEASETMPAPPDIR)"
 	@mkdir --parents "$(PWD)/release/${VERSION}"
 
 # Compress files: FreeBSD
