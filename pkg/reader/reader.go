@@ -113,6 +113,7 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters
 	return reader
 }
 
+// formatOffset generates offset output such as "0123"
 func (r *Reader) formatOffset(formatter OffsetFormatter, offset uint64) {
 	switch formatter {
 	case OffsetPercent:
@@ -123,6 +124,7 @@ func (r *Reader) formatOffset(formatter OffsetFormatter, offset uint64) {
 	}
 }
 
+// getoffsetLeft outputs the selected formatter on the left side
 func (r *Reader) getoffsetLeft(offset uint64) string {
 	r.sb.Reset()
 	if r.offsetFormatterCount > 0 {
@@ -136,6 +138,7 @@ func (r *Reader) getoffsetLeft(offset uint64) string {
 	return r.sb.String()
 }
 
+// getoffsetRight outputs the selected formatter on the right side after all the user selected byte formatters
 func (r *Reader) getoffsetRight(offset uint64) string {
 	r.sb.Reset()
 	if r.offsetFormatterCount > 1 {
