@@ -24,7 +24,7 @@ type Reader struct {
 	charFormatterCount    int
 	offsetFormatter       []OffsetFormatter // offset formatters (max 2) first one is displayed on the left side and second one on the right side
 	offsetFormatterCount  int
-	fileSize              int64                      // file size reference
+	fileSize              int64                      // file size reference, -1 means STDIN
 	ReadBytes             uint64                     // How many bytes Reader has been reading so far (for limit)
 	sb                    strings.Builder            // Faster than concatenating strings
 	Splitter              string                     // Splitter character for columns
@@ -113,7 +113,7 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters
 	return reader
 }
 
-func (r *Reader) formatOffset(formatter OffsetFormatter, offset int64) {
+func (r *Reader) formatOffset(formatter OffsetFormatter, offset uint64) {
 	switch formatter {
 	case OffsetPercent:
 		percent := (float64(offset) * 100.0) / float64(r.fileSize)
@@ -123,7 +123,7 @@ func (r *Reader) formatOffset(formatter OffsetFormatter, offset int64) {
 	}
 }
 
-func (r *Reader) getoffsetLeft(offset int64) string {
+func (r *Reader) getoffsetLeft(offset uint64) string {
 	r.sb.Reset()
 	if r.offsetFormatterCount > 0 {
 		r.sb.WriteString(r.Colors.offsetBreak)
@@ -136,7 +136,7 @@ func (r *Reader) getoffsetLeft(offset int64) string {
 	return r.sb.String()
 }
 
-func (r *Reader) getoffsetRight(offset int64) string {
+func (r *Reader) getoffsetRight(offset uint64) string {
 	r.sb.Reset()
 	if r.offsetFormatterCount > 1 {
 		// show offset on the right side
@@ -151,9 +151,19 @@ func (r *Reader) getoffsetRight(offset int64) string {
 
 // Read reads 16 bytes and provides string to display
 func (r *Reader) Read() (string, error) {
-	offset, err := r.r.Seek(0, io.SeekCurrent)
-	if err != nil {
-		return ``, err
+	var offset uint64
+
+	if r.fileSize == -1 {
+		// reading from STDIN, can't use seek
+		offset = r.ReadBytes
+	} else {
+		// Reading from file
+		offsettmp, err := r.r.Seek(0, io.SeekCurrent)
+		if err != nil {
+			return ``, fmt.Errorf(`couldn't seek: %w`, err)
+		}
+
+		offset = uint64(offsettmp)
 	}
 
 	offsetLeft := r.getoffsetLeft(offset)
