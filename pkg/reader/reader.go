@@ -50,7 +50,7 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters
 		fileSize:             filesize,
 		charFormatters:       formatters,
 		offsetFormatter:      offsetFormatter,
-		ReadBytes:            0, // How many byte's we've read
+		ReadBytes:            0, // How many bytes we've read
 		sb:                   strings.Builder{},
 		Splitter:             `┊`, // Splitter character between different columns
 		charFormatterCount:   len(formatters),
