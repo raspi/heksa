@@ -30,8 +30,6 @@ func GetOffsetFormatters(viewerStr []string) (formatters []OffsetFormatter, err 
 		return nil, fmt.Errorf(`error: max two formatters, got: %v`, viewerStr)
 	}
 
-	//formatters = make([]iface.OffsetFormatter, 0)
-
 	for _, v := range viewerStr {
 		if v == `no` {
 			v = ``
