@@ -13,12 +13,16 @@ import (
 	"strings"
 )
 
-var VERSION = `v0.0.0`
-var BUILD = `dev`
-var BUILDDATE = `0000-00-00T00:00:00+00:00`
+var (
+	VERSION   = `v0.0.0`
+	BUILD     = `dev`
+	BUILDDATE = `0000-00-00T00:00:00+00:00`
+)
 
-const AUTHOR = `Pekka Järvinen`
-const HOMEPAGE = `https://github.com/raspi/heksa`
+const (
+	AUTHOR   = `Pekka Järvinen`
+	HOMEPAGE = `https://github.com/raspi/heksa`
+)
 
 // Parse command line arguments
 func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter, offsetViewer []reader.OffsetFormatter, limit uint64, palette [256]color.AnsiColor, filesize int64) {
