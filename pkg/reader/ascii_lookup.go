@@ -2,38 +2,38 @@ package reader
 
 // convert byte to printable UTF-8 character
 var asciiByteToChar = [256]rune{
-	0:   'Ø',
-	1:   '.',
-	2:   '.',
-	3:   '.',
-	4:   '.',
-	5:   '.',
-	6:   '.',
-	7:   '.',
-	8:   '.',
-	9:   '⇥', // tab
-	10:  '↲', // \n
-	11:  '.',
-	12:  '.',
-	13:  '↲', // \r
-	14:  '.',
-	15:  '.',
-	16:  '.',
-	17:  '.',
-	18:  '.',
-	19:  '.',
-	20:  '.',
-	21:  '.',
-	22:  '.',
-	23:  '.',
-	24:  '.',
-	25:  '.',
-	26:  '.',
-	27:  '.',
-	28:  '.',
-	29:  '.',
-	30:  '.',
-	31:  '.',
+	0:   'Ø', // NUL Null
+	1:   '.', // SOH Start of Header
+	2:   '.', // STX Start of Text
+	3:   '.', // ETX End of Text
+	4:   '.', // EOT End of Transmission
+	5:   '.', // ENQ Enquiry
+	6:   '.', // ACK Acknowledge
+	7:   '.', // BEL Bell
+	8:   '.', // BS Backspace
+	9:   '⇥', // HT Horizontal Tab
+	10:  '↲', // LF \n Line Feed
+	11:  '.', // VT Vertical Tab
+	12:  '.', // FF Form Feed
+	13:  '↲', // CR \r Carriage Return
+	14:  '.', // SO Shift Out
+	15:  '.', // SI Shift In
+	16:  '.', // DLE Data Link Escape
+	17:  '.', // DC1 Device Control 1
+	18:  '.', // DC2 Device Control 2
+	19:  '.', // DC3 Device Control 3
+	20:  '.', // DC4 Device Control 4
+	21:  '.', // NAK Negative Acknowledge
+	22:  '.', // SYN Synchronize
+	23:  '.', // ETB End of Transmission Block
+	24:  '.', // CAN Cancel
+	25:  '.', // EM End of Medium
+	26:  '.', // SUB Substitute
+	27:  '.', // ESC Escape
+	28:  '.', // FS File Separator
+	29:  '.', // GS Group Separator
+	30:  '.', // RS Record Separator
+	31:  '.', // US Unit Separator
 	32:  ' ', // space
 	33:  '!',
 	34:  '"',
@@ -129,7 +129,10 @@ var asciiByteToChar = [256]rune{
 	124: '|',
 	125: '}',
 	126: '~',
-	127: '.',
+	127: '.', // DEL Delete
+
+	// End of ASCII
+
 	128: '.',
 	129: '.',
 	130: '.',
