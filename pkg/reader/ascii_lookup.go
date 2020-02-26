@@ -11,7 +11,7 @@ var asciiByteToChar = [256]rune{
 	6:   '.', // ACK Acknowledge
 	7:   '.', // BEL Bell
 	8:   '.', // BS Backspace
-	9:   '⇥', // HT Horizontal Tab
+	9:   '⇥', // HT \t Horizontal Tab
 	10:  '↲', // LF \n Line Feed
 	11:  '.', // VT Vertical Tab
 	12:  '.', // FF Form Feed
