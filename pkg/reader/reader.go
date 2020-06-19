@@ -196,7 +196,7 @@ func (r *Reader) Read() (string, error) {
 	for didx, byteFormatterType := range r.charFormatters {
 
 		for i := 0; i < r.width; i++ {
-			if i > 0 && i%r.visualSplitterSize == 0 {
+			if i != 0 && i%r.visualSplitterSize == 0 {
 				// Add pad for better visualization
 				r.sb.WriteString(` `)
 			}
