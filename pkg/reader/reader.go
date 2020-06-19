@@ -32,11 +32,17 @@ type Reader struct {
 	offsetFormatterWidth  map[OffsetFormatter]int    // How much padding width needed, calculated from fileSize variable
 	Colors                Colors                     // Colors
 	growHint              int                        // Grow hint for sb strings.Builder variable for speed
+	width                 int                        // Width
+	visualSplitterSize    int                        // Size of visual splitter (2 = XX XX XX, 3 = XXX XXX XXX, etc)
 }
 
-func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters []ByteFormatter, palette [256]color.AnsiColor, filesize int64) *Reader {
+func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters []ByteFormatter, palette [256]color.AnsiColor, width uint16, filesize int64) *Reader {
 	if formatters == nil {
 		panic(`nil formatter`)
+	}
+
+	if width == 0 {
+		panic(`zero width`)
 	}
 
 	var calcpalette [256]string
@@ -47,6 +53,8 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters
 
 	reader := &Reader{
 		r:                    r,
+		visualSplitterSize:   8, // Insert extra space after every N bytes
+		width:                int(width),
 		fileSize:             filesize,
 		charFormatters:       formatters,
 		offsetFormatter:      offsetFormatter,
@@ -152,7 +160,7 @@ func (r *Reader) getoffsetRight(offset uint64) string {
 	return r.sb.String()
 }
 
-// Read reads 16 bytes and provides string to display
+// Read reads N (r.width) bytes and provides string to display
 func (r *Reader) Read() (string, error) {
 	var offset uint64
 
@@ -176,7 +184,7 @@ func (r *Reader) Read() (string, error) {
 
 	r.sb.WriteString(offsetLeft)
 
-	tmp := make([]byte, 16)
+	tmp := make([]byte, r.width)
 	rb, err := r.r.Read(tmp)
 	if err != nil {
 		return ``, err
@@ -187,8 +195,8 @@ func (r *Reader) Read() (string, error) {
 	// iterate through every formatter which outputs it's own format
 	for didx, byteFormatterType := range r.charFormatters {
 
-		for i := 0; i < 16; i++ {
-			if i == 8 {
+		for i := 0; i < r.width; i++ {
+			if i > 0 && i%r.visualSplitterSize == 0 {
 				// Add pad for better visualization
 				r.sb.WriteString(` `)
 			}

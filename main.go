@@ -25,7 +25,7 @@ const (
 )
 
 // Parse command line arguments
-func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter, offsetViewer []reader.OffsetFormatter, limit uint64, palette [256]color.AnsiColor, filesize int64) {
+func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter, offsetViewer []reader.OffsetFormatter, limit uint64, palette [256]color.AnsiColor, filesize int64, width uint16) {
 	opt := getoptions.New()
 
 	opt.HelpSynopsisArgs(`<filename> or STDIN`)
@@ -67,6 +67,12 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 		opt.Description(`Start reading from certain offset. See NOTES.`),
 	)
 
+	argWidth := opt.StringOptional(`width`, `16`,
+		opt.Alias("w"),
+		opt.ArgName(`[prefix]width`),
+		opt.Description(`Width. See NOTES.`),
+	)
+
 	remainingArgs, err := opt.Parse(os.Args[1:])
 
 	if opt.Called("help") {
@@ -74,7 +80,7 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 		_, _ = fmt.Fprintf(os.Stdout, `(c) %v 2019- [ %v ]`+"\n", AUTHOR, HOMEPAGE)
 		_, _ = fmt.Fprintln(os.Stdout, opt.Help())
 		_, _ = fmt.Fprintln(os.Stdout, `NOTES:`)
-		_, _ = fmt.Fprintln(os.Stdout, `    - You can use prefixes for seek and limit. 0x = hex, 0b = binary, 0o = octal`)
+		_, _ = fmt.Fprintln(os.Stdout, `    - You can use prefixes for seek, limit and width. 0x = hex, 0b = binary, 0o = octal`)
 		_, _ = fmt.Fprintln(os.Stdout, `    - Use 'no' or '' for offset formatter for disabling offset output`)
 		_, _ = fmt.Fprintln(os.Stdout, `    - Use '--seek \-1234' for seeking from end of file`)
 		_, _ = fmt.Fprintln(os.Stdout, `    - Limit and seek parameters supports units (KB, KiB, MB, MiB, GB, GiB, TB, TiB)`)
@@ -87,6 +93,7 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 		_, _ = fmt.Fprintln(os.Stdout, `    heksa -l 0x1024 foo.dat`)
 		_, _ = fmt.Fprintln(os.Stdout, `    heksa -s 0b1010 foo.dat`)
 		_, _ = fmt.Fprintln(os.Stdout, `    heksa -s 4321KiB foo.dat`)
+		_, _ = fmt.Fprintln(os.Stdout, `    heksa -w 8 foo.dat`)
 		os.Exit(0)
 	} else if opt.Called("version") {
 		_, _ = fmt.Fprintf(os.Stdout, `%v build %v on %v`+"\n", VERSION, BUILD, BUILDDATE)
@@ -109,6 +116,17 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 	startOffset, err := units.Parse(strings.Replace(*argSeek, `\`, ``, -1))
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, `error parsing seek: %v`, err)
+		os.Exit(1)
+	}
+
+	widthTmp, err := units.Parse(*argWidth)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, `error parsing width: %v`, err)
+		os.Exit(1)
+	}
+	width = uint16(widthTmp)
+	if width == 0 {
+		_, _ = fmt.Fprint(os.Stderr, `width must be > 0`)
 		os.Exit(1)
 	}
 
@@ -173,16 +191,16 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 		source = fhandle
 	}
 
-	return source, displays, offsetViewer, limit, palette, filesize
+	return source, displays, offsetViewer, limit, palette, filesize, width
 }
 
 func main() {
-	source, displays, offViewer, limit, palette, filesize := getParams()
+	source, displays, offViewer, limit, palette, filesize, width := getParams()
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
 
-	r := reader.New(source, offViewer, displays, palette, filesize)
+	r := reader.New(source, offViewer, displays, palette, width, filesize)
 
 	isEven := false
 	// Dump hex
