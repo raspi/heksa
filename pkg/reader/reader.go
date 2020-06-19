@@ -34,6 +34,7 @@ type Reader struct {
 	growHint              int                        // Grow hint for sb strings.Builder variable for speed
 	width                 int                        // Width
 	visualSplitterSize    int                        // Size of visual splitter (2 = XX XX XX, 3 = XXX XXX XXX, etc)
+	visualSplitter        string                     // Visual splitter that gets inserted every visualSplitterSize bytes
 }
 
 func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters []ByteFormatter, palette [256]color.AnsiColor, width uint16, filesize int64) *Reader {
@@ -53,7 +54,8 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters
 
 	reader := &Reader{
 		r:                    r,
-		visualSplitterSize:   8, // Insert extra space after every N bytes
+		visualSplitterSize:   8,   // Insert extra space after every N bytes
+		visualSplitter:       ` `, // insert visualSplitter every visualSplitterSize bytes
 		width:                int(width),
 		fileSize:             filesize,
 		charFormatters:       formatters,
@@ -198,7 +200,7 @@ func (r *Reader) Read() (string, error) {
 		for i := 0; i < r.width; i++ {
 			if i != 0 && i%r.visualSplitterSize == 0 {
 				// Add pad for better visualization
-				r.sb.WriteString(` `)
+				r.sb.WriteString(r.visualSplitter)
 			}
 
 			if rb > i {
