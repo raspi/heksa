@@ -23,7 +23,7 @@ type Reader struct {
 	charFormatters        []ByteFormatter            // list of byte displayer(s) for data
 	charFormatterCount    int                        // shorthand for len(charFormatters), for speeding up
 	offsetFormatter       []OffsetFormatter          // offset formatters (max 2) first one is displayed on the left side and second one on the right side
-	offsetFormatterCount  int                        // shorhand for len(offsetFormatter), for speeding up
+	offsetFormatterCount  int                        // shorthand for len(offsetFormatter), for speeding up
 	fileSize              int64                      // file size reference, -1 means STDIN. Hint for offset formatter(s) for how many padding characters to use.
 	ReadBytes             uint64                     // How many bytes Reader has been reading so far (for limit)
 	sb                    strings.Builder            // Faster than concatenating strings
