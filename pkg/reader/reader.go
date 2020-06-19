@@ -270,7 +270,7 @@ func (r *Reader) Read() (string, error) {
 					r.sb.WriteString(`]`)
 				}
 
-				if i < 15 {
+				if i < (r.width - 1) {
 					switch byteFormatterType {
 					case ViewASCII:
 						continue
@@ -287,7 +287,7 @@ func (r *Reader) Read() (string, error) {
 
 				r.sb.WriteString(formatterPaddingMap[byteFormatterType])
 
-				if i < 15 {
+				if i < (r.width - 1) {
 					switch byteFormatterType {
 					case ViewASCII:
 						continue
