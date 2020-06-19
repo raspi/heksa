@@ -30,12 +30,13 @@ Hex dumper with colors
 ## heksa --help
 
 ```
-heksa - hex file dumper v1.11.0 - (2020-01-18T19:33:11+02:00)
+heksa - hex file dumper v1.12.0 - (2020-06-19T11:20:39+03:00)
 (c) Pekka Järvinen 2019- [ https://github.com/raspi/heksa ]
 SYNOPSIS:
     heksa [--format|-f <fmt1,fmt2,..>] [--help|-h|-?]
           [--limit|-l <[prefix]bytes[unit]>] [--offset-format|-o <fmt1[,fmt2]>]
-          [--seek|-s <[prefix]offset[unit]>] [--version] <filename> or STDIN
+          [--seek|-s <[prefix]offset[unit]>] [--version]
+          [--width|-w <[prefix]width>] <filename> or STDIN
 
 OPTIONS:
     --format|-f <fmt1,fmt2,..>          One or multiple of: asc, bit, bitwasc, bitwdec, bitwhex, dec, decwasc, hex, hexwasc, oct (default: "hex,asc")
@@ -51,12 +52,14 @@ OPTIONS:
 
     --version                           Show version information (default: false)
 
+    --width|-w <[prefix]width>          Width. See NOTES. (default: "16")
+
 
 NOTES:
-    - You can use prefixes for seek and limit. 0x = hex, 0b = binary, 0o = octal
+    - You can use prefixes for seek, limit and width. 0x = hex, 0b = binary, 0o = octal
     - Use 'no' or '' for offset formatter for disabling offset output
-    - Use '--seek \-[prefix]1000' for seeking to end of file
-    - Offset and seek parameters supports units (KB, KiB, MB, MiB, GB, GiB, TB, TiB)
+    - Use '--seek \-1234' for seeking from end of file
+    - Limit and seek parameters supports units (KB, KiB, MB, MiB, GB, GiB, TB, TiB)
 
 EXAMPLES:
     heksa -f hex,asc,bit foo.dat
@@ -66,6 +69,7 @@ EXAMPLES:
     heksa -l 0x1024 foo.dat
     heksa -s 0b1010 foo.dat
     heksa -s 4321KiB foo.dat
+    heksa -w 8 foo.dat
 ```
 
 ## Requirements
