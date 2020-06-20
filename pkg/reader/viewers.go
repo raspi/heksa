@@ -2,6 +2,17 @@ package reader
 
 import (
 	"fmt"
+	"github.com/raspi/heksa/pkg/reader/byteFormatters/ascii"
+	"github.com/raspi/heksa/pkg/reader/byteFormatters/base"
+	"github.com/raspi/heksa/pkg/reader/byteFormatters/bit"
+	"github.com/raspi/heksa/pkg/reader/byteFormatters/bitWithAscii"
+	"github.com/raspi/heksa/pkg/reader/byteFormatters/bitWithDecimal"
+	"github.com/raspi/heksa/pkg/reader/byteFormatters/bitWithHex"
+	"github.com/raspi/heksa/pkg/reader/byteFormatters/decWithAscii"
+	"github.com/raspi/heksa/pkg/reader/byteFormatters/decimal"
+	"github.com/raspi/heksa/pkg/reader/byteFormatters/hex"
+	"github.com/raspi/heksa/pkg/reader/byteFormatters/hexWithAscii"
+	"github.com/raspi/heksa/pkg/reader/byteFormatters/octal"
 	"sort"
 	"strings"
 )
@@ -35,20 +46,6 @@ var formatterStringToEnumMap = map[string]ByteFormatter{
 	`bitwasc`: ViewBitWithAsc,
 }
 
-// Padding when we are at EOF
-var formatterPaddingMap = map[ByteFormatter]string{
-	ViewASCII:        `‡`,
-	ViewHex:          `‡‡`,
-	ViewDec:          `‡‡‡`,
-	ViewOct:          `‡‡‡`,
-	ViewHexWithASCII: `‡‡‡‡‡‡`,
-	ViewDecWithASCII: `‡‡‡‡‡‡‡`,
-	ViewBit:          `‡‡‡‡‡‡‡‡`,
-	ViewBitWithHex:   `‡‡‡‡‡‡‡‡‡‡‡`,
-	ViewBitWithDec:   `‡‡‡‡‡‡‡‡‡‡‡‡`,
-	ViewBitWithAsc:   `‡‡‡‡‡‡‡‡‡‡‡‡`,
-}
-
 // getViewers returns viewers from string separated by ','
 func GetViewers(viewers []string) (ds []ByteFormatter, err error) {
 	for _, v := range viewers {
@@ -75,4 +72,35 @@ func GetViewerList() (viewers []string) {
 
 	sort.Strings(viewers)
 	return viewers
+}
+
+func GetFrom(formatter ByteFormatter) base.ByteFormatter {
+	var fmter base.ByteFormatter
+
+	switch formatter {
+	case ViewASCII:
+		fmter = ascii.New()
+	case ViewHex:
+		fmter = hex.New()
+	case ViewBit:
+		fmter = bit.New()
+	case ViewDec:
+		fmter = decimal.New()
+	case ViewOct:
+		fmter = octal.New()
+	case ViewHexWithASCII:
+		fmter = hexWithAscii.New()
+	case ViewDecWithASCII:
+		fmter = decWithAscii.New()
+	case ViewBitWithAsc:
+		fmter = bitWithAscii.New()
+	case ViewBitWithDec:
+		fmter = bitWithDecimal.New()
+	case ViewBitWithHex:
+		fmter = bitWithHex.New()
+	default:
+		return nil
+	}
+
+	return fmter
 }

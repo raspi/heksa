@@ -4,23 +4,19 @@ import (
 	"fmt"
 	"github.com/raspi/heksa/pkg/color"
 	"github.com/raspi/heksa/pkg/iface"
+	"github.com/raspi/heksa/pkg/reader/byteFormatters/base"
 	"io"
 	"strings"
 )
 
 type Colors struct {
-	palette       [256]string // precalculated color palette for each byte
-	SplitterColor color.AnsiColor
-	OffsetColor   color.AnsiColor
 	splitterBreak string
 	offsetBreak   string
-	specialBreak  string
-	hilightBreak  string
 }
 
 type Reader struct {
 	r                     iface.ReadSeekerCloser
-	charFormatters        []ByteFormatter            // list of byte displayer(s) for data
+	charFormatters        []base.ByteFormatter       // list of byte displayer(s) for data
 	charFormatterCount    int                        // shorthand for len(charFormatters), for speeding up
 	offsetFormatter       []OffsetFormatter          // offset formatters (max 2) first one is displayed on the left side and second one on the right side
 	offsetFormatterCount  int                        // shorthand for len(offsetFormatter), for speeding up
@@ -37,26 +33,20 @@ type Reader struct {
 	visualSplitter        string                     // Visual splitter that gets inserted every visualSplitterSize bytes
 }
 
-func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters []ByteFormatter, palette [256]color.AnsiColor, width uint16, filesize int64) *Reader {
+func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters []base.ByteFormatter, formatterWidth uint16, filesize int64) *Reader {
 	if formatters == nil {
 		panic(`nil formatter`)
 	}
 
-	if width == 0 {
-		panic(`zero width`)
-	}
-
-	var calcpalette [256]string
-
-	for idx := range palette {
-		calcpalette[idx] = fmt.Sprintf(`%s%s`, color.SetForeground, palette[idx].String())
+	if formatterWidth == 0 {
+		panic(`zero formatterWidth`)
 	}
 
 	reader := &Reader{
 		r:                    r,
 		visualSplitterSize:   8,   // Insert extra space after every N bytes
 		visualSplitter:       ` `, // insert visualSplitter every visualSplitterSize bytes
-		width:                int(width),
+		width:                int(formatterWidth),
 		fileSize:             filesize,
 		charFormatters:       formatters,
 		offsetFormatter:      offsetFormatter,
@@ -66,33 +56,17 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters
 		charFormatterCount:   len(formatters),
 		offsetFormatterCount: len(offsetFormatter),
 		Colors: Colors{
-			palette:       calcpalette,
-			SplitterColor: color.AnsiColor{Color: color.ColorGrey93_eeeeee},
-			OffsetColor:   color.AnsiColor{Color: color.ColorGrey93_eeeeee},
-			specialBreak:  fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey35_585858}),
-			hilightBreak:  fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey100_ffffff}),
+			splitterBreak: fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey93_eeeeee}),
+			offsetBreak:   fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey93_eeeeee}),
 		},
 	}
 
 	reader.offsetFormatterFormat = make(map[OffsetFormatter]string, reader.offsetFormatterCount)
 	reader.offsetFormatterWidth = make(map[OffsetFormatter]int, reader.offsetFormatterCount)
 
-	reader.Colors.splitterBreak = fmt.Sprintf(`%s%s`, color.SetForeground, reader.Colors.SplitterColor)
-	reader.Colors.offsetBreak = fmt.Sprintf(`%s%s`, color.SetForeground, reader.Colors.OffsetColor)
-
 	for _, f := range reader.charFormatters {
-		switch f {
-		case ViewHex:
-			reader.growHint += 49
-		case ViewDec, ViewOct:
-			reader.growHint += 65
-		case ViewASCII:
-			reader.growHint += 18
-		case ViewDecWithASCII:
-			reader.growHint += 129
-		case ViewHexWithASCII:
-			reader.growHint += 113
-		}
+		reader.growHint += int(formatterWidth)
+		reader.growHint += int(formatterWidth) * f.GetPrintSize()
 	}
 
 	for _, f := range reader.offsetFormatter {
@@ -187,15 +161,17 @@ func (r *Reader) Read() (string, error) {
 	r.sb.WriteString(offsetLeft)
 
 	tmp := make([]byte, r.width)
-	rb, err := r.r.Read(tmp)
+	bytesReadCount, err := r.r.Read(tmp)
 	if err != nil {
 		return ``, err
 	}
 
-	r.ReadBytes += uint64(rb)
+	r.ReadBytes += uint64(bytesReadCount)
 
 	// iterate through every formatter which outputs it's own format
 	for didx, byteFormatterType := range r.charFormatters {
+		// First character to print, so always true
+		base.ChangePalette = true
 
 		for i := 0; i < r.width; i++ {
 			if i != 0 && i%r.visualSplitterSize == 0 {
@@ -203,99 +179,27 @@ func (r *Reader) Read() (string, error) {
 				r.sb.WriteString(r.visualSplitter)
 			}
 
-			if rb > i {
-				if i == 0 || (i > 0 && tmp[i] != tmp[i-1]) {
-					// Only print on first and changed color
-					r.sb.WriteString(r.Colors.palette[tmp[i]])
+			if bytesReadCount > i {
+				if i == 0 || (i > 0 && tmp[i] != tmp[i-1] && base.Palette[tmp[i]] != base.Palette[tmp[i-1]]) {
+					base.ChangePalette = true
 				}
 
-				switch byteFormatterType {
-				case ViewHex:
-					r.sb.WriteString(fmt.Sprintf(`%02x`, tmp[i]))
-				case ViewDec:
-					r.sb.WriteString(fmt.Sprintf(`%03d`, tmp[i]))
-				case ViewOct:
-					r.sb.WriteString(fmt.Sprintf(`%03o`, tmp[i]))
-				case ViewBit, ViewBitWithDec, ViewBitWithHex, ViewBitWithAsc:
-					if byteFormatterType == ViewBitWithAsc {
-						r.sb.WriteString(r.Colors.palette[tmp[i]])
-					}
+				r.sb.WriteString(byteFormatterType.Print(tmp[i]))
 
-					for idx, ru := range fmt.Sprintf(`%08b`, tmp[i]) {
-						if idx == 0 {
-							r.sb.WriteString(color.SetUnderlineOn)
-						}
-
-						r.sb.WriteRune(ru)
-
-						if idx == 3 {
-							r.sb.WriteString(color.SetUnderlineOff)
-						}
-					}
-
-					switch byteFormatterType {
-					case ViewBitWithDec:
-						r.sb.WriteString(` `)
-						r.sb.WriteString(fmt.Sprintf(`%03d`, tmp[i]))
-					case ViewBitWithHex:
-						r.sb.WriteString(` `)
-						r.sb.WriteString(fmt.Sprintf(`%02x`, tmp[i]))
-					case ViewBitWithAsc:
-						r.sb.WriteString(` `)
-						r.sb.WriteString(r.Colors.specialBreak)
-						r.sb.WriteString(`[`)
-						r.sb.WriteString(r.Colors.hilightBreak)
-						r.sb.WriteString(fmt.Sprintf(`%c`, asciiByteToChar[tmp[i]]))
-						r.sb.WriteString(r.Colors.specialBreak)
-						r.sb.WriteString(`]`)
-					}
-
-				case ViewASCII:
-					r.sb.WriteString(fmt.Sprintf(`%c`, asciiByteToChar[tmp[i]]))
-				case ViewHexWithASCII:
-					r.sb.WriteString(r.Colors.palette[tmp[i]])
-					r.sb.WriteString(fmt.Sprintf(`%02x `, tmp[i]))
-					r.sb.WriteString(r.Colors.specialBreak)
-					r.sb.WriteString(`[`)
-					r.sb.WriteString(r.Colors.hilightBreak)
-					r.sb.WriteString(fmt.Sprintf(`%c`, asciiByteToChar[tmp[i]]))
-					r.sb.WriteString(r.Colors.specialBreak)
-					r.sb.WriteString(`]`)
-				case ViewDecWithASCII:
-					r.sb.WriteString(r.Colors.palette[tmp[i]])
-					r.sb.WriteString(fmt.Sprintf(`%03d `, tmp[i]))
-					r.sb.WriteString(r.Colors.specialBreak)
-					r.sb.WriteString(`[`)
-					r.sb.WriteString(r.Colors.hilightBreak)
-					r.sb.WriteString(fmt.Sprintf(`%c`, asciiByteToChar[tmp[i]]))
-					r.sb.WriteString(r.Colors.specialBreak)
-					r.sb.WriteString(`]`)
-				}
-
-				if i < (r.width - 1) {
-					switch byteFormatterType {
-					case ViewASCII:
-						continue
-					default:
-						r.sb.WriteString(` `)
-					}
+				if i < (r.width-1) && byteFormatterType.GetPrintSize() > 1 {
+					r.sb.WriteString(` `)
 				}
 			} else {
 				// There is no data so we add padding
-				if i == 0 || (i > 0 && tmp[i] != tmp[i-1]) {
+				if i == 0 || (i > 0 && tmp[i] != tmp[i-1] && base.Palette[tmp[i]] != base.Palette[tmp[i-1]]) {
 					// Only print on first and changed color
-					r.sb.WriteString(r.Colors.palette[0])
+					r.sb.WriteString(base.Palette[0])
 				}
 
-				r.sb.WriteString(formatterPaddingMap[byteFormatterType])
+				r.sb.WriteString(strings.Repeat(`‡`, byteFormatterType.GetPrintSize()))
 
-				if i < (r.width - 1) {
-					switch byteFormatterType {
-					case ViewASCII:
-						continue
-					default:
-						r.sb.WriteString(` `)
-					}
+				if i < (r.width-1) && byteFormatterType.GetPrintSize() > 1 {
+					r.sb.WriteString(` `)
 				}
 			}
 		}

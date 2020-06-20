@@ -6,6 +6,7 @@ import (
 	"github.com/raspi/heksa/pkg/color"
 	"github.com/raspi/heksa/pkg/iface"
 	"github.com/raspi/heksa/pkg/reader"
+	"github.com/raspi/heksa/pkg/reader/byteFormatters/base"
 	"github.com/raspi/heksa/pkg/units"
 	"io"
 	"os"
@@ -197,10 +198,33 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 func main() {
 	source, displays, offViewer, limit, palette, filesize, width := getParams()
 
+	var calcpalette [256]string
+
+	for idx := range palette {
+		calcpalette[idx] = fmt.Sprintf(`%s%s`, color.SetForeground, palette[idx].String())
+	}
+
+	base.Palette = calcpalette
+	base.ChangePalette = true
+	base.SpecialBreak = fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey35_585858})
+	base.HilightBreak = fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey100_ffffff})
+
+	var formatters []base.ByteFormatter
+	for _, f := range displays {
+		fmter := reader.GetFrom(f)
+		if fmter == nil {
+			_, _ = fmt.Fprintf(os.Stderr, `error: unknown formatter %v`, f)
+			os.Exit(1)
+
+		}
+
+		formatters = append(formatters, fmter)
+	}
+
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
 
-	r := reader.New(source, offViewer, displays, palette, width, filesize)
+	r := reader.New(source, offViewer, formatters, width, filesize)
 
 	isEven := false
 	// Dump hex

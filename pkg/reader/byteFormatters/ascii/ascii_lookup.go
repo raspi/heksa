@@ -1,8 +1,8 @@
-package reader
+package ascii
 
 // convert byte to printable UTF-8 character
-var asciiByteToChar = [256]rune{
-	0:   'Ø', // NUL Null
+var AsciiByteToChar = [256]rune{
+	0:   'Ø', // NUL Null 0x00 \0
 	1:   '.', // SOH Start of Header
 	2:   '.', // STX Start of Text
 	3:   '.', // ETX End of Text
@@ -260,5 +260,5 @@ var asciiByteToChar = [256]rune{
 	252: '.',
 	253: '.',
 	254: '.',
-	255: '•',
+	255: '•', // 0xFF
 }
