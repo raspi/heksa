@@ -56,7 +56,7 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []offFormatters.OffsetFormatt
 		offsetFormatterCount: len(offsetFormatter),
 		Colors: Colors{
 			splitterBreak: fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey93_eeeeee}),
-			offsetBreak:   fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey93_eeeeee}),
+			offsetBreak:   fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey82_d0d0d0}),
 		},
 	}
 
