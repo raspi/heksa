@@ -7,6 +7,7 @@ import (
 	"github.com/raspi/heksa/pkg/iface"
 	"github.com/raspi/heksa/pkg/reader"
 	"github.com/raspi/heksa/pkg/reader/byteFormatters/base"
+	offFormatters "github.com/raspi/heksa/pkg/reader/offsetFormatters/base"
 	"github.com/raspi/heksa/pkg/units"
 	"io"
 	"os"
@@ -221,10 +222,20 @@ func main() {
 		formatters = append(formatters, fmter)
 	}
 
+	binfo := offFormatters.BaseInfo{
+		FileSize: filesize,
+	}
+
+	var offormatters []offFormatters.OffsetFormatter
+	for _, f := range offViewer {
+		fmter := reader.GetFromOffsetFormatter(f, binfo)
+		offormatters = append(offormatters, fmter)
+	}
+
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
 
-	r := reader.New(source, offViewer, formatters, width, filesize)
+	r := reader.New(source, offormatters, formatters, width, filesize == -1)
 
 	isEven := false
 	// Dump hex

@@ -5,6 +5,7 @@ import (
 	"github.com/raspi/heksa/pkg/color"
 	"github.com/raspi/heksa/pkg/iface"
 	"github.com/raspi/heksa/pkg/reader/byteFormatters/base"
+	offFormatters "github.com/raspi/heksa/pkg/reader/offsetFormatters/base"
 	"io"
 	"strings"
 )
@@ -15,25 +16,23 @@ type Colors struct {
 }
 
 type Reader struct {
-	r                     iface.ReadSeekerCloser
-	charFormatters        []base.ByteFormatter       // list of byte displayer(s) for data
-	charFormatterCount    int                        // shorthand for len(charFormatters), for speeding up
-	offsetFormatter       []OffsetFormatter          // offset formatters (max 2) first one is displayed on the left side and second one on the right side
-	offsetFormatterCount  int                        // shorthand for len(offsetFormatter), for speeding up
-	fileSize              int64                      // file size reference, -1 means STDIN. Hint for offset formatter(s) for how many padding characters to use.
-	ReadBytes             uint64                     // How many bytes Reader has been reading so far (for limit)
-	sb                    strings.Builder            // Faster than concatenating strings
-	Splitter              string                     // Splitter character for columns
-	offsetFormatterFormat map[OffsetFormatter]string // Printf format for offset format
-	offsetFormatterWidth  map[OffsetFormatter]int    // How much padding width needed, calculated from fileSize variable
-	Colors                Colors                     // Colors
-	growHint              int                        // Grow hint for sb strings.Builder variable for speed
-	width                 int                        // Width
-	visualSplitterSize    int                        // Size of visual splitter (2 = XX XX XX, 3 = XXX XXX XXX, etc)
-	visualSplitter        string                     // Visual splitter that gets inserted every visualSplitterSize bytes
+	r                    iface.ReadSeekerCloser
+	charFormatters       []base.ByteFormatter            // list of byte displayer(s) for data
+	charFormatterCount   int                             // shorthand for len(charFormatters), for speeding up
+	offsetFormatters     []offFormatters.OffsetFormatter // offset formatters (max 2) first one is displayed on the left side and second one on the right side
+	offsetFormatterCount int                             // shorthand for len(offsetFormatters), for speeding up
+	isStdin              bool
+	ReadBytes            uint64          // How many bytes Reader has been reading so far (for limit)
+	sb                   strings.Builder // Faster than concatenating strings
+	Splitter             string          // Splitter character for columns
+	Colors               Colors          // Colors
+	growHint             int             // Grow hint for sb strings.Builder variable for speed
+	width                int             // Width
+	visualSplitterSize   int             // Size of visual splitter (2 = XX XX XX, 3 = XXX XXX XXX, etc)
+	visualSplitter       string          // Visual splitter that gets inserted every visualSplitterSize bytes
 }
 
-func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters []base.ByteFormatter, formatterWidth uint16, filesize int64) *Reader {
+func New(r iface.ReadSeekerCloser, offsetFormatter []offFormatters.OffsetFormatter, formatters []base.ByteFormatter, formatterWidth uint16, isStdin bool) *Reader {
 	if formatters == nil {
 		panic(`nil formatter`)
 	}
@@ -47,9 +46,9 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters
 		visualSplitterSize:   8,   // Insert extra space after every N bytes
 		visualSplitter:       ` `, // insert visualSplitter every visualSplitterSize bytes
 		width:                int(formatterWidth),
-		fileSize:             filesize,
+		isStdin:              isStdin,
 		charFormatters:       formatters,
-		offsetFormatter:      offsetFormatter,
+		offsetFormatters:     offsetFormatter,
 		ReadBytes:            0, // How many bytes we've read
 		sb:                   strings.Builder{},
 		Splitter:             `┊`, // Splitter character between different columns
@@ -61,51 +60,16 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []OffsetFormatter, formatters
 		},
 	}
 
-	reader.offsetFormatterFormat = make(map[OffsetFormatter]string, reader.offsetFormatterCount)
-	reader.offsetFormatterWidth = make(map[OffsetFormatter]int, reader.offsetFormatterCount)
-
 	for _, f := range reader.charFormatters {
 		reader.growHint += int(formatterWidth)
 		reader.growHint += int(formatterWidth) * f.GetPrintSize()
 	}
 
-	for _, f := range reader.offsetFormatter {
-		switch f {
-		case OffsetHex:
-			width := len(fmt.Sprintf(`%x`, filesize))
-			reader.growHint += width + 1
-			reader.offsetFormatterWidth[f] = width
-			reader.offsetFormatterFormat[f] = fmt.Sprintf(`%%0%dx`, width)
-		case OffsetDec:
-			width := len(fmt.Sprintf(`%d`, filesize))
-			reader.growHint += width + 1
-			reader.offsetFormatterWidth[f] = width
-			reader.offsetFormatterFormat[f] = fmt.Sprintf(`%%0%dd`, width)
-		case OffsetOct:
-			width := len(fmt.Sprintf(`%o`, filesize))
-			reader.growHint += width + 1
-			reader.offsetFormatterWidth[f] = width
-			reader.offsetFormatterFormat[f] = fmt.Sprintf(`%%0%do`, width)
-		case OffsetPercent:
-			width := 9
-			reader.growHint += width
-			reader.offsetFormatterWidth[f] = width
-			reader.offsetFormatterFormat[f] = `%07.3f%%`
-		}
+	for _, f := range reader.offsetFormatters {
+		reader.growHint += f.GetFormatWidth()
 	}
 
 	return reader
-}
-
-// formatOffset generates offset output such as "0123"
-func (r *Reader) formatOffset(formatter OffsetFormatter, offset uint64) {
-	switch formatter {
-	case OffsetPercent:
-		percent := (float64(offset) * 100.0) / float64(r.fileSize)
-		r.sb.WriteString(fmt.Sprintf(r.offsetFormatterFormat[formatter], percent))
-	default:
-		r.sb.WriteString(fmt.Sprintf(r.offsetFormatterFormat[formatter], offset))
-	}
 }
 
 // getoffsetLeft outputs the selected formatter on the left side
@@ -114,7 +78,7 @@ func (r *Reader) getoffsetLeft(offset uint64) string {
 	if r.offsetFormatterCount > 0 {
 		r.sb.WriteString(r.Colors.offsetBreak)
 		// show offset on the left side
-		r.formatOffset(r.offsetFormatter[0], offset)
+		r.sb.WriteString(r.offsetFormatters[0].Print(offset))
 		r.sb.WriteString(r.Colors.splitterBreak)
 		r.sb.WriteString(r.Splitter)
 	}
@@ -130,7 +94,7 @@ func (r *Reader) getoffsetRight(offset uint64) string {
 		r.sb.WriteString(r.Colors.splitterBreak)
 		r.sb.WriteString(r.Splitter)
 		r.sb.WriteString(r.Colors.offsetBreak)
-		r.formatOffset(r.offsetFormatter[1], offset)
+		r.sb.WriteString(r.offsetFormatters[1].Print(offset))
 	}
 
 	return r.sb.String()
@@ -140,7 +104,7 @@ func (r *Reader) getoffsetRight(offset uint64) string {
 func (r *Reader) Read() (string, error) {
 	var offset uint64
 
-	if r.fileSize == -1 {
+	if r.isStdin {
 		// reading from STDIN, can't use seek
 		offset = r.ReadBytes
 	} else {

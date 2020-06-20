@@ -2,6 +2,11 @@ package reader
 
 import (
 	"fmt"
+	offFormatters "github.com/raspi/heksa/pkg/reader/offsetFormatters/base"
+	"github.com/raspi/heksa/pkg/reader/offsetFormatters/decimal"
+	"github.com/raspi/heksa/pkg/reader/offsetFormatters/hex"
+	"github.com/raspi/heksa/pkg/reader/offsetFormatters/octal"
+	"github.com/raspi/heksa/pkg/reader/offsetFormatters/percent"
 	"sort"
 	"strings"
 )
@@ -59,4 +64,22 @@ func GetOffsetViewerList() (viewers []string) {
 
 	sort.Strings(viewers)
 	return viewers
+}
+
+func GetFromOffsetFormatter(formatter OffsetFormatter, info offFormatters.BaseInfo) offFormatters.OffsetFormatter {
+	var f offFormatters.OffsetFormatter
+	switch formatter {
+	case OffsetDec:
+		f = decimal.New(info)
+	case OffsetHex:
+		f = hex.New(info)
+	case OffsetOct:
+		f = octal.New(info)
+	case OffsetPercent:
+		f = percent.New(info)
+	default:
+		return nil
+	}
+
+	return f
 }
