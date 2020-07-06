@@ -8,6 +8,7 @@ type ByteFormatter interface {
 }
 
 var Palette [256]string
+var HideVisualSplitter bool
 
 var ChangePalette bool
 

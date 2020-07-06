@@ -14,7 +14,7 @@ Hex dumper with colors
   * Printable: A-Z, a-z, 0-9
   * Spaces: space, tab, new line
   * Special: 0x00, 0xFF
-* Output multiple formats at once (hexadecimal, decimal, octal, bits or special combination formats)
+* Output multiple formats at once (hexadecimal, decimal, octal, bits, uncode blocks, or special combination formats)
 * Multiple offset formats (hexadecimal, decimal, octal, percentage)
   * First one is displayed on left side and second one on the right side
 * Read only N bytes

@@ -138,7 +138,7 @@ func (r *Reader) Read() (string, error) {
 		base.ChangePalette = true
 
 		for i := 0; i < r.width; i++ {
-			if i != 0 && i%r.visualSplitterSize == 0 {
+			if i != 0 && !base.HideVisualSplitter && i%r.visualSplitterSize == 0 {
 				// Add pad for better visualization
 				r.sb.WriteString(r.visualSplitter)
 			}

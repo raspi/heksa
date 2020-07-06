@@ -8,6 +8,7 @@ import (
 	"github.com/raspi/heksa/pkg/reader/byteFormatters/bitWithAscii"
 	"github.com/raspi/heksa/pkg/reader/byteFormatters/bitWithDecimal"
 	"github.com/raspi/heksa/pkg/reader/byteFormatters/bitWithHex"
+	"github.com/raspi/heksa/pkg/reader/byteFormatters/block"
 	"github.com/raspi/heksa/pkg/reader/byteFormatters/decWithAscii"
 	"github.com/raspi/heksa/pkg/reader/byteFormatters/decimal"
 	"github.com/raspi/heksa/pkg/reader/byteFormatters/hex"
@@ -25,6 +26,7 @@ const (
 	ViewOct                      // Octal
 	ViewASCII
 	ViewBit          // Bits 00000000-11111111
+	ViewBlock        // Displays as colored block
 	ViewHexWithASCII // Displays hex and ascii at same time
 	ViewDecWithASCII // Displays dec and ascii at same time
 	ViewBitWithDec   // Displays bits and decimal at same time
@@ -39,6 +41,7 @@ var formatterStringToEnumMap = map[string]ByteFormatter{
 	`bit`:     ViewBit,
 	`dec`:     ViewDec,
 	`oct`:     ViewOct,
+	`blk`:     ViewBlock,
 	`hexwasc`: ViewHexWithASCII,
 	`decwasc`: ViewDecWithASCII,
 	`bitwdec`: ViewBitWithDec,
@@ -88,6 +91,8 @@ func GetFrom(formatter ByteFormatter) base.ByteFormatter {
 		fmter = decimal.New()
 	case ViewOct:
 		fmter = octal.New()
+	case ViewBlock:
+		fmter = block.New()
 	case ViewHexWithASCII:
 		fmter = hexWithAscii.New()
 	case ViewDecWithASCII:
