@@ -5,6 +5,9 @@ import (
 	"github.com/raspi/heksa/pkg/reader/offsetFormatters/base"
 )
 
+// minimal size for padding zeroes
+const minimalSize = 6
+
 type printer struct {
 	info   base.BaseInfo
 	format string
@@ -12,9 +15,14 @@ type printer struct {
 }
 
 func New(info base.BaseInfo) base.OffsetFormatter {
+	size := len(fmt.Sprintf(`%d`, info.FileSize))
+	if size < minimalSize {
+		size = minimalSize
+	}
+
 	p := printer{
 		info: info,
-		size: len(fmt.Sprintf(`%d`, info.FileSize)),
+		size: size,
 	}
 
 	p.format = fmt.Sprintf(`%%0%dd`, p.size)

@@ -6,19 +6,23 @@ import (
 )
 
 type printer struct {
-	info   base.BaseInfo
-	format string
-	size   int
+	info        base.BaseInfo
+	format      string
+	size        int
+	unknownSize bool // Unknown file size? (reading from STDIN)
 }
 
 func New(info base.BaseInfo) base.OffsetFormatter {
 	p := printer{
-		info:   info,
-		size:   9,
-		format: `%07.3f%%`,
+		info:        info,
+		size:        9,
+		format:      `%07.3f%%`,
+		unknownSize: false,
 	}
 
 	if p.info.FileSize == -1 {
+		// Unknown file size
+		p.unknownSize = true
 		p.size = 3
 	}
 
@@ -30,7 +34,7 @@ func (p printer) GetFormatWidth() int {
 }
 
 func (p printer) Print(offset uint64) string {
-	if p.info.FileSize == -1 {
+	if p.unknownSize {
 		// Can't know percentage for STDIN
 		return `??%`
 	}
