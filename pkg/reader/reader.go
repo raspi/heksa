@@ -32,7 +32,7 @@ type Reader struct {
 	visualSplitter       string          // Visual splitter that gets inserted every visualSplitterSize bytes
 }
 
-func New(r iface.ReadSeekerCloser, offsetFormatter []offFormatters.OffsetFormatter, formatters []base.ByteFormatter, formatterWidth uint16, isStdin bool) *Reader {
+func New(r iface.ReadSeekerCloser, offsetFormatter []offFormatters.OffsetFormatter, formatters []base.ByteFormatter, formatterWidth uint16, visualSplitterSize uint8, isStdin bool) *Reader {
 	if formatters == nil {
 		panic(`nil formatter`)
 	}
@@ -43,8 +43,8 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []offFormatters.OffsetFormatt
 
 	reader := &Reader{
 		r:                    r,
-		visualSplitterSize:   8,   // Insert extra space after every N bytes
-		visualSplitter:       ` `, // insert visualSplitter every visualSplitterSize bytes
+		visualSplitterSize:   int(visualSplitterSize), // Insert extra space after every N bytes
+		visualSplitter:       ` `,                     // insert visualSplitter every visualSplitterSize bytes
 		width:                int(formatterWidth),
 		isStdin:              isStdin,
 		charFormatters:       formatters,
@@ -138,8 +138,8 @@ func (r *Reader) Read() (string, error) {
 		base.ChangePalette = true
 
 		for i := 0; i < r.width; i++ {
-			if i != 0 && i%r.visualSplitterSize == 0 {
-				// Add pad for better visualization
+			if r.visualSplitterSize != 0 && i != 0 && i%r.visualSplitterSize == 0 {
+				// Add pad for better visualization every visualSplitterSize bytes
 				r.sb.WriteString(r.visualSplitter)
 			}
 

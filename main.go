@@ -27,7 +27,7 @@ const (
 )
 
 // Parse command line arguments
-func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter, offsetViewer []reader.OffsetFormatter, limit uint64, palette [256]color.AnsiColor, filesize int64, width uint16) {
+func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter, offsetViewer []reader.OffsetFormatter, limit uint64, palette [256]color.AnsiColor, filesize int64, width uint16, splitter uint8) {
 	opt := getoptions.New()
 
 	opt.HelpSynopsisArgs(`<filename> or STDIN`)
@@ -73,6 +73,12 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 		opt.Alias("w"),
 		opt.ArgName(`[prefix]width`),
 		opt.Description(`Width. See NOTES.`),
+	)
+
+	argSplitter := opt.IntOptional(`splitter`, 8,
+		opt.Alias("S"),
+		opt.ArgName(`size`),
+		opt.Description(`Insert visual splitter every N bytes. Zero (0) disables.`),
 	)
 
 	remainingArgs, err := opt.Parse(os.Args[1:])
@@ -193,11 +199,11 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 		source = fhandle
 	}
 
-	return source, displays, offsetViewer, limit, palette, filesize, width
+	return source, displays, offsetViewer, limit, palette, filesize, width, uint8(*argSplitter)
 }
 
 func main() {
-	source, displays, offViewer, limit, palette, filesize, width := getParams()
+	source, displays, offViewer, limit, palette, filesize, width, splitterSize := getParams()
 
 	var calcpalette [256]string
 
@@ -235,7 +241,7 @@ func main() {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
 
-	r := reader.New(source, offormatters, formatters, width, filesize == -1)
+	r := reader.New(source, offormatters, formatters, width, splitterSize, filesize == -1)
 
 	isEven := false
 	// Dump hex
