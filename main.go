@@ -204,6 +204,7 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 
 func main() {
 	source, displays, offViewer, limit, palette, filesize, width, splitterSize := getParams()
+	usingLimit := limit > 0
 
 	var calcpalette [256]string
 
@@ -270,7 +271,7 @@ func main() {
 
 		_, _ = fmt.Printf(`%s%s%s`+"\n", color, s, clear)
 
-		if limit > 0 && r.ReadBytes >= limit {
+		if usingLimit && r.ReadBytes >= limit {
 			// Limit is set and found
 			break
 		}
