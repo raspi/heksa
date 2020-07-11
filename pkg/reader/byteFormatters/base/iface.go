@@ -15,8 +15,6 @@ type ByteFormatter interface {
 
 type FormatterGroup struct {
 	palette            [256]string
-	specialBreak       string
-	hilightBreak       string
 	changePalette      bool
 	formatters         []ByteFormatter
 	Width              int
@@ -29,7 +27,7 @@ type FormatterGroup struct {
 	paddingColor       string // Color for padding (EOF)
 }
 
-func New(formatters []ByteFormatter, palette [256]string, SpecialBreak string, HilightBreak string, width uint16, visualSplitterSize uint8) FormatterGroup {
+func New(formatters []ByteFormatter, palette [256]string, width uint16, visualSplitterSize uint8) FormatterGroup {
 	if formatters == nil {
 		panic(`nil formatter`)
 	}
@@ -40,8 +38,6 @@ func New(formatters []ByteFormatter, palette [256]string, SpecialBreak string, H
 
 	return FormatterGroup{
 		palette:            palette,
-		specialBreak:       SpecialBreak,
-		hilightBreak:       HilightBreak,
 		formatters:         formatters,
 		changePalette:      true,
 		Width:              int(width),

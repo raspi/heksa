@@ -220,7 +220,7 @@ func getParams() (source iface.ReadSeekerCloser, offsetViewer []reader.OffsetFor
 		formatters = append(formatters, fmter)
 	}
 
-	fGroup := base.New(formatters, calcpalette, SpecialBreak, HilightBreak, width, uint8(*argSplitter))
+	fGroup := base.New(formatters, calcpalette, width, uint8(*argSplitter))
 
 	return source, offsetViewer, limit, filesize, fGroup
 }
