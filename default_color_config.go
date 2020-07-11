@@ -15,6 +15,8 @@ UpperByte=127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 14
 
 // Default colors for different groups
 const DefaultGroupColors = `
+; See https://en.wikipedia.org/wiki/ANSI_escape_code
+;
 ; Background for even line number
 LineEven=48;5;235
 ; Background for odd line number
