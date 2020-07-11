@@ -263,13 +263,13 @@ func main() {
 			os.Exit(1)
 		}
 
-		color := LineEven
+		lineColor := LineEven
 		if isEven {
-			color = LineOdd
+			lineColor = LineOdd
 		}
 		isEven = !isEven
 
-		_, _ = fmt.Printf(`%s%s%s`+"\n", color, s, clear)
+		_, _ = fmt.Printf(`%s%s%s`+"\n", lineColor, s, clear)
 
 		if usingLimit && r.ReadBytes >= limit {
 			// Limit is set and found
