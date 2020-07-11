@@ -7,22 +7,24 @@ import (
 )
 
 type printer struct {
-	p base.ByteFormatter
+	p            base.ByteFormatter
+	hilightBreak string
+	specialBreak string
 }
 
-func New() base.ByteFormatter {
+func New(hilightBreak string, specialBreak string) base.ByteFormatter {
 	return printer{
-		p: decimal.New(),
+		p:            decimal.New(),
+		hilightBreak: hilightBreak,
+		specialBreak: specialBreak,
 	}
 }
 
 func (p printer) Print(b byte) (o string) {
-	base.ChangePalette = true
-
 	o += p.p.Print(b)
-	o += ` ` + base.SpecialBreak + `[` + base.HilightBreak
+	o += ` ` + p.specialBreak + `[` + p.hilightBreak
 	o += string(ascii.AsciiByteToChar[b])
-	o += base.SpecialBreak + `]`
+	o += p.specialBreak + `]`
 	return o
 }
 

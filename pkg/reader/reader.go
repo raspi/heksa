@@ -11,14 +11,12 @@ import (
 )
 
 type Colors struct {
-	splitterBreak string
 	offsetBreak   string
+	splitterBreak string
 }
 
 type Reader struct {
 	r                    iface.ReadSeekerCloser
-	charFormatters       []base.ByteFormatter            // list of byte displayer(s) for data
-	charFormatterCount   int                             // shorthand for len(charFormatters), for speeding up
 	offsetFormatters     []offFormatters.OffsetFormatter // offset formatters (max 2) first one is displayed on the left side and second one on the right side
 	offsetFormatterCount int                             // shorthand for len(offsetFormatters), for speeding up
 	isStdin              bool
@@ -27,42 +25,23 @@ type Reader struct {
 	Splitter             string          // Splitter character for columns
 	Colors               Colors          // Colors
 	growHint             int             // Grow hint for sb strings.Builder variable for speed
-	width                int             // Width
-	visualSplitterSize   int             // Size of visual splitter (2 = XX XX XX, 3 = XXX XXX XXX, etc)
-	visualSplitter       string          // Visual splitter that gets inserted every visualSplitterSize bytes
+	formatterGroup       base.FormatterGroup
 }
 
-func New(r iface.ReadSeekerCloser, offsetFormatter []offFormatters.OffsetFormatter, formatters []base.ByteFormatter, formatterWidth uint16, visualSplitterSize uint8, isStdin bool) *Reader {
-	if formatters == nil {
-		panic(`nil formatter`)
-	}
-
-	if formatterWidth == 0 {
-		panic(`zero formatterWidth`)
-	}
-
+func New(r iface.ReadSeekerCloser, offsetFormatter []offFormatters.OffsetFormatter, formatterGroup base.FormatterGroup, isStdin bool) *Reader {
 	reader := &Reader{
 		r:                    r,
-		visualSplitterSize:   int(visualSplitterSize), // Insert extra space after every N bytes
-		visualSplitter:       ` `,                     // insert visualSplitter every visualSplitterSize bytes
-		width:                int(formatterWidth),
 		isStdin:              isStdin,
-		charFormatters:       formatters,
 		offsetFormatters:     offsetFormatter,
 		ReadBytes:            0, // How many bytes we've read
 		sb:                   strings.Builder{},
 		Splitter:             `┊`, // Splitter character between different columns
-		charFormatterCount:   len(formatters),
 		offsetFormatterCount: len(offsetFormatter),
+		formatterGroup:       formatterGroup,
 		Colors: Colors{
-			splitterBreak: fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey93_eeeeee}),
 			offsetBreak:   fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey82_d0d0d0}),
+			splitterBreak: fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey93_eeeeee}),
 		},
-	}
-
-	for _, f := range reader.charFormatters {
-		reader.growHint += int(formatterWidth)
-		reader.growHint += int(formatterWidth) * f.GetPrintSize()
 	}
 
 	for _, f := range reader.offsetFormatters {
@@ -122,9 +101,11 @@ func (r *Reader) Read() (string, error) {
 	r.sb.Reset()
 	r.sb.Grow(r.growHint)
 
+	// Offset on the left
 	r.sb.WriteString(offsetLeft)
 
-	tmp := make([]byte, r.width)
+	// Fetch bytes with selected formatters
+	tmp := make([]byte, r.formatterGroup.Width)
 	bytesReadCount, err := r.r.Read(tmp)
 	if err != nil {
 		return ``, err
@@ -132,48 +113,9 @@ func (r *Reader) Read() (string, error) {
 
 	r.ReadBytes += uint64(bytesReadCount)
 
-	// iterate through every formatter which outputs it's own format
-	for didx, byteFormatterType := range r.charFormatters {
-		// First character to print, so always true
-		base.ChangePalette = true
+	r.sb.WriteString(r.formatterGroup.Print(tmp[0:bytesReadCount]))
 
-		for i := 0; i < r.width; i++ {
-			if r.visualSplitterSize != 0 && i != 0 && i%r.visualSplitterSize == 0 {
-				// Add pad for better visualization every visualSplitterSize bytes
-				r.sb.WriteString(r.visualSplitter)
-			}
-
-			if bytesReadCount > i {
-				if i == 0 || (i > 0 && tmp[i] != tmp[i-1] && base.Palette[tmp[i]] != base.Palette[tmp[i-1]]) {
-					base.ChangePalette = true
-				}
-
-				r.sb.WriteString(byteFormatterType.Print(tmp[i]))
-
-				if i < (r.width-1) && byteFormatterType.GetPrintSize() > 1 {
-					r.sb.WriteString(` `)
-				}
-			} else {
-				// There is no data so we add padding
-				if i == 0 || (i > 0 && tmp[i] != tmp[i-1] && base.Palette[tmp[i]] != base.Palette[tmp[i-1]]) {
-					// Only print on first and changed color
-					r.sb.WriteString(base.Palette[0])
-				}
-
-				r.sb.WriteString(strings.Repeat(`‡`, byteFormatterType.GetPrintSize()))
-
-				if i < (r.width-1) && byteFormatterType.GetPrintSize() > 1 {
-					r.sb.WriteString(` `)
-				}
-			}
-		}
-
-		if didx < (r.charFormatterCount - 1) {
-			r.sb.WriteString(r.Colors.splitterBreak)
-			r.sb.WriteString(r.Splitter)
-		}
-	}
-
+	// Offset on the right
 	r.sb.WriteString(offsetRight)
 
 	return r.sb.String(), nil

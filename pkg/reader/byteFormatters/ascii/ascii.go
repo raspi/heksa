@@ -10,13 +10,7 @@ func New() base.ByteFormatter {
 }
 
 func (p printer) Print(b byte) (o string) {
-	if base.ChangePalette {
-		base.ChangePalette = false
-		o += base.Palette[b]
-	}
-
-	o += string(AsciiByteToChar[b])
-	return o
+	return string(AsciiByteToChar[b])
 }
 
 func (p printer) GetPrintSize() int {

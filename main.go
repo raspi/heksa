@@ -27,7 +27,7 @@ const (
 )
 
 // Parse command line arguments
-func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter, offsetViewer []reader.OffsetFormatter, limit uint64, palette [256]color.AnsiColor, filesize int64, width uint16, splitter uint8) {
+func getParams() (source iface.ReadSeekerCloser, offsetViewer []reader.OffsetFormatter, limit uint64, filesize int64, fg base.FormatterGroup) {
 	opt := getoptions.New()
 
 	opt.HelpSynopsisArgs(`<filename> or STDIN`)
@@ -132,7 +132,7 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 		_, _ = fmt.Fprintf(os.Stderr, `error parsing width: %v`, err)
 		os.Exit(1)
 	}
-	width = uint16(widthTmp)
+	width := uint16(widthTmp)
 	if width == 0 {
 		_, _ = fmt.Fprint(os.Stderr, `width must be > 0`)
 		os.Exit(1)
@@ -144,13 +144,13 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 		os.Exit(1)
 	}
 
-	displays, err = reader.GetViewers(strings.Split(*argFormat, `,`))
+	displays, err := reader.GetViewers(strings.Split(*argFormat, `,`))
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, `error getting formatter: %v`, err)
 		os.Exit(1)
 	}
 
-	palette = defaultCharacterColors
+	palette := defaultCharacterColors
 
 	stat, _ := os.Stdin.Stat()
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
@@ -199,27 +199,18 @@ func getParams() (source iface.ReadSeekerCloser, displays []reader.ByteFormatter
 		source = fhandle
 	}
 
-	return source, displays, offsetViewer, limit, palette, filesize, width, uint8(*argSplitter)
-}
-
-func main() {
-	source, displays, offViewer, limit, palette, filesize, width, splitterSize := getParams()
-	usingLimit := limit > 0
-
 	var calcpalette [256]string
 
 	for idx := range palette {
 		calcpalette[idx] = fmt.Sprintf(`%s%s`, color.SetForeground, palette[idx].String())
 	}
 
-	base.Palette = calcpalette
-	base.ChangePalette = true
-	base.SpecialBreak = fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey35_585858})
-	base.HilightBreak = fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey100_ffffff})
+	SpecialBreak := fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey35_585858})
+	HilightBreak := fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey100_ffffff})
 
 	var formatters []base.ByteFormatter
 	for _, f := range displays {
-		fmter := reader.GetFrom(f)
+		fmter := reader.GetByteFormatter(f, HilightBreak, SpecialBreak)
 		if fmter == nil {
 			_, _ = fmt.Fprintf(os.Stderr, `error: unknown formatter %v`, f)
 			os.Exit(1)
@@ -228,6 +219,15 @@ func main() {
 
 		formatters = append(formatters, fmter)
 	}
+
+	fGroup := base.New(formatters, calcpalette, SpecialBreak, HilightBreak, width, uint8(*argSplitter))
+
+	return source, offsetViewer, limit, filesize, fGroup
+}
+
+func main() {
+	source, offViewer, limit, filesize, fGroup := getParams()
+	usingLimit := limit > 0
 
 	binfo := offFormatters.BaseInfo{
 		FileSize: filesize,
@@ -242,7 +242,7 @@ func main() {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
 
-	r := reader.New(source, offormatters, formatters, width, splitterSize, filesize == -1)
+	r := reader.New(source, offormatters, fGroup, filesize == -1)
 
 	isEven := false
 	// Dump hex
