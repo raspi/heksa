@@ -1,8 +1,6 @@
 package base
 
 import (
-	"fmt"
-	"github.com/raspi/heksa/pkg/color"
 	"strings"
 )
 
@@ -27,7 +25,7 @@ type FormatterGroup struct {
 	paddingColor       string // Color for padding (EOF)
 }
 
-func New(formatters []ByteFormatter, palette [256]string, width uint16, visualSplitterSize uint8) FormatterGroup {
+func New(formatters []ByteFormatter, bytePalette [256]string, splitterBreak string, paddingColor string, width uint16, visualSplitterSize uint8) FormatterGroup {
 	if formatters == nil {
 		panic(`nil formatter`)
 	}
@@ -37,7 +35,7 @@ func New(formatters []ByteFormatter, palette [256]string, width uint16, visualSp
 	}
 
 	return FormatterGroup{
-		palette:            palette,
+		palette:            bytePalette,
 		formatters:         formatters,
 		changePalette:      true,
 		Width:              int(width),
@@ -46,8 +44,8 @@ func New(formatters []ByteFormatter, palette [256]string, width uint16, visualSp
 		visualSplitter:     ` `,
 		formatterCount:     len(formatters),
 		Splitter:           `┊`, // Splitter character between different columns
-		splitterBreak:      fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey93_eeeeee}),
-		paddingColor:       fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorRed3_af0000}),
+		splitterBreak:      splitterBreak,
+		paddingColor:       paddingColor,
 	}
 }
 

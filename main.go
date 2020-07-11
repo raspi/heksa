@@ -26,8 +26,13 @@ const (
 	HOMEPAGE = `https://github.com/raspi/heksa`
 )
 
+// These color group names MUST exist in config
+var requiredColorGroupNames = []string{
+	`LineEven`, `LineOdd`, `Splitter`, `Offset`, `Padding`, `Default`, `Special`, `Highlight`,
+}
+
 // Parse command line arguments
-func getParams() (source iface.ReadSeekerCloser, offsetViewer []reader.OffsetFormatter, limit uint64, filesize int64, fg base.FormatterGroup) {
+func getParams() (source iface.ReadSeekerCloser, offsetViewer []reader.OffsetFormatter, colorGroupings map[string]string, limit uint64, filesize int64, fg base.FormatterGroup) {
 	opt := getoptions.New()
 
 	opt.HelpSynopsisArgs(`<filename> or STDIN`)
@@ -150,8 +155,6 @@ func getParams() (source iface.ReadSeekerCloser, offsetViewer []reader.OffsetFor
 		os.Exit(1)
 	}
 
-	palette := defaultCharacterColors
-
 	stat, _ := os.Stdin.Stat()
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
 		// Stdin has data
@@ -199,18 +202,21 @@ func getParams() (source iface.ReadSeekerCloser, offsetViewer []reader.OffsetFor
 		source = fhandle
 	}
 
-	var calcpalette [256]string
-
-	for idx := range palette {
-		calcpalette[idx] = fmt.Sprintf(`%s%s`, color.SetForeground, palette[idx].String())
+	colorGroupings, err = color.GetColorGroupColorDefaults(strings.NewReader(DefaultGroupColors), requiredColorGroupNames)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, `error loading color group config: %v`, err)
+		os.Exit(1)
 	}
 
-	SpecialBreak := fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey35_585858})
-	HilightBreak := fmt.Sprintf(`%s%s`, color.SetForeground, color.AnsiColor{Color: color.ColorGrey100_ffffff})
+	palette, err := color.GetColors(strings.NewReader(DefaultByteColorGroups), colorGroupings)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, `error loading color config: %v`, err)
+		os.Exit(1)
+	}
 
 	var formatters []base.ByteFormatter
 	for _, f := range displays {
-		fmter := reader.GetByteFormatter(f, HilightBreak, SpecialBreak)
+		fmter := reader.GetByteFormatter(f, colorGroupings[`Highlight`], colorGroupings[`Special`])
 		if fmter == nil {
 			_, _ = fmt.Fprintf(os.Stderr, `error: unknown formatter %v`, f)
 			os.Exit(1)
@@ -220,13 +226,13 @@ func getParams() (source iface.ReadSeekerCloser, offsetViewer []reader.OffsetFor
 		formatters = append(formatters, fmter)
 	}
 
-	fGroup := base.New(formatters, calcpalette, width, uint8(*argSplitter))
+	fGroup := base.New(formatters, palette, colorGroupings[`Splitter`], colorGroupings[`Padding`], width, uint8(*argSplitter))
 
-	return source, offsetViewer, limit, filesize, fGroup
+	return source, offsetViewer, colorGroupings, limit, filesize, fGroup
 }
 
 func main() {
-	source, offViewer, limit, filesize, fGroup := getParams()
+	source, offViewer, colorGroupings, limit, filesize, fGroup := getParams()
 	usingLimit := limit > 0
 
 	binfo := offFormatters.BaseInfo{
@@ -242,7 +248,7 @@ func main() {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
 
-	r := reader.New(source, offormatters, fGroup, filesize == -1)
+	r := reader.New(source, offormatters, colorGroupings[`Offset`], colorGroupings[`Splitter`], fGroup, filesize == -1)
 
 	isEven := false
 	// Dump hex
@@ -263,13 +269,13 @@ func main() {
 			os.Exit(1)
 		}
 
-		lineColor := LineEven
+		lineColor := colorGroupings[`LineEven`]
 		if isEven {
-			lineColor = LineOdd
+			lineColor = colorGroupings[`LineOdd`]
 		}
 		isEven = !isEven
 
-		_, _ = fmt.Printf(`%s%s%s`+"\n", lineColor, s, clear)
+		_, _ = fmt.Printf(`%s%s%s`+"\n", lineColor, s, color.Clear)
 
 		if usingLimit && r.ReadBytes >= limit {
 			// Limit is set and found
