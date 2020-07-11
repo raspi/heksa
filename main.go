@@ -278,6 +278,6 @@ func main() {
 
 	}
 
-	source.Close()
+	_ = source.Close()
 
 }
