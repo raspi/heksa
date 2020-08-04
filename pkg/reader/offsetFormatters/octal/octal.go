@@ -33,6 +33,7 @@ func New(info base.BaseInfo) base.OffsetFormatter {
 func (p printer) GetFormatWidth() int {
 	return p.size
 }
+
 func (p printer) Print(offset uint64) string {
 	return fmt.Sprintf(p.format, offset)
 }
