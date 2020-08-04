@@ -5,6 +5,7 @@ import (
 	offFormatters "github.com/raspi/heksa/pkg/reader/offsetFormatters/base"
 	"github.com/raspi/heksa/pkg/reader/offsetFormatters/decimal"
 	"github.com/raspi/heksa/pkg/reader/offsetFormatters/hex"
+	"github.com/raspi/heksa/pkg/reader/offsetFormatters/human"
 	"github.com/raspi/heksa/pkg/reader/offsetFormatters/octal"
 	"github.com/raspi/heksa/pkg/reader/offsetFormatters/percent"
 	"sort"
@@ -14,18 +15,22 @@ import (
 type OffsetFormatter uint8
 
 const (
-	OffsetHex     OffsetFormatter = iota // Hexadecimal
-	OffsetDec                            // Decimal
-	OffsetOct                            // Octal
-	OffsetPercent                        // Percentage 0-100 from offset and filesize
+	OffsetHex      OffsetFormatter = iota // Hexadecimal
+	OffsetDec                             // Decimal
+	OffsetOct                             // Octal
+	OffsetPercent                         // Percentage 0-100 from offset and filesize
+	OffsetHumanSI                         // Offset in human form (SI) 1000
+	OffsetHumanIEC                        // Offset in human form (IEC) 1024
 )
 
 // Get enum from string
 var offsetFormattersStringToEnumMap = map[string]OffsetFormatter{
-	`hex`: OffsetHex,
-	`dec`: OffsetDec,
-	`oct`: OffsetOct,
-	`per`: OffsetPercent,
+	`hex`:    OffsetHex,
+	`dec`:    OffsetDec,
+	`oct`:    OffsetOct,
+	`per`:    OffsetPercent,
+	`humiec`: OffsetHumanIEC,
+	`humsi`:  OffsetHumanSI,
 }
 
 // GetOffsetFormatters parses string and returns proper formatter(s)
@@ -77,6 +82,10 @@ func GetFromOffsetFormatter(formatter OffsetFormatter, info offFormatters.BaseIn
 		f = octal.New(info)
 	case OffsetPercent:
 		f = percent.New(info)
+	case OffsetHumanSI: // 1000
+		f = human.New(info, 1000)
+	case OffsetHumanIEC: // 1024
+		f = human.New(info, 1024)
 	default:
 		return nil
 	}
