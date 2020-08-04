@@ -10,6 +10,7 @@ type Commands struct {
 	Build   []string `json:"build,omitempty"`   // 2. build(){...} How it's built from source?
 	Test    []string `json:"test,omitempty"`    // 3. check(){...} Tests before install
 	Install []string `json:"install,omitempty"` // 4. package(){...} How package is installed?
+	Version []string `json:"version,omitempty"` // 0. pkgver(){...} How source-based package gets version?
 }
 
 type OptionalPackage struct {

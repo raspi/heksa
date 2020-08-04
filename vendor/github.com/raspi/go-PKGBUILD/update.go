@@ -3,7 +3,9 @@ package PKGBUILD
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io/ioutil"
+	"net/url"
 	"path"
 	"regexp"
 	"strings"
@@ -45,7 +47,7 @@ func (ct checksumType) String() string {
 // Update checksums to file(s)
 // File must be in format
 // <checksum> <file path>
-func GetChecksumsFromFile(chtype checksumType, path string, fn func(fpath string) (url, arch, alias string)) (f Files) {
+func GetChecksumsFromFile(chtype checksumType, path string, fn func(fpath string) (url, arch, alias string, err error)) (f Files, err error) {
 	f = make(Files)
 	lines, err := GetLinesFromFile(path)
 
@@ -63,7 +65,10 @@ func GetChecksumsFromFile(chtype checksumType, path string, fn func(fpath string
 		checksum := matches[1]
 		fname := matches[2]
 
-		url, arch, alias := fn(fname)
+		url, arch, alias, err := fn(fname)
+		if err != nil {
+			return f, err
+		}
 
 		if url == `` {
 			continue
@@ -83,7 +88,7 @@ func GetChecksumsFromFile(chtype checksumType, path string, fn func(fpath string
 		f[arch] = append(f[arch], newSource)
 	}
 
-	return f
+	return f, nil
 }
 
 // Read a file and split with new line separator
@@ -105,28 +110,38 @@ func GetLinesFromFile(path string) (lines []string, err error) {
 // How architecture can be found from file name
 var DefaultArchRegEx = regexp.MustCompile(`linux-([^\.]+)\.`)
 
-func (t Template) DefaultChecksumFilesFunc(fpath string) (url, arch, alias string) {
+func (t Template) DefaultChecksumFilesFunc(fpath string) (urlAddress, arch, alias string, err error) {
 	fpath = strings.TrimLeft(fpath, `.`)
 	fpath = strings.TrimLeft(fpath, `/`)
 	filename := path.Base(fpath)
 
 	if !strings.Contains(filename, `linux`) {
-		return ``, ``, ``
+		return ``, ``, ``, fmt.Errorf(`'linux' was not found in filename %#s`, filename)
 	}
 
 	match := DefaultArchRegEx.FindStringSubmatch(filename)
 	if len(match) == 0 {
-		return ``, ``, ``
+		return ``, ``, ``, fmt.Errorf(`filename %#s was not found in %v`, filename, DefaultArchRegEx)
 	}
 
 	filename = strings.Replace(filename, t.Name[0], `$pkgname`, 1)
-	filename = strings.Replace(filename, t.Version, `$pkgver`, 1)
+
+	if strings.Contains(filename, `$pkgname`) {
+		// Some other package's version might also match, so only replace package's version
+		filename = strings.Replace(filename, t.Version, `$pkgver`, 1)
+	}
 
 	arch, ok := GoArchToLinuxArch[match[1]]
 	if !ok {
-		return ``, ``, ``
+		return ``, ``, ``, fmt.Errorf(`arch %#s was not found`, match[1])
 	}
 
-	url = path.Join(t.PackageURLPrefix, filename)
-	return url, arch, alias
+	u, err := url.Parse(t.PackageURLPrefix)
+	if err != nil {
+		return ``, ``, ``, fmt.Errorf(`couldn't parse url: %w`, err)
+	}
+
+	u.Path = path.Join(u.Path, filename)
+	urlAddress = u.String()
+	return urlAddress, arch, alias, nil
 }

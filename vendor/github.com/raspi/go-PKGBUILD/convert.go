@@ -160,87 +160,94 @@ func (t Template) dependsToString() string {
 func (t Template) String() string {
 	var out bytes.Buffer
 
-	fmt.Fprintf(&out, `# Maintainer: %s <%s>`+"\n", t.Maintainer, t.MaintainerEmail)
-	fmt.Fprintf(&out, `# Generated at: %s `+"\n", time.Now())
-	fmt.Fprintln(&out)
+	_, _ = fmt.Fprintf(&out, `# Maintainer: %s <%s>`+"\n", t.Maintainer, t.MaintainerEmail)
+	_, _ = fmt.Fprintf(&out, `# Generated at: %s `+"\n", time.Now())
+	_, _ = fmt.Fprintln(&out)
 
 	if len(t.Name) == 1 {
-		fmt.Fprintf(&out, `pkgname=%v`+"\n", t.Name[0])
+		_, _ = fmt.Fprintf(&out, `pkgname=%v`+"\n", t.Name[0])
 	} else {
-		fmt.Fprintf(&out, `pkgname=%v`+"\n", wrapStrings(t.Name, ` `, ``, ``))
+		_, _ = fmt.Fprintf(&out, `pkgname=%v`+"\n", wrapStrings(t.Name, ` `, ``, ``))
 	}
 
-	fmt.Fprintf(&out, `pkgver=%v`+"\n", t.Version)
-	fmt.Fprintf(&out, `pkgrel=%v`+"\n", t.Release)
+	_, _ = fmt.Fprintf(&out, `pkgver=%v`+"\n", t.Version)
+	_, _ = fmt.Fprintf(&out, `pkgrel=%v`+"\n", t.Release)
 
 	epoch := t.ReleaseTime.Unix()
 
 	if epoch > 0 {
-		fmt.Fprintf(&out, `epoch=%v`+"\n", epoch)
+		_, _ = fmt.Fprintf(&out, `epoch=%v`+"\n", epoch)
 	}
 
-	fmt.Fprintf(&out, `pkgdesc=%q`+"\n", t.ShortDescription)
-	fmt.Fprintf(&out, `url=%q`+"\n", t.URL)
-	fmt.Fprintf(&out, `license=(%v)`+"\n", wrapStrings(t.Licenses, ` `, `'`, `'`))
-	fmt.Fprintf(&out, `arch=(%v)`+"\n", wrapStrings(t.getArchList(), ` `, `'`, `'`))
+	_, _ = fmt.Fprintf(&out, `pkgdesc=%q`+"\n", t.ShortDescription)
+	_, _ = fmt.Fprintf(&out, `url=%q`+"\n", t.URL)
+	_, _ = fmt.Fprintf(&out, `license=(%v)`+"\n", wrapStrings(t.Licenses, ` `, `'`, `'`))
+	_, _ = fmt.Fprintf(&out, `arch=(%v)`+"\n", wrapStrings(t.getArchList(), ` `, `'`, `'`))
+
+	if len(t.Options) > 0 {
+		_, _ = fmt.Fprintf(&out, `options=(%v)`+"\n", strings.Join(t.Options, ` `))
+	}
 
 	if t.Install != `` {
-		fmt.Fprintf(&out, `install=%v`+"\n", t.Install)
+		_, _ = fmt.Fprintf(&out, `install=%v`+"\n", t.Install)
 	}
 
 	if t.ChangeLogFile != `` {
-		fmt.Fprintf(&out, `changelog=%v`+"\n", t.ChangeLogFile)
+		_, _ = fmt.Fprintf(&out, `changelog=%v`+"\n", t.ChangeLogFile)
 	}
 
 	if len(t.ValidPGPKeys) > 0 {
-		fmt.Fprintf(&out, `validpgpkeys=(%v)`+"\n", wrapStrings(t.ValidPGPKeys, ` `, `'`, `'`))
+		_, _ = fmt.Fprintf(&out, `validpgpkeys=(%v)`+"\n", wrapStrings(t.ValidPGPKeys, ` `, `'`, `'`))
 	}
 
 	if len(t.NoExtractFiles) > 0 {
-		fmt.Fprintf(&out, `noextract=(%v)`+"\n", wrapStrings(t.NoExtractFiles, ` `, `'`, `'`))
+		_, _ = fmt.Fprintf(&out, `noextract=(%v)`+"\n", wrapStrings(t.NoExtractFiles, ` `, `'`, `'`))
 	}
 
 	if len(t.Groups) > 0 {
-		fmt.Fprintf(&out, `groups=(%v)`+"\n", wrapStrings(t.Groups, ` `, `'`, `'`))
+		_, _ = fmt.Fprintf(&out, `groups=(%v)`+"\n", wrapStrings(t.Groups, ` `, `'`, `'`))
 	}
 
 	if len(t.Backup) > 0 {
-		fmt.Fprintf(&out, `backup=(%v)`+"\n", wrapStrings(t.Backup, ` `, `'`, `'`))
+		_, _ = fmt.Fprintf(&out, `backup=(%v)`+"\n", wrapStrings(t.Backup, ` `, `'`, `'`))
 	}
 
-	fmt.Fprint(&out, t.dependsToString())
+	_, _ = fmt.Fprint(&out, t.dependsToString())
 	if len(t.OptionalPackages) > 0 {
-		fmt.Fprint(&out, t.optionalToString()+"\n")
+		_, _ = fmt.Fprint(&out, t.optionalToString()+"\n")
 	}
 
-	fmt.Fprintln(&out, t.sourceToString())
+	_, _ = fmt.Fprintln(&out, t.sourceToString())
+
+	// Calculate version from source package
+	if len(t.Commands.Version) > 0 {
+		_, _ = fmt.Fprintln(&out, "\n"+`pkgver() {`)
+		_, _ = fmt.Fprint(&out, `  `+strings.Join(t.Commands.Version, "\n  "))
+		_, _ = fmt.Fprintln(&out, "\n}")
+	}
 
 	if len(t.Commands.Prepare) > 0 {
-		fmt.Fprintln(&out, "\n"+`prepare() {`)
-		fmt.Fprint(&out, `  `)
-		fmt.Fprint(&out, strings.Join(t.Commands.Prepare, "\n  "))
-		fmt.Fprintln(&out, "\n}")
+		_, _ = fmt.Fprintln(&out, "\n"+`prepare() {`)
+		_, _ = fmt.Fprint(&out, `  `+strings.Join(t.Commands.Prepare, "\n  "))
+		_, _ = fmt.Fprintln(&out, "\n}")
 	}
 
 	if len(t.Commands.Build) > 0 {
-		fmt.Fprintln(&out, "\n"+`build() {`)
-		fmt.Fprint(&out, `  `)
-		fmt.Fprint(&out, strings.Join(t.Commands.Build, "\n  "))
-		fmt.Fprintln(&out, "\n}")
+		_, _ = fmt.Fprintln(&out, "\n"+`build() {`)
+		_, _ = fmt.Fprint(&out, `  `+strings.Join(t.Commands.Build, "\n  "))
+		_, _ = fmt.Fprintln(&out, "\n}")
 	}
 
 	if len(t.Commands.Test) > 0 {
-		fmt.Fprintln(&out, "\n"+`check() {`)
-		fmt.Fprint(&out, `  `)
-		fmt.Fprint(&out, strings.Join(t.Commands.Test, "\n  "))
-		fmt.Fprintln(&out, "\n}")
+		_, _ = fmt.Fprintln(&out, "\n"+`check() {`)
+		_, _ = fmt.Fprint(&out, `  `+strings.Join(t.Commands.Test, "\n  "))
+		_, _ = fmt.Fprintln(&out, "\n}")
 	}
 
 	if len(t.Commands.Install) > 0 {
-		fmt.Fprintln(&out, "\n"+`package() {`)
-		fmt.Fprint(&out, `  `)
-		fmt.Fprint(&out, strings.Join(t.Commands.Install, "\n  "))
-		fmt.Fprintln(&out, "\n}")
+		_, _ = fmt.Fprintln(&out, "\n"+`package() {`)
+		_, _ = fmt.Fprint(&out, `  `+strings.Join(t.Commands.Install, "\n  "))
+		_, _ = fmt.Fprintln(&out, "\n}")
 	}
 
 	return out.String()

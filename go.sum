@@ -1,4 +1,4 @@
 github.com/DavidGamba/go-getoptions v0.17.0 h1:dSP8GsjVj/bGrKS753YvcHXYy5Uq1VQUzk4cQIRmF5k=
 github.com/DavidGamba/go-getoptions v0.17.0/go.mod h1:wYjd1McJbGzBFD61+lahGR+5A8QGA1aBnRZmfkBLy5A=
-github.com/raspi/go-PKGBUILD v0.0.5 h1:8WKTNzffMm10/DrJQk5KuK2FN0vDJFKk3TUsFCqpW1w=
-github.com/raspi/go-PKGBUILD v0.0.5/go.mod h1:oLnBjHHvrL9Nz6yZV6CB/vq4npYervKQLHlMNOe/hUs=
+github.com/raspi/go-PKGBUILD v0.0.9 h1:EuRhNA4tqIbp9tG0xQYqdA0ZA2yGQthiABAqrCYR8lw=
+github.com/raspi/go-PKGBUILD v0.0.9/go.mod h1:oLnBjHHvrL9Nz6yZV6CB/vq4npYervKQLHlMNOe/hUs=

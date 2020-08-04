@@ -29,7 +29,7 @@ build:
 
 # Update go module(s)
 modup:
-	@go get -u github.com/raspi/go-PKGBUILD@v0.0.5
+	@go get -u github.com/raspi/go-PKGBUILD@v0.0.9
 	@go mod vendor
 	@go mod tidy
 
@@ -171,6 +171,6 @@ compress-everything: copycommon compress-linux compress-windows compress-freebsd
 # Distro: Arch linux - https://www.archlinux.org/
 # Generates multi-arch PKGBUILD
 ldistro-arch:
-	pushd release/linux/arch && go run . -version ${VERSION} > "$(PWD)/release/${VERSION}/$(APPANDVER)-linux-Arch.PKGBUILD"
+	pushd release/linux/arch && go run . -version ${VERSION}
 
 .PHONY: all clean test default

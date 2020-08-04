@@ -1,6 +1,14 @@
-# go-PKGBUILD
+![GitHub All Releases](https://img.shields.io/github/downloads/raspi/go-PKGBUILD/total?style=for-the-badge)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/raspi/go-PKGBUILD?style=for-the-badge)
+![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/raspi/go-PKGBUILD?style=for-the-badge)
 
-Generate Arch Linux PKGBUILD string from template struct
+# go-PKGBUILD library
+
+Generate Arch Linux PKGBUILD string from template struct. See `man PKGBUILD`.
+
+## Install
+
+    go get -u github.com/raspi/go-PKGBUILD
 
 ## Projects using this library
 
@@ -9,7 +17,11 @@ Generate Arch Linux PKGBUILD string from template struct
 * Yours?
   * Send pull request or open new issue
  
- ## Example JSON
+ ## Notes
+ 
+ * Use empty string (`""`) as CPU architecture when referencing source files and checksums without CPU architecture
+  
+ ## Example template as JSON
  
  ```json
  {
