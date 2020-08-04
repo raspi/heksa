@@ -97,7 +97,7 @@ func getParams() (source iface.ReadSeekerCloser, offsetViewer []reader.OffsetFor
 		_, _ = fmt.Fprintln(os.Stdout, `    - Use '--seek \-1234' for seeking from end of file`)
 		_, _ = fmt.Fprintln(os.Stdout, `    - Limit and seek parameters supports units (KB, KiB, MB, MiB, GB, GiB, TB, TiB)`)
 		_, _ = fmt.Fprintln(os.Stdout, `    - Offset formatters:`)
-		_, _ = fmt.Fprintln(os.Stdout, `      - Use 'no' or '' for offset formatter for disabling offset output`)
+		_, _ = fmt.Fprintln(os.Stdout, `      - Disable formatter output with 'no' or ''`)
 		_, _ = fmt.Fprintln(os.Stdout, `      - 'humiec' (IEC: 1024 B) and 'humsi' (SI: 1000 B) displays offset in human form (n KiB/KB)`)
 		_, _ = fmt.Fprintln(os.Stdout)
 		_, _ = fmt.Fprintln(os.Stdout, `EXAMPLES:`)
