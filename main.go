@@ -286,6 +286,9 @@ func main() {
 
 	}
 
-	_ = source.Close()
-
+	err := source.Close()
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, `couldn't close file: %v`, err)
+		os.Exit(1)
+	}
 }
