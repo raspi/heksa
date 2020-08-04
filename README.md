@@ -79,24 +79,30 @@ EXAMPLES:
 ## Requirements
 
 * Terminal with ANSI color support
-  * KDE's Konsole is currently used for development
+  * [KDE](https://kde.org/)'s [Konsole](https://konsole.kde.org/) is currently used for development
 * Operating system
-  * GNU/Linux 
+  * [GNU/Linux](https://www.gnu.org/distros/distros.html)
     * x64 arm arm64 ppc64 ppc64le
-  * Microsoft Windows
+  * [Microsoft Windows](https://www.microsoft.com/en-us/windows)
     * x64
-  * Darwin (Apple Mac)
+  * [Darwin](https://www.apple.com/macos/) (Apple Mac)
     * x64
-  * FreeBSD
+  * [FreeBSD](https://www.freebsd.org/)
     * x64 arm
-  * NetBSD
+  * [NetBSD](https://www.netbsd.org/)
     * x64 arm
-  * OpenBSD
+  * [OpenBSD](https://www.openbsd.org/)
     * x64 arm arm64
+  * Other OSes supported by [Go](https://golang.org)
+    * For full list, see: https://golang.org/doc/install/source#environment
 
 ## Get source
 
     git clone https://github.com/raspi/heksa
+
+## Contributing and helping with the project
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [current issues](https://github.com/raspi/heksa/issues) that might need help.
 
 ## Developing
 
