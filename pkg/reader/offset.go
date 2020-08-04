@@ -18,7 +18,7 @@ const (
 	OffsetHex      OffsetFormatter = iota // Hexadecimal
 	OffsetDec                             // Decimal
 	OffsetOct                             // Octal
-	OffsetPercent                         // Percentage 0-100 from offset and filesize
+	OffsetPercent                         // Percentage 0-100 % from offset and filesize
 	OffsetHumanSI                         // Offset in human form (SI) 1000
 	OffsetHumanIEC                        // Offset in human form (IEC) 1024
 )
