@@ -9,6 +9,7 @@ type ByteFormatter interface {
 	// How many characters formatter will print (1-N)
 	// Used for padding and grow hint
 	GetPrintSize() int
+	UseSplitter() bool // Formatter can enable/disable visual splitter which occurs every N bytes
 }
 
 type FormatterGroup struct {
@@ -60,7 +61,7 @@ func (fg *FormatterGroup) Print(tmp []byte) string {
 		fg.changePalette = true
 
 		for i := 0; i < fg.Width; i++ {
-			if fg.visualSplitterSize != 0 && i != 0 && i%fg.visualSplitterSize == 0 {
+			if byteFormatterType.UseSplitter() && fg.visualSplitterSize != 0 && i != 0 && i%fg.visualSplitterSize == 0 {
 				// Add pad for better visualization every visualSplitterSize bytes
 				fg.sb.WriteString(fg.visualSplitter)
 			}

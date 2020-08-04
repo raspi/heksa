@@ -16,3 +16,7 @@ func (p printer) Print(b byte) (o string) {
 func (p printer) GetPrintSize() int {
 	return 1
 }
+
+func (p printer) UseSplitter() bool {
+	return true
+}
