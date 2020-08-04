@@ -30,25 +30,27 @@ Hex dumper with colors
 ## heksa --help
 
 ```
-heksa - hex file dumper v1.12.0 - (2020-06-19T11:20:39+03:00)
+heksa - hex file dumper v1.13.0 - (2020-08-04T21:40:08+03:00)
 (c) Pekka Järvinen 2019- [ https://github.com/raspi/heksa ]
 SYNOPSIS:
     heksa [--format|-f <fmt1,fmt2,..>] [--help|-h|-?]
           [--limit|-l <[prefix]bytes[unit]>] [--offset-format|-o <fmt1[,fmt2]>]
-          [--seek|-s <[prefix]offset[unit]>] [--version]
+          [--seek|-s <[prefix]offset[unit]>] [--splitter|-S <size>] [--version]
           [--width|-w <[prefix]width>] <filename> or STDIN
 
 OPTIONS:
-    --format|-f <fmt1,fmt2,..>          One or multiple of: asc, bit, bitwasc, bitwdec, bitwhex, dec, decwasc, hex, hexwasc, oct (default: "hex,asc")
+    --format|-f <fmt1,fmt2,..>          One or multiple of: asc, bit, bitwasc, bitwdec, bitwhex, blk, dec, decwasc, hex, hexwasc, oct (default: "hex,asc")
 
     --help|-h|-?                        Show this help (default: false)
 
     --limit|-l <[prefix]bytes[unit]>    Read only N bytes (0 = no limit). See NOTES. (default: "0")
 
-    --offset-format|-o <fmt1[,fmt2]>    One or two of: dec, hex, oct, per, no, ''.
+    --offset-format|-o <fmt1[,fmt2]>    One or two of: dec, hex, humiec, humsi, oct, per, no, ''.
                                         First one is displayed on the left side and second one on right side after formatters. (default: "hex")
 
     --seek|-s <[prefix]offset[unit]>    Start reading from certain offset. See NOTES. (default: "0")
+
+    --splitter|-S <size>                Insert visual splitter every N bytes. Zero (0) disables. (default: 8)
 
     --version                           Show version information (default: false)
 
@@ -57,9 +59,11 @@ OPTIONS:
 
 NOTES:
     - You can use prefixes for seek, limit and width. 0x = hex, 0b = binary, 0o = octal
-    - Use 'no' or '' for offset formatter for disabling offset output
     - Use '--seek \-1234' for seeking from end of file
     - Limit and seek parameters supports units (KB, KiB, MB, MiB, GB, GiB, TB, TiB)
+    - Offset formatters:
+      - Disable formatter output with 'no' or ''
+      - 'humiec' (IEC: 1024 B) and 'humsi' (SI: 1000 B) displays offset in human form (n KiB/KB)
 
 EXAMPLES:
     heksa -f hex,asc,bit foo.dat
