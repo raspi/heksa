@@ -83,9 +83,9 @@ func GetFromOffsetFormatter(formatter OffsetFormatter, info offFormatters.BaseIn
 	case OffsetPercent:
 		f = percent.New(info)
 	case OffsetHumanSI: // 1000
-		f = human.New(info, 1000)
+		f = human.New(1000)
 	case OffsetHumanIEC: // 1024
-		f = human.New(info, 1024)
+		f = human.New(1024)
 	default:
 		return nil
 	}
