@@ -16,6 +16,7 @@ import (
 )
 
 var (
+	// These are set with Makefile -X=main.VERSION, etc
 	VERSION   = `v0.0.0`
 	BUILD     = `dev`
 	BUILDDATE = `0000-00-00T00:00:00+00:00`
