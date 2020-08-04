@@ -24,6 +24,7 @@ type FormatterGroup struct {
 	Splitter           string
 	splitterBreak      string
 	paddingColor       string // Color for padding (EOF)
+	EofPadding         string // EOF padding character
 }
 
 func New(formatters []ByteFormatter, bytePalette [256]string, splitterBreak string, paddingColor string, width uint16, visualSplitterSize uint8) FormatterGroup {
@@ -46,6 +47,7 @@ func New(formatters []ByteFormatter, bytePalette [256]string, splitterBreak stri
 		formatterCount:     len(formatters),
 		Splitter:           `┊`, // Splitter character between different columns
 		splitterBreak:      splitterBreak,
+		EofPadding:         `‡`,
 		paddingColor:       paddingColor,
 	}
 }
@@ -88,7 +90,8 @@ func (fg *FormatterGroup) Print(tmp []byte) string {
 					fg.sb.WriteString(fg.paddingColor)
 				}
 
-				fg.sb.WriteString(strings.Repeat(`‡`, byteFormatterType.GetPrintSize()))
+				// Print padding character N times
+				fg.sb.WriteString(strings.Repeat(fg.EofPadding, byteFormatterType.GetPrintSize()))
 
 				if i < (fg.Width-1) && (byteFormatterType.GetPrintSize() > 1) {
 					fg.sb.WriteString(` `)
