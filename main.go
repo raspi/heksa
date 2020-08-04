@@ -110,6 +110,7 @@ func getParams() (source iface.ReadSeekerCloser, offsetViewer []reader.OffsetFor
 		_, _ = fmt.Fprintln(os.Stdout, `    heksa -s 0b1010 foo.dat`)
 		_, _ = fmt.Fprintln(os.Stdout, `    heksa -s 4321KiB foo.dat`)
 		_, _ = fmt.Fprintln(os.Stdout, `    heksa -w 8 foo.dat`)
+		_, _ = fmt.Fprintln(os.Stdout, `    echo "test" | heksa`)
 		os.Exit(0)
 	} else if opt.Called("version") {
 		_, _ = fmt.Fprintf(os.Stdout, `%v build %v on %v`+"\n", VERSION, BUILD, BUILDDATE)
