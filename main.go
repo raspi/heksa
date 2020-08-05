@@ -2,6 +2,11 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"os"
+	"os/signal"
+	"strings"
+
 	"github.com/DavidGamba/go-getoptions"
 	"github.com/raspi/heksa/pkg/color"
 	"github.com/raspi/heksa/pkg/iface"
@@ -9,10 +14,6 @@ import (
 	"github.com/raspi/heksa/pkg/reader/byteFormatters/base"
 	offFormatters "github.com/raspi/heksa/pkg/reader/offsetFormatters/base"
 	"github.com/raspi/heksa/pkg/units"
-	"io"
-	"os"
-	"os/signal"
-	"strings"
 )
 
 var (
@@ -159,7 +160,12 @@ func getParams() (source iface.ReadSeekerCloser, offsetViewer []reader.OffsetFor
 		os.Exit(1)
 	}
 
-	stat, _ := os.Stdin.Stat()
+	stat, err := os.Stdin.Stat()
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, `couldn't stat stdin: %v`, err)
+		os.Exit(1)
+	}
+
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
 		// Stdin has data
 		source = os.Stdin
@@ -203,6 +209,12 @@ func getParams() (source iface.ReadSeekerCloser, offsetViewer []reader.OffsetFor
 		}
 
 		filesize = fi.Size()
+
+		if !fi.Mode().IsRegular() {
+			// Not a regular file, so file size is unknown
+			filesize = -1
+		}
+
 		source = fhandle
 	}
 
