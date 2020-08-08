@@ -262,15 +262,15 @@ func main() {
 		offormatters = append(offormatters, fmter)
 	}
 
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt)
-
 	colors := reader.ReaderColors{
 		LineOdd:  colorGroupings[`LineOdd`],
 		LineEven: colorGroupings[`LineEven`],
 		Offset:   colorGroupings[`Offset`],
 		Splitter: colorGroupings[`Splitter`],
 	}
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt)
 
 	r := reader.New(source, offormatters, colors, fGroup, filesize == -1)
 
