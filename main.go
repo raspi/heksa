@@ -265,9 +265,15 @@ func main() {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
 
-	r := reader.New(source, offormatters, colorGroupings[`Offset`], colorGroupings[`Splitter`], fGroup, filesize == -1)
+	colors := reader.ReaderColors{
+		LineOdd:  colorGroupings[`LineOdd`],
+		LineEven: colorGroupings[`LineEven`],
+		Offset:   colorGroupings[`Offset`],
+		Splitter: colorGroupings[`Splitter`],
+	}
 
-	isEven := false
+	r := reader.New(source, offormatters, colors, fGroup, filesize == -1)
+
 	// Dump hex
 	for {
 		select {
@@ -286,19 +292,14 @@ func main() {
 			os.Exit(1)
 		}
 
-		lineColor := colorGroupings[`LineEven`]
-		if isEven {
-			lineColor = colorGroupings[`LineOdd`]
-		}
-		isEven = !isEven
-
-		_, _ = fmt.Printf(`%s%s%s`+"\n", lineColor, s, color.Clear)
+		// Print formatted line
+		// <optional offset formatter #1><split><format 1><split><format N...><optional split><optional offset formatter #2>
+		_, _ = fmt.Printf(`%s`+"\n", s)
 
 		if usingLimit && r.ReadBytes >= limit {
 			// Limit is set and found
 			break
 		}
-
 	}
 
 	err := source.Close()

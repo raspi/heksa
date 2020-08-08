@@ -2,12 +2,20 @@ package reader
 
 import (
 	"fmt"
+	"github.com/raspi/heksa/pkg/color"
 	"github.com/raspi/heksa/pkg/iface"
 	"github.com/raspi/heksa/pkg/reader/byteFormatters/base"
 	offFormatters "github.com/raspi/heksa/pkg/reader/offsetFormatters/base"
 	"io"
 	"strings"
 )
+
+type ReaderColors struct {
+	LineOdd  string
+	LineEven string
+	Offset   string
+	Splitter string
+}
 
 type Reader struct {
 	r                    iface.ReadSeekerCloser
@@ -19,11 +27,11 @@ type Reader struct {
 	Splitter             string          // Splitter character for columns
 	growHint             int             // Grow hint for sb strings.Builder variable for speed
 	formatterGroup       base.FormatterGroup
-	offsetBreak          string
-	splitterBreak        string
+	colors               ReaderColors
+	isEven               bool
 }
 
-func New(r iface.ReadSeekerCloser, offsetFormatter []offFormatters.OffsetFormatter, offsetBreak string, splitterBreak string, formatterGroup base.FormatterGroup, isStdin bool) *Reader {
+func New(r iface.ReadSeekerCloser, offsetFormatter []offFormatters.OffsetFormatter, colors ReaderColors, formatterGroup base.FormatterGroup, isStdin bool) *Reader {
 	reader := &Reader{
 		r:                    r,
 		isStdin:              isStdin,
@@ -33,8 +41,8 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []offFormatters.OffsetFormatt
 		Splitter:             `┊`, // Splitter character between different columns
 		offsetFormatterCount: len(offsetFormatter),
 		formatterGroup:       formatterGroup,
-		offsetBreak:          offsetBreak,
-		splitterBreak:        splitterBreak,
+		colors:               colors,
+		isEven:               false,
 	}
 
 	for _, f := range reader.offsetFormatters {
@@ -48,10 +56,10 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []offFormatters.OffsetFormatt
 func (r *Reader) getoffsetLeft(offset uint64) string {
 	r.sb.Reset()
 	if r.offsetFormatterCount > 0 {
-		r.sb.WriteString(r.offsetBreak)
+		r.sb.WriteString(r.colors.Offset)
 		// show offset on the left side
 		r.sb.WriteString(r.offsetFormatters[0].Print(offset))
-		r.sb.WriteString(r.splitterBreak)
+		r.sb.WriteString(r.colors.Splitter)
 		r.sb.WriteString(r.Splitter)
 	}
 
@@ -63,9 +71,9 @@ func (r *Reader) getoffsetRight(offset uint64) string {
 	r.sb.Reset()
 	if r.offsetFormatterCount > 1 {
 		// show offset on the right side
-		r.sb.WriteString(r.splitterBreak)
+		r.sb.WriteString(r.colors.Splitter)
 		r.sb.WriteString(r.Splitter)
-		r.sb.WriteString(r.offsetBreak)
+		r.sb.WriteString(r.colors.Offset)
 		r.sb.WriteString(r.offsetFormatters[1].Print(offset))
 	}
 
@@ -94,9 +102,6 @@ func (r *Reader) Read() (string, error) {
 	r.sb.Reset()
 	r.sb.Grow(r.growHint)
 
-	// Offset on the left
-	r.sb.WriteString(offsetLeft)
-
 	// Fetch bytes with selected formatters
 	tmp := make([]byte, r.formatterGroup.Width)
 	bytesReadCount, err := r.r.Read(tmp)
@@ -106,10 +111,25 @@ func (r *Reader) Read() (string, error) {
 
 	r.ReadBytes += uint64(bytesReadCount)
 
+	// Change between two background colors
+	if r.isEven {
+		r.sb.WriteString(r.colors.LineEven)
+	} else {
+		r.sb.WriteString(r.colors.LineOdd)
+	}
+	r.isEven = !r.isEven // Flip between true -> false | false -> true
+
+	// Offset on the left
+	r.sb.WriteString(offsetLeft)
+
+	// Print the formatted bytes
 	r.sb.WriteString(r.formatterGroup.Print(tmp[0:bytesReadCount]))
 
 	// Offset on the right
 	r.sb.WriteString(offsetRight)
+
+	// clear ANSI code so that terminal doesn't explode
+	r.sb.WriteString(color.Clear)
 
 	return r.sb.String(), nil
 }
