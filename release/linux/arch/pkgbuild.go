@@ -44,9 +44,14 @@ func main() {
 	basetpl.Version = *versionArg
 
 	flist := make(PKGBUILD.Files)
+	shasumsfile := fmt.Sprintf(`%s-%s.shasums`, packageName, basetpl.Version)
 
 	log.Printf(`Reading checksums`)
-	cf, err := os.Open(path.Join(releasePath, fmt.Sprintf(`%s-%s.shasums`, packageName, basetpl.Version)))
+	cf, err := os.Open(path.Join(releasePath, shasumsfile))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, `couldn't open shasums file %q: %v`, shasumsfile, err)
+		os.Exit(1)
+	}
 	defer cf.Close()
 
 	scanner := bufio.NewScanner(cf)
