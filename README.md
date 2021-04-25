@@ -6,6 +6,8 @@
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/raspi/heksa?style=for-the-badge)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/raspi/heksa?style=for-the-badge)
 
+[![Packaging status](https://repology.org/badge/vertical-allrepos/heksa.svg)](https://repology.org/project/heksa/versions)
+
 Hex dumper with colors
 
 ## Features
