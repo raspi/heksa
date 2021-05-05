@@ -1,9 +1,16 @@
 package ascii
 
-import "github.com/raspi/heksa/pkg/reader/byteFormatters/base"
+import (
+	"fmt"
+	"github.com/raspi/heksa/pkg/reader/byteFormatters/base"
+)
 
 // Check implementation
 var _ base.ByteFormatter = AsciiPrinter{}
+
+func PrintSpecial(specialBreak, hilightBreak string, b byte) string {
+	return fmt.Sprintf(`%[1]s[%[2]s%[3]c%[1]s]`, specialBreak, hilightBreak, AsciiByteToChar[b])
+}
 
 type AsciiPrinter struct {
 }

@@ -24,11 +24,7 @@ func New(hilightBreak string, specialBreak string) BitWithAsciiPrinter {
 }
 
 func (p BitWithAsciiPrinter) Print(b byte) (o string) {
-	o += p.p.Print(b)
-	o += ` ` + p.specialBreak + `[` + p.hilightBreak
-	o += string(ascii.AsciiByteToChar[b])
-	o += p.specialBreak + `]`
-	return o
+	return p.p.Print(b) + ` ` + ascii.PrintSpecial(p.specialBreak, p.hilightBreak, b)
 }
 
 func (p BitWithAsciiPrinter) GetPrintSize() int {
