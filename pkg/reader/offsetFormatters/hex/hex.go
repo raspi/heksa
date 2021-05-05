@@ -6,24 +6,24 @@ import (
 )
 
 // Check implementation
-var _ base.OffsetFormatter = printer{}
+var _ base.OffsetFormatter = HexPrinter{}
 
 // minimal size for padding zeroes
 const minimalSize = 6
 
-type printer struct {
+type HexPrinter struct {
 	info   base.BaseInfo
 	format string
 	size   int
 }
 
-func New(info base.BaseInfo) base.OffsetFormatter {
+func New(info base.BaseInfo) HexPrinter {
 	size := len(fmt.Sprintf(`%x`, info.FileSize))
 	if size < minimalSize {
 		size = minimalSize
 	}
 
-	p := printer{
+	p := HexPrinter{
 		info: info,
 		size: size,
 	}
@@ -32,10 +32,10 @@ func New(info base.BaseInfo) base.OffsetFormatter {
 	return p
 }
 
-func (p printer) GetFormatWidth() int {
+func (p HexPrinter) GetFormatWidth() int {
 	return p.size
 }
 
-func (p printer) Print(offset uint64) string {
+func (p HexPrinter) Print(offset uint64) string {
 	return fmt.Sprintf(p.format, offset)
 }

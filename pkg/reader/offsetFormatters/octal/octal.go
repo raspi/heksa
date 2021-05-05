@@ -6,24 +6,24 @@ import (
 )
 
 // Check implementation
-var _ base.OffsetFormatter = printer{}
+var _ base.OffsetFormatter = OctalPrinter{}
 
 // minimal size for padding zeroes
 const minimalSize = 6
 
-type printer struct {
+type OctalPrinter struct {
 	info   base.BaseInfo
 	format string
 	size   int
 }
 
-func New(info base.BaseInfo) base.OffsetFormatter {
+func New(info base.BaseInfo) OctalPrinter {
 	size := len(fmt.Sprintf(`%o`, info.FileSize))
 	if size < minimalSize {
 		size = minimalSize
 	}
 
-	p := printer{
+	p := OctalPrinter{
 		info: info,
 		size: size,
 	}
@@ -33,10 +33,10 @@ func New(info base.BaseInfo) base.OffsetFormatter {
 	return p
 }
 
-func (p printer) GetFormatWidth() int {
+func (p OctalPrinter) GetFormatWidth() int {
 	return p.size
 }
 
-func (p printer) Print(offset uint64) string {
+func (p OctalPrinter) Print(offset uint64) string {
 	return fmt.Sprintf(p.format, offset)
 }

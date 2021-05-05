@@ -6,17 +6,17 @@ import (
 )
 
 // Check implementation
-var _ base.OffsetFormatter = printer{}
+var _ base.OffsetFormatter = PercentPrinter{}
 
-type printer struct {
+type PercentPrinter struct {
 	info        base.BaseInfo
 	format      string
 	size        int
 	unknownSize bool // Unknown file size? (reading from STDIN)
 }
 
-func New(info base.BaseInfo) base.OffsetFormatter {
-	p := printer{
+func New(info base.BaseInfo) PercentPrinter {
+	p := PercentPrinter{
 		info:        info,
 		size:        9,
 		format:      `%07.3f%%`,
@@ -32,11 +32,11 @@ func New(info base.BaseInfo) base.OffsetFormatter {
 	return p
 }
 
-func (p printer) GetFormatWidth() int {
+func (p PercentPrinter) GetFormatWidth() int {
 	return p.size
 }
 
-func (p printer) Print(offset uint64) string {
+func (p PercentPrinter) Print(offset uint64) string {
 	if p.unknownSize {
 		// Can't know percentage for STDIN
 		return `??%`

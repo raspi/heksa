@@ -6,17 +6,17 @@ import (
 )
 
 // Check implementation
-var _ base.OffsetFormatter = printer{}
+var _ base.OffsetFormatter = HumanPrinter{}
 
-type printer struct {
+type HumanPrinter struct {
 	format     string
 	formatSize int
 	unit       uint64
 }
 
-func New(unit int) base.OffsetFormatter {
+func New(unit int) HumanPrinter {
 
-	p := printer{
+	p := HumanPrinter{
 		unit: uint64(unit),
 	}
 
@@ -34,11 +34,11 @@ func New(unit int) base.OffsetFormatter {
 	return p
 }
 
-func (p printer) GetFormatWidth() int {
+func (p HumanPrinter) GetFormatWidth() int {
 	return p.formatSize
 }
 
-func (p printer) Print(b uint64) string {
+func (p HumanPrinter) Print(b uint64) string {
 	if b < p.unit {
 		switch p.unit {
 		case 1000: // SI
