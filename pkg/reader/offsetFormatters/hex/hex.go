@@ -9,7 +9,7 @@ import (
 var _ base.OffsetFormatter = HexPrinter{}
 
 // minimal size for padding zeroes
-const minimalSize = 6
+const minimalSize = 8 // 8 = 0xFFFFFFFF = 4294967295 bytes = ~4 GiB
 
 type HexPrinter struct {
 	info   base.BaseInfo
