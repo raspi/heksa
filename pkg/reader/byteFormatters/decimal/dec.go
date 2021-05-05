@@ -2,6 +2,9 @@ package decimal
 
 import "github.com/raspi/heksa/pkg/reader/byteFormatters/base"
 
+// Check implementation
+var _ base.ByteFormatter = printer{}
+
 type printer struct {
 }
 

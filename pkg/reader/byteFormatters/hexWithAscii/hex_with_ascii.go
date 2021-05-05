@@ -6,6 +6,9 @@ import (
 	"github.com/raspi/heksa/pkg/reader/byteFormatters/hex"
 )
 
+// Check implementation
+var _ base.ByteFormatter = printer{}
+
 type printer struct {
 	p            base.ByteFormatter
 	hilightBreak string
