@@ -5,6 +5,9 @@ import (
 	"github.com/raspi/heksa/pkg/reader/offsetFormatters/base"
 )
 
+// Check implementation
+var _ base.OffsetFormatter = printer{}
+
 type printer struct {
 	info        base.BaseInfo
 	format      string

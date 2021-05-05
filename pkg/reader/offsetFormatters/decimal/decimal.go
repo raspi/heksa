@@ -5,6 +5,9 @@ import (
 	"github.com/raspi/heksa/pkg/reader/offsetFormatters/base"
 )
 
+// Check implementation
+var _ base.OffsetFormatter = printer{}
+
 // minimal size for padding zeroes
 const minimalSize = 6
 
