@@ -22,7 +22,7 @@ type Reader struct {
 	offsetFormatters     []offFormatters.OffsetFormatter // offset formatters (max 2) first one is displayed on the left side and second one on the right side
 	offsetFormatterCount int                             // shorthand for len(offsetFormatters), for speeding up
 	isStdin              bool                            // Are we reading from STDIN? if so, we can't ask for offset position from file
-	ReadBytes            uint64                          // How many bytes Reader has been reading so far (for limit)
+	readTotalBytes       uint64                          // How many bytes Reader has been reading so far (for limit)
 	sb                   strings.Builder                 // Faster than concatenating strings
 	Splitter             string                          // Splitter character for columns
 	growHint             int                             // Grow hint for sb strings.Builder variable for speed
@@ -36,7 +36,7 @@ func New(r iface.ReadSeekerCloser, offsetFormatter []offFormatters.OffsetFormatt
 		r:                    r,
 		isStdin:              isStdin,
 		offsetFormatters:     offsetFormatter,
-		ReadBytes:            0, // How many bytes we've read
+		readTotalBytes:       0, // How many bytes we've read
 		sb:                   strings.Builder{},
 		Splitter:             `┊`, // Splitter character between different columns
 		offsetFormatterCount: len(offsetFormatter),
@@ -86,7 +86,7 @@ func (r *Reader) Read() (string, error) {
 
 	if r.isStdin {
 		// reading from STDIN, can't use seek
-		offset = r.ReadBytes
+		offset = r.readTotalBytes
 	} else {
 		// Reading from file
 		offsettmp, err := r.r.Seek(0, io.SeekCurrent)
@@ -109,7 +109,7 @@ func (r *Reader) Read() (string, error) {
 		return ``, err
 	}
 
-	r.ReadBytes += uint64(bytesReadCount)
+	r.readTotalBytes += uint64(bytesReadCount)
 
 	// Change between two background colors
 	if r.isEven {
@@ -132,4 +132,8 @@ func (r *Reader) Read() (string, error) {
 	r.sb.WriteString(color.Clear)
 
 	return r.sb.String(), nil
+}
+
+func (r *Reader) GetReadBytes() uint64 {
+	return r.readTotalBytes
 }
