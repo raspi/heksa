@@ -11,8 +11,8 @@ import (
 )
 
 type ReaderColors struct {
-	LineOdd  string
-	LineEven string
+	LineOdd  string // background color
+	LineEven string // background color
 	Offset   string
 	Splitter string
 }
@@ -21,14 +21,14 @@ type Reader struct {
 	r                    iface.ReadSeekerCloser
 	offsetFormatters     []offFormatters.OffsetFormatter // offset formatters (max 2) first one is displayed on the left side and second one on the right side
 	offsetFormatterCount int                             // shorthand for len(offsetFormatters), for speeding up
-	isStdin              bool
-	ReadBytes            uint64          // How many bytes Reader has been reading so far (for limit)
-	sb                   strings.Builder // Faster than concatenating strings
-	Splitter             string          // Splitter character for columns
-	growHint             int             // Grow hint for sb strings.Builder variable for speed
+	isStdin              bool                            // Are we reading from STDIN? if so, we can't ask for offset position from file
+	ReadBytes            uint64                          // How many bytes Reader has been reading so far (for limit)
+	sb                   strings.Builder                 // Faster than concatenating strings
+	Splitter             string                          // Splitter character for columns
+	growHint             int                             // Grow hint for sb strings.Builder variable for speed
 	formatterGroup       base.FormatterGroup
 	colors               ReaderColors
-	isEven               bool
+	isEven               bool // change background color for printed line
 }
 
 func New(r iface.ReadSeekerCloser, offsetFormatter []offFormatters.OffsetFormatter, colors ReaderColors, formatterGroup base.FormatterGroup, isStdin bool) *Reader {
