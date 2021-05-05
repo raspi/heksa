@@ -7,23 +7,23 @@ import (
 )
 
 // Check implementation
-var _ base.ByteFormatter = printer{}
+var _ base.ByteFormatter = BitWithHexPrinter{}
 
-type printer struct {
+type BitWithHexPrinter struct {
 	p            base.ByteFormatter
 	hilightBreak string
 	specialBreak string
 }
 
-func New(hilightBreak string, specialBreak string) base.ByteFormatter {
-	return printer{
+func New(hilightBreak string, specialBreak string) BitWithHexPrinter {
+	return BitWithHexPrinter{
 		p:            bit.New(),
 		hilightBreak: hilightBreak,
 		specialBreak: specialBreak,
 	}
 }
 
-func (p printer) Print(b byte) (o string) {
+func (p BitWithHexPrinter) Print(b byte) (o string) {
 	o += p.p.Print(b)
 	o += ` ` + p.specialBreak + `[` + p.hilightBreak
 	o += hex.HexByteToString[b]
@@ -31,10 +31,10 @@ func (p printer) Print(b byte) (o string) {
 	return o
 }
 
-func (p printer) GetPrintSize() int {
+func (p BitWithHexPrinter) GetPrintSize() int {
 	return 13
 }
 
-func (p printer) UseSplitter() bool {
+func (p BitWithHexPrinter) UseSplitter() bool {
 	return true
 }

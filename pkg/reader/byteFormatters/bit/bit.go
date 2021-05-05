@@ -6,16 +6,16 @@ import (
 )
 
 // Check implementation
-var _ base.ByteFormatter = printer{}
+var _ base.ByteFormatter = BitPrinter{}
 
-type printer struct {
+type BitPrinter struct {
 }
 
-func New() base.ByteFormatter {
-	return printer{}
+func New() BitPrinter {
+	return BitPrinter{}
 }
 
-func (p printer) Print(b byte) (o string) {
+func (p BitPrinter) Print(b byte) (o string) {
 	for idx, ru := range bitByteToString[b] {
 		if idx == 0 {
 			o += color.SetUnderlineOn
@@ -31,10 +31,10 @@ func (p printer) Print(b byte) (o string) {
 	return o
 }
 
-func (p printer) GetPrintSize() int {
+func (p BitPrinter) GetPrintSize() int {
 	return 8
 }
 
-func (p printer) UseSplitter() bool {
+func (p BitPrinter) UseSplitter() bool {
 	return true
 }

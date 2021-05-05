@@ -5,23 +5,23 @@ import (
 )
 
 // Check implementation
-var _ base.ByteFormatter = printer{}
+var _ base.ByteFormatter = HexPrinter{}
 
-type printer struct {
+type HexPrinter struct {
 }
 
-func New() base.ByteFormatter {
-	return printer{}
+func New() HexPrinter {
+	return HexPrinter{}
 }
 
-func (p printer) Print(b byte) (o string) {
+func (p HexPrinter) Print(b byte) (o string) {
 	return HexByteToString[b]
 }
 
-func (p printer) GetPrintSize() int {
+func (p HexPrinter) GetPrintSize() int {
 	return 2
 }
 
-func (p printer) UseSplitter() bool {
+func (p HexPrinter) UseSplitter() bool {
 	return true
 }

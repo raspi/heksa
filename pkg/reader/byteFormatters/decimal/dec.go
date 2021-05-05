@@ -3,23 +3,23 @@ package decimal
 import "github.com/raspi/heksa/pkg/reader/byteFormatters/base"
 
 // Check implementation
-var _ base.ByteFormatter = printer{}
+var _ base.ByteFormatter = DecimalPrinter{}
 
-type printer struct {
+type DecimalPrinter struct {
 }
 
-func New() base.ByteFormatter {
-	return printer{}
+func New() DecimalPrinter {
+	return DecimalPrinter{}
 }
 
-func (p printer) Print(b byte) (o string) {
+func (p DecimalPrinter) Print(b byte) (o string) {
 	return DecByteToString[b]
 }
 
-func (p printer) GetPrintSize() int {
+func (p DecimalPrinter) GetPrintSize() int {
 	return 3
 }
 
-func (p printer) UseSplitter() bool {
+func (p DecimalPrinter) UseSplitter() bool {
 	return true
 }

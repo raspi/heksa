@@ -7,23 +7,23 @@ import (
 )
 
 // Check implementation
-var _ base.ByteFormatter = printer{}
+var _ base.ByteFormatter = DecimalWithAsciiPrinter{}
 
-type printer struct {
+type DecimalWithAsciiPrinter struct {
 	p            base.ByteFormatter
 	hilightBreak string
 	specialBreak string
 }
 
-func New(hilightBreak string, specialBreak string) base.ByteFormatter {
-	return printer{
+func New(hilightBreak string, specialBreak string) DecimalWithAsciiPrinter {
+	return DecimalWithAsciiPrinter{
 		p:            decimal.New(),
 		hilightBreak: hilightBreak,
 		specialBreak: specialBreak,
 	}
 }
 
-func (p printer) Print(b byte) (o string) {
+func (p DecimalWithAsciiPrinter) Print(b byte) (o string) {
 	o += p.p.Print(b)
 	o += ` ` + p.specialBreak + `[` + p.hilightBreak
 	o += string(ascii.AsciiByteToChar[b])
@@ -31,10 +31,10 @@ func (p printer) Print(b byte) (o string) {
 	return o
 }
 
-func (p printer) GetPrintSize() int {
+func (p DecimalWithAsciiPrinter) GetPrintSize() int {
 	return 7
 }
 
-func (p printer) UseSplitter() bool {
+func (p DecimalWithAsciiPrinter) UseSplitter() bool {
 	return true
 }

@@ -3,23 +3,23 @@ package octal
 import "github.com/raspi/heksa/pkg/reader/byteFormatters/base"
 
 // Check implementation
-var _ base.ByteFormatter = printer{}
+var _ base.ByteFormatter = OctalPrinter{}
 
-type printer struct {
+type OctalPrinter struct {
 }
 
-func New() base.ByteFormatter {
-	return printer{}
+func New() OctalPrinter {
+	return OctalPrinter{}
 }
 
-func (p printer) Print(b byte) (o string) {
+func (p OctalPrinter) Print(b byte) (o string) {
 	return octByteToString[b]
 }
 
-func (p printer) GetPrintSize() int {
+func (p OctalPrinter) GetPrintSize() int {
 	return 3
 }
 
-func (p printer) UseSplitter() bool {
+func (p OctalPrinter) UseSplitter() bool {
 	return true
 }
