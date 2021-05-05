@@ -6,14 +6,15 @@ import (
 
 type ByteFormatter interface {
 	Print(byte) string
-	// How many characters formatter will print (1-N)
-	// Used for padding and grow hint
+
+	// GetPrintSize Tells how many characters formatter will print (1-N) (ASCII=1, hex=2, etc, ..).
+	// It's also used for padding and memory grow hint.
 	GetPrintSize() int
 	UseSplitter() bool // Formatter can enable/disable visual splitter which occurs every N bytes
 }
 
 type FormatterGroup struct {
-	palette            [256]string
+	palette            [256]string // color palette for characters 0-255
 	changePalette      bool
 	formatters         []ByteFormatter
 	Width              int
