@@ -294,7 +294,7 @@ func main() {
 
 		// Print formatted line
 		// <optional offset formatter #1><split><format 1><split><format N...><optional split><optional offset formatter #2>
-		_, _ = fmt.Printf(`%s`+"\n", s)
+		_, _ = fmt.Println(s)
 
 		if usingLimit && r.GetReadBytes() >= limit {
 			// Limit is set and found
