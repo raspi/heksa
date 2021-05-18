@@ -108,6 +108,8 @@ func getParams() (source iface.ReadSeekerCloser, offsetViewer []reader.OffsetFor
 		_, _ = fmt.Fprintln(os.Stdout, `    - Offset formatters:`)
 		_, _ = fmt.Fprintln(os.Stdout, `      - Disable formatter output with 'no' or ''`)
 		_, _ = fmt.Fprintln(os.Stdout, `      - 'humiec' (IEC: 1024 B) and 'humsi' (SI: 1000 B) displays offset in human form (n KiB/KB)`)
+		_, _ = fmt.Fprintln(os.Stdout, `    - Formatters:`)
+		_, _ = fmt.Fprintln(os.Stdout, `      - 'blk' can be used to print simple color blocks which helps to visualize where data vs. human readable strings are`)
 		_, _ = fmt.Fprintln(os.Stdout)
 		_, _ = fmt.Fprintln(os.Stdout, `EXAMPLES:`)
 		_, _ = fmt.Fprintln(os.Stdout, `    heksa -f hex,asc,bit foo.dat`)
