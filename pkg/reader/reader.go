@@ -13,8 +13,8 @@ import (
 type ReaderColors struct {
 	LineOdd  string // background color
 	LineEven string // background color
-	Offset   string
-	Splitter string
+	Offset   string // Color of offset
+	Splitter string // Color of splitter character
 }
 
 type Reader struct {
