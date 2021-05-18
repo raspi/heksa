@@ -32,13 +32,14 @@ Hex dumper with colors
 ## heksa --help
 
 ```
-heksa - hex file dumper v1.13.0 - (2020-08-04T21:40:08+03:00)
+heksa - hex file dumper v1.14.0 - (2021-05-18T16:20:59+03:00)
 (c) Pekka Järvinen 2019- [ https://github.com/raspi/heksa ]
 SYNOPSIS:
     heksa [--format|-f <fmt1,fmt2,..>] [--help|-h|-?]
           [--limit|-l <[prefix]bytes[unit]>] [--offset-format|-o <fmt1[,fmt2]>]
-          [--seek|-s <[prefix]offset[unit]>] [--splitter|-S <size>] [--version]
-          [--width|-w <[prefix]width>] <filename> or STDIN
+          [--print-relative-offset|-r] [--seek|-s <[prefix]offset[unit]>]
+          [--splitter|-S <size>] [--version] [--width|-w <[prefix]width>]
+          <filename> or STDIN
 
 OPTIONS:
     --format|-f <fmt1,fmt2,..>          One or multiple of: asc, bit, bitwasc, bitwdec, bitwhex, blk, dec, decwasc, hex, hexwasc, oct (default: "hex,asc")
@@ -49,6 +50,8 @@ OPTIONS:
 
     --offset-format|-o <fmt1[,fmt2]>    One or two of: dec, hex, humiec, humsi, oct, per, no, ''.
                                         First one is displayed on the left side and second one on right side after formatters. (default: "hex")
+
+    --print-relative-offset|-r          Print relative offset(s) starting from 0 (file only) (default: false)
 
     --seek|-s <[prefix]offset[unit]>    Start reading from certain offset. See NOTES. (default: "0")
 
@@ -63,9 +66,12 @@ NOTES:
     - You can use prefixes for seek, limit and width. 0x = hex, 0b = binary, 0o = octal
     - Use '--seek \-1234' for seeking from end of file
     - Limit and seek parameters supports units (KB, KiB, MB, MiB, GB, GiB, TB, TiB)
+    - --print-relative-offset can be used when seeking to certain offset to also print extra offset position starting from zero
     - Offset formatters:
       - Disable formatter output with 'no' or ''
       - 'humiec' (IEC: 1024 B) and 'humsi' (SI: 1000 B) displays offset in human form (n KiB/KB)
+    - Formatters:
+      - 'blk' can be used to print simple color blocks which helps to visualize where data vs. human readable strings are
 
 EXAMPLES:
     heksa -f hex,asc,bit foo.dat
@@ -76,6 +82,7 @@ EXAMPLES:
     heksa -s 0b1010 foo.dat
     heksa -s 4321KiB foo.dat
     heksa -w 8 foo.dat
+    echo "test" | heksa
 ```
 
 ## Requirements
