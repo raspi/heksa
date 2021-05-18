@@ -25,6 +25,7 @@ Hex dumper with colors
 * Seek and limit supports 
   * Prefixes hex (`0x`), octal (`0o`) and binary (`0b`)
   * Units (KB, KiB, MB, MiB, GB, GiB, TB, TiB)
+* Print relative offset starting from zero if seeking a file
 * Read from stdin
 
 ![Screenshot](https://github.com/raspi/heksa/blob/master/_assets/screenshot2.png)
