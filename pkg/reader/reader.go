@@ -18,31 +18,40 @@ type ReaderColors struct {
 }
 
 type Reader struct {
-	r                    iface.ReadSeekerCloser
-	offsetFormatters     []offFormatters.OffsetFormatter // offset formatters (max 2) first one is displayed on the left side and second one on the right side
-	offsetFormatterCount int                             // shorthand for len(offsetFormatters), for speeding up
-	isStdin              bool                            // Are we reading from STDIN? if so, we can't ask for offset position from file
-	readTotalBytes       uint64                          // How many bytes Reader has been reading so far (for limit)
-	sb                   strings.Builder                 // Faster than concatenating strings
-	Splitter             string                          // Splitter character for columns
-	growHint             int                             // Grow hint for sb strings.Builder variable for speed
-	formatterGroup       base.FormatterGroup
-	colors               ReaderColors
-	isEven               bool // change background color for printed line
+	r                      iface.ReadSeekerCloser
+	offsetFormatters       []offFormatters.OffsetFormatter // offset formatters (max 2) first one is displayed on the left side and second one on the right side
+	offsetFormatterCount   int                             // shorthand for len(offsetFormatters), for speeding up
+	isStdin                bool                            // Are we reading from STDIN? if so, we can't ask for offset position from file
+	readTotalBytes         uint64                          // How many bytes Reader has been reading so far (for limit)
+	readRelativeTotalBytes uint64                          // How many bytes Reader has been reading relatively
+	sb                     strings.Builder                 // Faster than concatenating strings
+	Splitter               string                          // Splitter character for columns
+	growHint               int                             // Grow hint for sb strings.Builder variable for speed
+	formatterGroup         base.FormatterGroup
+	colors                 ReaderColors
+	isEven                 bool // change background color for printed line
+	printRelativeOffset    bool // Print relative offset?
 }
 
-func New(r iface.ReadSeekerCloser, offsetFormatter []offFormatters.OffsetFormatter, colors ReaderColors, formatterGroup base.FormatterGroup, isStdin bool) *Reader {
+func New(r iface.ReadSeekerCloser, offsetFormatter []offFormatters.OffsetFormatter, colors ReaderColors, formatterGroup base.FormatterGroup, isStdin bool, useRelativeOffset bool) *Reader {
+
+	if isStdin {
+		useRelativeOffset = false
+	}
+
 	reader := &Reader{
-		r:                    r,
-		isStdin:              isStdin,
-		offsetFormatters:     offsetFormatter,
-		readTotalBytes:       0, // How many bytes we've read
-		sb:                   strings.Builder{},
-		Splitter:             `┊`, // Splitter character between different columns
-		offsetFormatterCount: len(offsetFormatter),
-		formatterGroup:       formatterGroup,
-		colors:               colors,
-		isEven:               false,
+		r:                      r,
+		isStdin:                isStdin,
+		offsetFormatters:       offsetFormatter,
+		readTotalBytes:         0, // How many bytes we've read
+		readRelativeTotalBytes: 0, // How many bytes we've read relatively (always starts from zero)
+		sb:                     strings.Builder{},
+		Splitter:               `┊`, // Splitter character between different columns
+		offsetFormatterCount:   len(offsetFormatter),
+		formatterGroup:         formatterGroup,
+		colors:                 colors,
+		isEven:                 false,
+		printRelativeOffset:    useRelativeOffset,
 	}
 
 	for _, f := range reader.offsetFormatters {
@@ -99,6 +108,10 @@ func (r *Reader) Read() (string, error) {
 
 	offsetLeft := r.getoffsetLeft(offset)
 	offsetRight := r.getoffsetRight(offset)
+
+	offsetLeftRelative := r.getoffsetLeft(r.readRelativeTotalBytes)
+	offsetRightRelative := r.getoffsetRight(r.readRelativeTotalBytes)
+
 	r.sb.Reset()
 	r.sb.Grow(r.growHint)
 
@@ -110,6 +123,7 @@ func (r *Reader) Read() (string, error) {
 	}
 
 	r.readTotalBytes += uint64(bytesReadCount)
+	r.readRelativeTotalBytes += uint64(bytesReadCount)
 
 	// Change between two background colors
 	if r.isEven {
@@ -122,8 +136,18 @@ func (r *Reader) Read() (string, error) {
 	// Offset on the left
 	r.sb.WriteString(offsetLeft)
 
+	if r.printRelativeOffset {
+		// Print relative offset
+		r.sb.WriteString(offsetLeftRelative)
+	}
+
 	// Print the formatted bytes
 	r.sb.WriteString(r.formatterGroup.Print(tmp[0:bytesReadCount]))
+
+	if r.printRelativeOffset {
+		// Print relative offset
+		r.sb.WriteString(offsetRightRelative)
+	}
 
 	// Offset on the right
 	r.sb.WriteString(offsetRight)

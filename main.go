@@ -35,7 +35,7 @@ var requiredColorGroupNames = []string{
 }
 
 // Parse command line arguments
-func getParams() (source iface.ReadSeekerCloser, offsetViewer []reader.OffsetFormatter, colorGroupings map[string]string, limit uint64, filesize int64, fg base.FormatterGroup) {
+func getParams() (source iface.ReadSeekerCloser, offsetViewer []reader.OffsetFormatter, colorGroupings map[string]string, limit uint64, filesize int64, fg base.FormatterGroup, printRelative bool) {
 	opt := getoptions.New()
 
 	opt.HelpSynopsisArgs(`<filename> or STDIN`)
@@ -57,6 +57,11 @@ func getParams() (source iface.ReadSeekerCloser, offsetViewer []reader.OffsetFor
 				"\n"+
 				`First one is displayed on the left side and second one on right side after formatters.`,
 		),
+	)
+
+	argPrintRelativeOffset := opt.Bool(`print-relative-offset`, false,
+		opt.Alias(`r`),
+		opt.Description(`Print relative offset(s) starting from 0 (file only)`),
 	)
 
 	argFormat := opt.StringOptional(`format`, `hex,asc`,
@@ -99,6 +104,7 @@ func getParams() (source iface.ReadSeekerCloser, offsetViewer []reader.OffsetFor
 		_, _ = fmt.Fprintln(os.Stdout, `    - You can use prefixes for seek, limit and width. 0x = hex, 0b = binary, 0o = octal`)
 		_, _ = fmt.Fprintln(os.Stdout, `    - Use '--seek \-1234' for seeking from end of file`)
 		_, _ = fmt.Fprintln(os.Stdout, `    - Limit and seek parameters supports units (KB, KiB, MB, MiB, GB, GiB, TB, TiB)`)
+		_, _ = fmt.Fprintln(os.Stdout, `    - --print-relative-offset can be used when seeking to certain offset to also print extra offset position starting from zero`)
 		_, _ = fmt.Fprintln(os.Stdout, `    - Offset formatters:`)
 		_, _ = fmt.Fprintln(os.Stdout, `      - Disable formatter output with 'no' or ''`)
 		_, _ = fmt.Fprintln(os.Stdout, `      - 'humiec' (IEC: 1024 B) and 'humsi' (SI: 1000 B) displays offset in human form (n KiB/KB)`)
@@ -245,11 +251,11 @@ func getParams() (source iface.ReadSeekerCloser, offsetViewer []reader.OffsetFor
 
 	fGroup := base.New(formatters, palette, colorGroupings[`Splitter`], colorGroupings[`Padding`], width, uint8(*argSplitter))
 
-	return source, offsetViewer, colorGroupings, limit, filesize, fGroup
+	return source, offsetViewer, colorGroupings, limit, filesize, fGroup, *argPrintRelativeOffset
 }
 
 func main() {
-	source, offViewer, colorGroupings, limit, filesize, fGroup := getParams()
+	source, offViewer, colorGroupings, limit, filesize, fGroup, printRelative := getParams()
 	usingLimit := limit > 0
 
 	binfo := offFormatters.BaseInfo{
@@ -272,7 +278,12 @@ func main() {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
 
-	r := reader.New(source, offormatters, colors, fGroup, filesize == -1)
+	isStdin := filesize == -1
+	if isStdin {
+		printRelative = false
+	}
+
+	r := reader.New(source, offormatters, colors, fGroup, isStdin, printRelative)
 
 	// Dump hex
 	for {
