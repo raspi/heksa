@@ -12,11 +12,11 @@ Hex dumper with colors
 
 ## Features
 
-* ANSI colors for different byte groups such as 
+* [ANSI colors](https://en.wikipedia.org/wiki/ANSI_escape_code#Colors) for different byte groups such as 
   * Printable: A-Z, a-z, 0-9
   * Spaces: space, tab, new line
   * Special: 0x00, 0xFF
-* Output multiple formats at once (hexadecimal, decimal, octal, bits or special combination formats)
+* Output multiple formats at once ([hexadecimal](https://en.wikipedia.org/wiki/Hexadecimal), [decimal](https://en.wikipedia.org/wiki/Decimal), [octal](https://en.wikipedia.org/wiki/Octal), [bits](https://en.wikipedia.org/wiki/Binary_number) or special combination formats)
 * Multiple offset formats (hexadecimal, decimal, octal, percentage)
   * First one is displayed on left side and second one on the right side
 * Read only N bytes
@@ -26,7 +26,7 @@ Hex dumper with colors
   * Prefixes hex (`0x`), octal (`0o`) and binary (`0b`)
   * Units (KB, KiB, MB, MiB, GB, GiB, TB, TiB)
 * Print relative offset starting from zero if seeking a file
-* Read from stdin
+* Read from [stdin](https://en.wikipedia.org/wiki/Standard_streams#Standard_input_(stdin))
 
 ![Screenshot](https://github.com/raspi/heksa/blob/master/_assets/screenshot2.png)
 
