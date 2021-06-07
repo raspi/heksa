@@ -245,7 +245,6 @@ func getParams() (source iface.ReadSeekerCloser, offsetViewer []reader.OffsetFor
 		if fmter == nil {
 			_, _ = fmt.Fprintf(os.Stderr, `error: unknown formatter %v`, f)
 			os.Exit(1)
-
 		}
 
 		formatters = append(formatters, fmter)
