@@ -3,7 +3,6 @@ package reader
 import (
 	"fmt"
 	"github.com/raspi/heksa/pkg/color"
-	"github.com/raspi/heksa/pkg/iface"
 	"github.com/raspi/heksa/pkg/reader/byteFormatters/base"
 	offFormatters "github.com/raspi/heksa/pkg/reader/offsetFormatters/base"
 	"io"
@@ -18,7 +17,7 @@ type ReaderColors struct {
 }
 
 type Reader struct {
-	r                      iface.ReadSeekerCloser
+	r                      io.ReadSeekCloser
 	offsetFormatters       []offFormatters.OffsetFormatter // offset formatters (max 2) first one is displayed on the left side and second one on the right side
 	offsetFormatterCount   int                             // shorthand for len(offsetFormatters), for speeding up
 	isStdin                bool                            // Are we reading from STDIN? if so, we can't ask for offset position from file
@@ -33,7 +32,7 @@ type Reader struct {
 	printRelativeOffset    bool // Print relative offset?
 }
 
-func New(r iface.ReadSeekerCloser, offsetFormatter []offFormatters.OffsetFormatter, colors ReaderColors, formatterGroup base.FormatterGroup, isStdin bool, useRelativeOffset bool) *Reader {
+func New(r io.ReadSeekCloser, offsetFormatter []offFormatters.OffsetFormatter, colors ReaderColors, formatterGroup base.FormatterGroup, isStdin bool, useRelativeOffset bool) *Reader {
 
 	if isStdin {
 		useRelativeOffset = false

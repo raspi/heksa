@@ -10,7 +10,6 @@ import (
 
 	"github.com/DavidGamba/go-getoptions"
 	"github.com/raspi/heksa/pkg/color"
-	"github.com/raspi/heksa/pkg/iface"
 	"github.com/raspi/heksa/pkg/reader"
 	"github.com/raspi/heksa/pkg/reader/byteFormatters/base"
 	offFormatters "github.com/raspi/heksa/pkg/reader/offsetFormatters/base"
@@ -35,7 +34,7 @@ var requiredColorGroupNames = []string{
 }
 
 // Parse command line arguments
-func getParams() (source iface.ReadSeekerCloser, offsetViewer []reader.OffsetFormatter, colorGroupings map[string]string, limit uint64, filesize int64, fg base.FormatterGroup, printRelative bool) {
+func getParams() (source io.ReadSeekCloser, offsetViewer []reader.OffsetFormatter, colorGroupings map[string]string, limit uint64, filesize int64, fg base.FormatterGroup, printRelative bool) {
 	opt := getoptions.New()
 
 	opt.HelpSynopsisArgs(`<filename> or STDIN`)
