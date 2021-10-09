@@ -71,24 +71,22 @@ func GetOffsetViewerList() (viewers []string) {
 	return viewers
 }
 
+// GetFromOffsetFormatter gets implementation of given formatter
 func GetFromOffsetFormatter(formatter OffsetFormatter, info offFormatters.BaseInfo) offFormatters.OffsetFormatter {
-	var f offFormatters.OffsetFormatter
 	switch formatter {
 	case OffsetDec:
-		f = decimal.New(info)
+		return decimal.New(info)
 	case OffsetHex:
-		f = hex.New(info)
+		return hex.New(info)
 	case OffsetOct:
-		f = octal.New(info)
+		return octal.New(info)
 	case OffsetPercent:
-		f = percent.New(info)
+		return percent.New(info)
 	case OffsetHumanSI: // 1000
-		f = human.New(1000)
+		return human.New(1000)
 	case OffsetHumanIEC: // 1024
-		f = human.New(1024)
+		return human.New(1024)
 	default:
 		return nil
 	}
-
-	return f
 }
