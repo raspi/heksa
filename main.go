@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -285,6 +286,10 @@ func main() {
 
 	r := reader.New(source, offormatters, colors, fGroup, isStdin, printRelative)
 
+	isFirst := true
+	lastData := make([]byte, fGroup.Width)
+	repeatedCount := 0
+
 	// Dump hex
 	for {
 		select {
@@ -296,6 +301,7 @@ func main() {
 		s, err := r.Read()
 		if err != nil {
 			if errors.Is(err, io.EOF) {
+				// End of File
 				break
 			}
 
@@ -303,14 +309,29 @@ func main() {
 			os.Exit(1)
 		}
 
-		// Print formatted line
-		// <optional offset formatter #1><split><format 1><split><format N...><optional split><optional offset formatter #2>
-		_, _ = fmt.Println(s)
+		data := r.GetData()
+
+		if !isFirst && bytes.Equal(data, lastData) {
+			repeatedCount++
+		} else {
+			if repeatedCount > 0 {
+				_, _ = fmt.Println("\t" + fmt.Sprintf(`-- last line repeated %[1]d times (%[2]d bytes (0x%04[2]x))`, 1+repeatedCount, (1+repeatedCount)*fGroup.Width))
+			}
+
+			repeatedCount = 0
+
+			// Print formatted line
+			// <optional offset formatter #1><split><format 1><split><format N...><optional split><optional offset formatter #2>
+			_, _ = fmt.Println(s)
+		}
 
 		if usingLimit && r.GetReadBytes() >= limit {
 			// Limit is set and found
 			break
 		}
+
+		lastData = data
+		isFirst = false
 	}
 
 	err := source.Close()
@@ -318,4 +339,11 @@ func main() {
 		_, _ = fmt.Fprintf(os.Stderr, `couldn't close file: %v`, err)
 		os.Exit(1)
 	}
+
+	if repeatedCount > 0 {
+		_, _ = fmt.Println("\t" + fmt.Sprintf(`-- last line repeated %[1]d times (%[2]d bytes (0x%04[2]x))`, repeatedCount, repeatedCount*fGroup.Width))
+	}
+
+	_, _ = fmt.Println()
+	_, _ = fmt.Println(fmt.Sprintf(`Read %d bytes total`, r.GetReadBytes()))
 }

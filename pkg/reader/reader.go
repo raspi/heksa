@@ -28,8 +28,9 @@ type Reader struct {
 	growHint               int                             // Grow hint for sb strings.Builder variable for speed
 	formatterGroup         base.FormatterGroup
 	colors                 ReaderColors
-	isEven                 bool // change background color for printed line
-	printRelativeOffset    bool // Print relative offset?
+	isEven                 bool   // change background color for printed line
+	printRelativeOffset    bool   // Print relative offset?
+	data                   []byte // Raw bytes data for accessing repeating data, etc
 }
 
 func New(r io.ReadSeekCloser, offsetFormatter []offFormatters.OffsetFormatter, colors ReaderColors, formatterGroup base.FormatterGroup, isStdin bool, useRelativeOffset bool) *Reader {
@@ -51,6 +52,7 @@ func New(r io.ReadSeekCloser, offsetFormatter []offFormatters.OffsetFormatter, c
 		colors:                 colors,
 		isEven:                 false,
 		printRelativeOffset:    useRelativeOffset,
+		data:                   make([]byte, formatterGroup.Width),
 	}
 
 	for _, f := range reader.offsetFormatters {
@@ -115,8 +117,8 @@ func (r *Reader) Read() (string, error) {
 	r.sb.Grow(r.growHint)
 
 	// Fetch bytes with selected formatters
-	tmp := make([]byte, r.formatterGroup.Width)
-	bytesReadCount, err := r.r.Read(tmp)
+	r.data = make([]byte, r.formatterGroup.Width)
+	bytesReadCount, err := r.r.Read(r.data)
 	if err != nil {
 		return ``, err
 	}
@@ -141,7 +143,7 @@ func (r *Reader) Read() (string, error) {
 	}
 
 	// Print the formatted bytes
-	r.sb.WriteString(r.formatterGroup.Print(tmp[0:bytesReadCount]))
+	r.sb.WriteString(r.formatterGroup.Print(r.data[0:bytesReadCount]))
 
 	if r.printRelativeOffset {
 		// Print relative offset
@@ -159,4 +161,9 @@ func (r *Reader) Read() (string, error) {
 
 func (r *Reader) GetReadBytes() uint64 {
 	return r.readTotalBytes
+}
+
+// GetData return raw data read in Read()
+func (r *Reader) GetData() []byte {
+	return r.data
 }
