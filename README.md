@@ -5,6 +5,7 @@
 ![GitHub All Releases](https://img.shields.io/github/downloads/raspi/heksa/total?style=for-the-badge)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/raspi/heksa?style=for-the-badge)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/raspi/heksa?style=for-the-badge)
+[![Go Report Card](https://goreportcard.com/badge/github.com/raspi/heksa)](https://goreportcard.com/report/github.com/raspi/heksa)
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/heksa.svg)](https://repology.org/project/heksa/versions)
 
