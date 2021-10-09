@@ -49,7 +49,7 @@ var formatterStringToEnumMap = map[string]ByteFormatter{
 	`blk`:     ViewBlock,
 }
 
-// getViewers returns viewers from string separated by ','
+// GetViewers returns viewers from string separated by ','
 func GetViewers(viewers []string) (ds []ByteFormatter, err error) {
 	for _, v := range viewers {
 		en, ok := formatterStringToEnumMap[v]
