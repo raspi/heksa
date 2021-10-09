@@ -79,34 +79,30 @@ func GetViewerList() (viewers []string) {
 
 // GetByteFormatter gets implementation of given formatter
 func GetByteFormatter(formatter ByteFormatter, hilightBreak string, specialBreak string) base.ByteFormatter {
-	var fmter base.ByteFormatter
-
 	switch formatter {
 	case ViewASCII:
-		fmter = ascii.New()
+		return ascii.New()
 	case ViewHex:
-		fmter = hex.New()
+		return hex.New()
 	case ViewBit:
-		fmter = bit.New()
+		return bit.New()
 	case ViewDec:
-		fmter = decimal.New()
+		return decimal.New()
 	case ViewOct:
-		fmter = octal.New()
+		return octal.New()
 	case ViewHexWithASCII:
-		fmter = hexWithAscii.New(hilightBreak, specialBreak)
+		return hexWithAscii.New(hilightBreak, specialBreak)
 	case ViewDecWithASCII:
-		fmter = decWithAscii.New(hilightBreak, specialBreak)
+		return decWithAscii.New(hilightBreak, specialBreak)
 	case ViewBitWithAsc:
-		fmter = bitWithAscii.New(hilightBreak, specialBreak)
+		return bitWithAscii.New(hilightBreak, specialBreak)
 	case ViewBitWithDec:
-		fmter = bitWithDecimal.New(hilightBreak, specialBreak)
+		return bitWithDecimal.New(hilightBreak, specialBreak)
 	case ViewBitWithHex:
-		fmter = bitWithHex.New(hilightBreak, specialBreak)
+		return bitWithHex.New(hilightBreak, specialBreak)
 	case ViewBlock:
-		fmter = block.New()
+		return block.New()
 	default:
 		return nil
 	}
-
-	return fmter
 }
