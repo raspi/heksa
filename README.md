@@ -130,3 +130,7 @@ Requirements:
 1. `make release`
 
 If there's a lot of visual changes you can take new screenshots with `screenshot.sh` script in [_assets](_assets) directory
+
+## Is it any good?
+
+Yes.
