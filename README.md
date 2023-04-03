@@ -105,7 +105,7 @@ EXAMPLES:
   * [OpenBSD](https://www.openbsd.org/)
     * x64 arm arm64
   * Other OSes supported by [Go](https://golang.org)
-    * For full list, see: https://golang.org/doc/install/source#environment
+    * For full list, see: https://go.dev/doc/install/source#environment
 
 ## Get source
 
@@ -130,3 +130,7 @@ Requirements:
 1. `make release`
 
 If there's a lot of visual changes you can take new screenshots with `screenshot.sh` script in [_assets](_assets) directory
+
+## Is it any good?
+
+Yes.
