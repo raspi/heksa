@@ -5,7 +5,7 @@ VERSION := $(shell git describe --abbrev=0 --always --tags)
 BUILD := $(shell git rev-parse $(VERSION))
 BUILDDATE := $(shell git log -1 --format=%aI $(VERSION))
 BUILDFILES?=$$(find . -mindepth 1 -maxdepth 1 -type f \( -iname "*${APPNAME}-v*" -a ! -iname "*.shasums" \))
-LDFLAGS := -ldflags "-s -w -X=main.VERSION=$(VERSION) -X=main.BUILD=$(BUILD) -X=main.BUILDDATE=$(BUILDDATE)"
+LDFLAGS := -trimpath -ldflags "-s -w -X=main.VERSION=$(VERSION) -X=main.BUILD=$(BUILD) -X=main.BUILDDATE=$(BUILDDATE)"
 RELEASETMPDIR := $(shell mktemp -d -t ${APPNAME}-rel-XXXXXX)
 APPANDVER := ${APPNAME}-$(VERSION)
 RELEASETMPAPPDIR := $(RELEASETMPDIR)/$(APPANDVER)
